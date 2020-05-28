@@ -8,6 +8,7 @@ export class Player {
 	public hand: Hand;
 	public folded = false;
 	public allIn = false;
+	disconnected: boolean = false;
 
 	constructor(public id: string, public name: string, public chips: number) {
 	}

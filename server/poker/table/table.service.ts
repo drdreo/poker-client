@@ -1,10 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Table } from '../table';
+import { Table } from './Table';
+import { Subject } from 'rxjs';
+import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class TableService {
 
 	tables: Table[] = [];
+
+	private _tableCommands$ = new Subject();
+	tableCommands$ = this._tableCommands$.asObservable();
 
 	constructor(private logger: Logger) {
 		this.logger.setContext('TableService');
@@ -31,11 +36,34 @@ export class TableService {
 		return this.tables.find(table => table.name === roomName);
 	}
 
+	playerLeft(playerID: string) {
+		for (let table of this.tables) {
+			const player = table.players.find(player => player.id === playerID);
+			if (player) {
+				player.disconnected = true;
+				// if every player disconnected, remove the table
+				if (table.players.every(player => player.disconnected)) {
+					this.logger.debug(`Table[${table.name}] removed!`);
+					this.tables = this.tables.filter(t => t.name !== table.name);
+				}
+			}
+		}
+	}
+
+	playerReconnected(playerID: string) {
+		for (let table of this.tables) {
+			const player = table.players.find(player => player.id === playerID);
+			if (player) {
+				player.disconnected = false;
+			}
+		}
+	}
+
 	/**
 	 *
 	 * @returns the new players ID
 	 */
-	createOrJoinTable(tableName: string, playerName: string): string {
+	createOrJoinTable(tableName: string, playerName: string): { playerID: string } {
 		let table = this.getTable(tableName);
 
 		if (!table) {
@@ -43,40 +71,85 @@ export class TableService {
 			table = this.createTable(tableName);
 		}
 
-		this.logger.debug(`Player[${playerName}] joined Table[${playerName}]!`);
-		return table.addPlayer(playerName, 1000);
+		this.logger.debug(`Player[${playerName}] joining Table[${tableName}]!`);
+
+		const playerID = table.addPlayer(playerName, 1000);
+		if (!playerID) {
+			throw Error('This shouldnt ever happen!');
+		}
+
+		return {playerID};
 	}
+
+	startGame(tableName: string) {
+		const table = this.tables.find(table => table.name === tableName);
+		table.startGame();
+		this._tableCommands$.next({cmd: 'game_started', data: table.players});
+	}
+
 
 	/***********************
 	 * Game methods
 	 ************************/
 
-	check(playerID: string) {
-		this.logger.debug(`Player[${playerID}] checked!`);
+	check(tableName: string, playerID: string) {
+		const table = this.tables.find(table => table.name === tableName);
 
-		// Todo: find table
-		this.tables[0].check(playerID);
+		if (table) {
+			if (table.hasGame()) {
+				this.logger.debug(`Player[${playerID}] checked!`);
+				table.check(playerID);
+			} else {
+				throw new WsException(`Can't act before the game has started!`);
+			}
+		} else {
+			throw new WsException(`Table[${tableName}] does no longer exist!`);
+		}
 	}
 
-	call(playerID: string) {
-		this.logger.debug(`Player[${playerID}] called!`);
+	call(tableName: string, playerID: string) {
+		const table = this.tables.find(table => table.name === tableName);
 
-		// Todo: find table
-		this.tables[0].call(playerID);
+		if (table) {
+			if (table.hasGame()) {
+				this.logger.debug(`Player[${playerID}] called!`);
+				table.call(playerID);
+			} else {
+				throw new WsException(`Can't act before the game has started!`);
+			}
+		} else {
+			throw new WsException(`Table[${tableName}] does no longer exist!`);
+		}
 	}
 
-	bet(playerID: string, coins: number) {
-		this.logger.debug(`Player[${playerID}] bet [${coins}]!`);
+	bet(tableName: string, playerID: string, coins: number) {
+		const table = this.tables.find(table => table.name === tableName);
 
-		// Todo: find table
-		this.tables[0].call(playerID);
+		if (table) {
+			if (table.hasGame()) {
+				this.logger.debug(`Player[${playerID}] bet [${coins}]!`);
+				table.bet(playerID, coins);
+			} else {
+				throw new WsException(`Can't act before the game has started!`);
+			}
+		} else {
+			throw new WsException(`Table[${tableName}] does no longer exist!`);
+		}
 	}
 
-	fold(playerID: string) {
-		this.logger.debug(`Player[${playerID}] folded!`);
+	fold(tableName: string, playerID: string) {
+		const table = this.tables.find(table => table.name === tableName);
 
-		// Todo: find table
-		this.tables[0].fold(playerID);
+		if (table) {
+			if (table.hasGame()) {
+				this.logger.debug(`Player[${playerID}] folded!`);
+				table.fold(playerID);
+			} else {
+				throw new WsException(`Can't act before the game has started!`);
+			}
+		} else {
+			throw new WsException(`Table[${tableName}] does no longer exist!`);
+		}
 	}
 
 

@@ -11,11 +11,29 @@ export class AppComponent {
 
 	constructor(private pokerService: PokerService) {}
 
+
+	create() {
+		this.pokerService.createOrJoinRoom();
+	}
+
+	startGame() {
+		this.pokerService.startGame();
+	}
+
 	check() {
 		this.pokerService.check();
 	}
 
-	create() {
-		this.pokerService.create();
+	call() {
+		this.pokerService.call();
 	}
+
+	bet() {
+		this.pokerService.bet(100);
+	}
+
+	fold() {
+		this.pokerService.fold();
+	}
+
 }

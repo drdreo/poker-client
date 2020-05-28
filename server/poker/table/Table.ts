@@ -1,9 +1,8 @@
-import { Hand, Player } from './player';
+import { Hand, Player } from '../Player';
 import { WsException } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
-import { Game } from './game';
+import { Game } from '../Game';
 import { v4 as uuidv4 } from 'uuid';
-
 
 
 export class Table {
@@ -38,27 +37,32 @@ export class Table {
 		}
 	}
 
-	public addPlayer(playerName: string, chips: number): string {
+	public hasGame(): boolean {
+		return !!this.game;
+	}
+
+	public getPlayer(playerID: string): Player {
+		return this.players.find(player => player.id === playerID);
+	}
+
+	public addPlayer(playerName: string, chips: number): string | null {
 		//If there is no current game and we have enough players, start a new game.
 		if (this.game) {
-			throw new Error('Game already started');
+			throw new WsException('Game already started');
 		}
 
 		if (this.players.length < this.maxPlayers) {
 			// create and add a new player
 			const playerID = uuidv4();
 			this.players.push(new Player(playerID, playerName, chips));
-
-			// automatically start game
-			if (this.players.length >= this.minPlayers) {
-				this.startGame();
-			}
 			return playerID;
+		} else {
+			return null;
 		}
-		throw new Error('Too many players!');
+		throw new WsException('Too many players!');
 	}
 
-	private setStartPlayer(){
+	private setStartPlayer() {
 		this.currentPlayer = 0;
 	}
 
@@ -68,13 +72,19 @@ export class Table {
 		this.currentPlayer = newIndex;
 	}
 
-	private getPlayerIndexByID(playerID:string){
+	private getPlayerIndexByID(playerID: string) {
 		return this.players.findIndex(player => player.id === playerID);
 	}
+
 	public startGame() {
-		this.game = new Game(this.smallBlind, this.bigBlind);
-		this.setStartPlayer();
-		this.putCards();
+		if (!this.game) {
+			this.game = new Game(this.smallBlind, this.bigBlind);
+			this.setStartPlayer();
+			this.putCards();
+		} else {
+			throw new WsException('Game already started!');
+		}
+
 	}
 
 	private putCards() {
@@ -88,9 +98,8 @@ export class Table {
 
 	public call(playerID: string) {
 		const playerIndex = this.getPlayerIndexByID(playerID);
-		// TODO: check if current player
-		if (playerIndex === this.currentPlayer) {
-
+		if (playerIndex !== this.currentPlayer) {
+			throw new WsException('Not your turn!');
 		}
 		let maxBet = GetMax(this.game.round.bets);
 		this.game.round.bets[playerIndex] = maxBet;
@@ -99,21 +108,18 @@ export class Table {
 
 	public bet(playerID: string, bet: number) {
 		const playerIndex = this.getPlayerIndexByID(playerID);
-		// TODO: check if current player
-		if (playerIndex === this.currentPlayer) {
-			this.game.round.bets[playerIndex] = bet;
-			this.nextPlayer();
-		} else {
-			throw new Error('Not your turn!');
+		if (playerIndex !== this.currentPlayer) {
+			throw new WsException('Not your turn!');
 		}
+		this.game.round.bets[playerIndex] = bet;
+		this.nextPlayer();
 	}
 
 
 	public fold(playerID: string) {
 		const playerIndex = this.getPlayerIndexByID(playerID);
-		// TODO: check if current player
-		if (playerIndex === this.currentPlayer) {
-
+		if (playerIndex !== this.currentPlayer) {
+			throw new WsException('Not your turn!');
 		}
 
 		let bet = this.game.round.bets[playerIndex];
@@ -128,7 +134,7 @@ export class Table {
 	public check(playerID: string) {
 		const playerIndex = this.getPlayerIndexByID(playerID);
 		// TODO: check if current player
-		if (playerIndex === this.currentPlayer) {
+		if (playerIndex !== this.currentPlayer) {
 			throw new WsException('Not your turn!');
 		}
 		this.game.round.bets[playerIndex] = 0;
