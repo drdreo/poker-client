@@ -1,4 +1,4 @@
-import { Hand, Player } from '../Player';
+import { Hand, Player, PlayerPreview } from '../Player';
 import { WsException } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Game } from '../Game';
@@ -43,6 +43,19 @@ export class Table {
 
 	public getPlayer(playerID: string): Player {
 		return this.players.find(player => player.id === playerID);
+	}
+
+	public getPlayersPreview(): PlayerPreview[] {
+		return this.players.map(player => {
+			return {
+				id: player.id,
+				name: player.name,
+				chips: player.chips,
+				allIn: player.allIn,
+				folded: player.folded,
+				disconnected: player.disconnected,
+			};
+		});
 	}
 
 	public addPlayer(playerName: string, chips: number): string | null {

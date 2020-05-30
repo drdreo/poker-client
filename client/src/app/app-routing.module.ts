@@ -1,11 +1,21 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
+import { HomeComponent } from './home/home.component';
+import { ErrorComponent } from './error/error.component';
 
 
-const routes: Routes = [];
+const routes: Routes = [
+	{
+		path: 'table',
+		loadChildren: () => import('./table/table.module').then(m => m.TableModule),
+	},
+	{path: '', component: HomeComponent, pathMatch: 'full'},
+	{path: '**', component: ErrorComponent},
+];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+	imports: [RouterModule.forRoot(routes)],
+	exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {
+}

@@ -1,0 +1,30 @@
+<div class="page-container">
+    <h1 class="table_name">Table {{table}}</h1>
+
+    <div class="ready_message">
+        Everyone's in?
+        <button (click)="startGame()">Start</button>
+    </div>
+
+
+    <div class="game_controls">
+        <button class="button" (click)="check()">Check</button>
+        <button class="button" (click)="call()">Call</button>
+        <button class="button" (click)="bet()">Bet</button>
+        <button class="button" (click)="fold()">Fold</button>
+    </div>
+
+
+    <div class="table">
+        <div class="card-place">
+            <app-card *ngFor="let card of five_cards" [card]="card"></app-card>
+        </div>
+        <div class="players">
+            <app-player *ngFor="let player of players; let i = index;" [player]="player" [index]="i" [currentPlayer]="player_playing">
+
+            </app-player>
+        </div>
+    </div>
+</div>
+
+

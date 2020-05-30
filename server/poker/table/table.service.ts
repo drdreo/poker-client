@@ -153,4 +153,13 @@ export class TableService {
 	}
 
 
+	getAllTables() {
+		return this.tables.map(table => {
+			return {name: table.name, started: table.hasGame()};
+		});
+	}
+
+	getPlayersCount() {
+		return this.tables.reduce((prev, cur) => prev + cur.players.length, 0);
+	}
 }

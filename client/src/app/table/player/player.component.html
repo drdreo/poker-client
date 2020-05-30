@@ -1,0 +1,30 @@
+<div class="player"
+     [ngClass]="'player-'+ (index + 1)"
+     [class.playing]="currentPlayer === index">
+    <div class="bank">
+        <div class="bank-value">{{ player.bank - player.onTable }}</div>
+        <div class="jetons v-10" *ngIf="(player.bank - player.onTable) / 10 >= 1"></div>
+        <div class="jetons v-5" *ngIf="(player.bank - player.onTable) / 2 >= 1"></div>
+        <div class="jetons v-1" *ngIf="(player.bank - player.onTable) >= 1"></div>
+    </div>
+    <div class="avatar" [ngStyle]="{'background-color': player.color || 'dodgerblue'}"></div>
+    <div class="name">{{player.name}}</div>
+    <div class="mise">
+        <div class="mise-value">
+            {{ player.onTable }}
+        </div>
+        <div class="jeton-10" *ngIf="player.onTable / 10 >= 1">
+            <div class="jetons v-10"
+                 *ngFor="let temp of getCoinsIterateable((player.onTable - (player.onTable % 10)) / 10); let i = index;"
+                 [ngStyle]="{'top.px': (-2 + (i * 5))}"></div>
+        </div>
+        <div class="jeton-5" *ngIf="player.onTable % 10 && player.onTable % 10 >= 2">
+            <div class="jetons v-5"
+                 *ngFor="let temp of getCoinsIterateable(((player.onTable % 10) - ((player.onTable % 10) % 2)) / 2); let i = index;"
+                 [ngStyle]="{'top.px': (-2 + (i * 5))}"></div>
+        </div>
+        <div class="jeton-1">
+            <div class="jetons v-1" *ngIf="player.onTable % 10 && player.onTable % 2"></div>
+        </div>
+    </div>
+</div>

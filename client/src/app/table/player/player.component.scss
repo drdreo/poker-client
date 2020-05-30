@@ -1,0 +1,276 @@
+$name-font-family: 'Balsamiq Sans', cursive;
+$table-font-family: Arial;
+
+
+.player {
+  position: absolute;
+
+  .avatar {
+    width: 120px;
+    height: 120px;
+    background-color: lightcoral;
+    border-radius: 100%;
+    position: relative;
+    box-shadow: 2px 10px 0 rgba(0, 0, 0, .4);
+    z-index: 20;
+
+    &:after {
+      content: '';
+      width: 70px;
+      height: 70px;
+      position: absolute;
+      background-color: rgba(0, 0, 0, .1);
+      top: 50%;
+      left: 50%;
+      transform: translatex(-50%) translatey(-50%);
+      border-radius: 100%;
+      box-shadow: 0 5px 0 rgba(0, 0, 0, .2)
+    }
+  }
+
+  .name {
+    font-family: $name-font-family;
+    text-align: center;
+    width: 100px;
+    color: #96e296;
+    padding: 5px 0;
+    margin-left: 10px;
+    box-sizing: border-box;
+    border: 2px solid #96e296;
+    border-radius: 5px;
+    margin-top: 15px;
+    text-overflow: ellipsis;
+    font-size: 11px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  &.playing:before {
+    content: '...';
+    color: white;
+    font-size: 20px;
+    position: absolute;
+    background-color: #76daff;
+    display: inline-block;
+    line-height: 0px;
+    height: 10px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    z-index: 100;
+  }
+
+  &.player-1 {
+    top: 0;
+    left: 50%;
+    transform: translatex(-50%) translatey(-50%);
+  }
+
+  &.player-2 {
+    bottom: 0;
+    left: 50%;
+    transform: translatex(-50%) translatey(50%) rotatez(180deg);
+
+    .name {
+      transform: rotatez(180deg);
+    }
+
+    .bank-value {
+      transform: rotatez(180deg);
+    }
+
+    .mise-value {
+      transform: rotatez(180deg);
+    }
+  }
+
+  &.player-3 {
+    top: 50%;
+    left: 0;
+    transform: translatex(-50%) translatey(-50%) rotatez(-90deg);
+
+    .name {
+      transform: rotatez(0deg);
+    }
+  }
+
+  &.player-4 {
+    top: 50%;
+    right: 0;
+    transform: translatex(50%) translatey(-50%) rotatez(90deg);
+
+    .name {
+      transform: rotatez(0deg);
+    }
+  }
+
+  &.player-5 {
+    top: 0;
+    left: 25%;
+    transform: translatex(-50%) translatey(-50%);
+  }
+
+  &.player-6 {
+    bottom: 0;
+    left: 75%;
+    transform: translatex(-50%) translatey(50%) rotatez(180deg);
+
+    .name {
+      transform: rotatez(180deg);
+    }
+
+    .bank-value {
+      transform: rotatez(180deg);
+    }
+
+    .mise-value {
+      transform: rotatez(180deg);
+    }
+  }
+
+  &.player-7 {
+    top: 0;
+    left: 75%;
+    transform: translatex(-50%) translatey(-50%);
+  }
+
+  &.player-8 {
+    bottom: 0;
+    left: 25%;
+    transform: translatex(-50%) translatey(50%) rotatez(180deg);
+
+    .name, .bank-value, .mise-value {
+      transform: rotatez(180deg);
+    }
+  }
+
+  &.player-9 {
+    top: 5%;
+    left: 95%;
+    transform: translatex(-50%) translatey(-50%);
+  }
+
+  &.player-10 {
+    bottom: 5%;
+    left: 95%;
+    transform: translatex(-50%) translatey(50%);
+  }
+
+  &.player-11 {
+    bottom: 5%;
+    left: 5%;
+    transform: translatex(-50%) translatey(50%);
+  }
+
+  &.player-12 {
+    top: 5%;
+    left: 5%;
+    transform: translatex(-50%) translatey(-50%);
+  }
+
+}
+
+
+.bank {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  top: 100px;
+  right: 0;
+  z-index: 10;
+
+  .bank-value {
+    position: absolute;
+    font-family: $table-font-family;
+    right: -30px;
+    font-weight: bold;
+    font-size: 12px;
+    color: #96e296;
+
+    &:after {
+      content: "€";
+    }
+  }
+
+  .v-10 {
+    top: -2px;
+    right: -2px;
+    background-color: crimson;
+  }
+
+  .v-5 {
+    top: 15px;
+    right: 5px;
+    background-color: goldenrod;
+  }
+
+  .v-1 {
+    top: 22px;
+    left: -10px;
+    background-color: #444;
+  }
+}
+
+.mise {
+  position: absolute;
+  top: 170px;
+  left: 50%;
+  transform: translatex(-50%);
+  height: 40px;
+  width: 60px;
+
+  .mise-value {
+    position: absolute;
+    font-family: $table-font-family;
+    right: -30px;
+    font-weight: bold;
+    font-size: 12px;
+    color: #96e296;
+
+    &:after {
+      content: "€";
+    }
+  }
+
+  [class^="jeton-"] {
+    position: absolute;
+  }
+
+  .jeton-10 {
+    top: -2px;
+    left: 0;
+  }
+
+  .jeton-5 {
+    top: -2px;
+    left: 22px;
+    background-color: goldenrod;
+  }
+
+  .jeton-1 {
+    top: -2px;
+    right: 15px;
+    background-color: #444;
+  }
+}
+
+
+.jetons {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 100%;
+  border: 2px white dotted;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, .1);
+
+  &.v-10 {
+    background-color: crimson;
+  }
+
+  &.v-5 {
+    background-color: goldenrod;
+  }
+
+  &.v-1 {
+    background-color: #444;
+  }
+}

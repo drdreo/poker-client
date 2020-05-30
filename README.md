@@ -6,7 +6,8 @@ Server made with Nest.js
 
 # Poker Server
 
-
+# TODO:
+https://angular.io/guide/route-animations
 ## Running the app
 
 ```bash

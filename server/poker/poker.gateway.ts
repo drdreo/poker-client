@@ -94,7 +94,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.connections.find(conn => conn.id === socket.id).playerID = newPlayerID;
 
 		this.server.emit('playerJoined', playerName);
-		return {event: 'server:joined', data: newPlayerID};
+		return {event: 'server:joined', data: {newPlayerID}};
 	}
 
 	@SubscribeMessage('startGame')

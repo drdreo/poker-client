@@ -3,6 +3,8 @@ export interface Hand {
 	message: string;
 }
 
+export type  PlayerPreview = Omit<Player, 'cards' | 'hand'>;
+
 export class Player {
 	public cards: string[] = [];
 	public hand: Hand;

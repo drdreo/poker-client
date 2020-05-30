@@ -1,7 +1,8 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
 import { map, takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 interface PlayerCheck {
 	playerID: string;
@@ -20,23 +21,24 @@ interface PlayerBet {
 	coins: number;
 }
 
+export interface PokerTable {
+	name: string;
+	started: boolean;
+}
+
+export interface HomeInfo {
+	tables: PokerTable[];
+	players: number;
+}
 
 @Injectable({
 	providedIn: 'root',
 })
 export class PokerService implements OnDestroy {
 
-
 	private unsubscribe$ = new Subject();
 
-	constructor(private socket: Socket) {
-		this.socket.emit('handshake', 'tester');
-
-
-		this.roomJoined().subscribe(playerID => {
-			localStorage.setItem('playerID', playerID);
-		});
-
+	constructor(private socket: Socket, private http: HttpClient) {
 		this.gameStarted().subscribe(console.log);
 
 		this.playerChecked().subscribe();
@@ -51,8 +53,17 @@ export class PokerService implements OnDestroy {
 		this.unsubscribe$.complete();
 	}
 
-	createOrJoinRoom() {
-		this.socket.emit('joinRoom', {playerName: 'Hackl', roomName: 'Hagenberg', playerID: localStorage.getItem('playerID')});
+	fetchHomeInfo(): Observable<HomeInfo> {
+		return this.http.get<HomeInfo>('/api/poker/home');
+	}
+
+	loadTable(tableName: string) {
+		return this.http.get<HomeInfo>('/api/poker/table/' + tableName).toPromise();
+	}
+
+
+	createOrJoinRoom(username: string, tableName: string) {
+		this.socket.emit('joinRoom', {playerName: username, roomName: tableName, playerID: localStorage.getItem('playerID')});
 	}
 
 	roomJoined() {
@@ -113,7 +124,6 @@ export class PokerService implements OnDestroy {
 				   );
 	}
 
-
 	fold() {
 		this.socket.emit('player:fold');
 	}
@@ -125,6 +135,5 @@ export class PokerService implements OnDestroy {
 					   takeUntil(this.unsubscribe$),
 				   );
 	}
-
 
 }
