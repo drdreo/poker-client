@@ -1,6 +1,12 @@
 $name-font-family: 'Balsamiq Sans', cursive;
 $table-font-family: 'Open Sans', sans-serif;
 
+$currency-symbol: "€";
+
+$jeton-50-color: lightgrey;
+$jeton-10-color: crimson;
+$jeton-5-color: goldenrod;
+$jeton-1-color: #444;
 
 .player {
   position: absolute;
@@ -46,15 +52,18 @@ $table-font-family: 'Open Sans', sans-serif;
   }
 
   &.playing:before {
-    content: '...';
+    content: ' .';
+    animation: dots 1.5s steps(5) infinite;
+
     color: white;
     font-size: 20px;
     position: absolute;
     background-color: #76daff;
     display: inline-block;
-    line-height: 0px;
+    line-height: 0;
     height: 10px;
-    padding: 5px 10px;
+    width: 15px;
+    padding: 2px 10px 5px ;
     border-radius: 5px;
     z-index: 100;
   }
@@ -187,26 +196,26 @@ $table-font-family: 'Open Sans', sans-serif;
     color: #96e296;
 
     &:after {
-      content: "€";
+      content: $currency-symbol;
     }
   }
 
   .v-50 {
     top: -2px;
     right: -20px;
-    background-color: lightgray;
+    background-color: $jeton-50-color;
   }
 
   .v-10 {
     top: -2px;
     right: -5px;
-    background-color: crimson;
+    background-color: $jeton-10-color;
   }
 
   .v-5 {
     top: 15px;
     right: 10px;
-    background-color: goldenrod;
+    background-color: $jeton-5-color;
   }
 
   .v-1 {
@@ -233,7 +242,7 @@ $table-font-family: 'Open Sans', sans-serif;
     color: #ffeb3b;
 
     &:after {
-      content: "€";
+      content: $currency-symbol;
     }
   }
 
@@ -254,13 +263,13 @@ $table-font-family: 'Open Sans', sans-serif;
   .jeton-5 {
     top: -2px;
     left: 22px;
-    background-color: goldenrod;
+    background-color: $jeton-5-color;
   }
 
   .jeton-1 {
     top: -2px;
     right: 15px;
-    background-color: #444;
+    background-color: $jeton-1-color;
   }
 }
 
@@ -274,18 +283,41 @@ $table-font-family: 'Open Sans', sans-serif;
   box-shadow: 2px 2px 0 rgba(0, 0, 0, .1);
 
   &.v-50 {
-    background-color: lightgray;
+    background-color: $jeton-50-color;
   }
 
   &.v-10 {
-    background-color: crimson;
+    background-color: $jeton-10-color;
   }
 
   &.v-5 {
-    background-color: goldenrod;
+    background-color: $jeton-5-color;
   }
 
   &.v-1 {
-    background-color: #444;
+    background-color: $jeton-1-color;
+  }
+}
+
+
+/* loading dots */
+@keyframes dots {
+  0%, 20% {
+    color: rgba(0, 0, 0, 0);
+    text-shadow: .25em 0 0 rgba(0, 0, 0, 0),
+    .5em 0 0 rgba(0, 0, 0, 0);
+  }
+  40% {
+    color: white;
+    text-shadow: .25em 0 0 rgba(0, 0, 0, 0),
+    .5em 0 0 rgba(0, 0, 0, 0);
+  }
+  60% {
+    text-shadow: .25em 0 0 white,
+    .5em 0 0 rgba(0, 0, 0, 0);
+  }
+  80%, 100% {
+    text-shadow: .25em 0 0 white,
+    .5em 0 0 white;
   }
 }

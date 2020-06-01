@@ -87,17 +87,12 @@ body {
 }
 
 
-button {
-  &.link {
-    background-color: #0000;
-    border: none;
-  }
-}
-
 .link {
   text-decoration: underline;
   cursor: pointer;
   color: $primary-color;
+  background-color: transparent;
+  border: none;
 
   &:hover {
     color: darken($primary-color, 10);

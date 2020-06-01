@@ -31,6 +31,20 @@ export interface HomeInfo {
 	players: number;
 }
 
+interface PlayerOverview {
+	id: string;
+	name: string;
+	chips: number;
+	allIn: boolean;
+	folded: boolean;
+	disconnected: boolean;
+}
+
+export interface TableResponse {
+	name: string;
+	players: PlayerOverview[];
+}
+
 @Injectable({
 	providedIn: 'root',
 })
@@ -58,7 +72,7 @@ export class PokerService implements OnDestroy {
 	}
 
 	loadTable(tableName: string) {
-		return this.http.get<HomeInfo>('/api/poker/table/' + tableName).toPromise();
+		return this.http.get<TableResponse>('/api/poker/table/' + tableName).toPromise();
 	}
 
 

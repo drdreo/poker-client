@@ -5,6 +5,18 @@
   top: 10%;
 }
 
+.ready-container {
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+
+  &__message {
+    font-weight: bold;
+    margin-bottom: 1rem
+  ;
+  }
+}
+
 .game_controls {
   position: absolute;
   bottom: 5%;
@@ -86,12 +98,16 @@
   position: absolute;
   height: 100%;
   width: 100%;
-  background-color: #0000007a;
-
+  background-color: #000000ab;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 
   visibility: hidden;
   opacity: 0;
   transition: opacity 500ms ease;
+  z-index: 10;
 
   &.visible {
     opacity: 1;

@@ -12,7 +12,8 @@ import { Subject } from 'rxjs';
 })
 export class TableComponent implements OnInit, OnDestroy {
 
-	showOverlay: boolean = false;
+	showOverlay: boolean = true;
+	isPlayer:boolean = false;
 
 
 	playerColors = [
@@ -85,13 +86,14 @@ export class TableComponent implements OnInit, OnDestroy {
 			.pipe(
 				switchMap(params => {
 					const table = params.get('tableName');
+					this.table = table;
 					return this.pokerService.loadTable(table);
 				}),
 				takeUntil(this.unsubscribe$))
 			.subscribe(table => {
 				console.log(table);
-				// this.table = table.name;
-				// this.players = table.players;
+				this.players = table.players;
+				this.isPlayer = table.players.some(player => player.id === localStorage.getItem("playerID"));
 			}, error => {
 				console.log(error);
 				this.showOverlay = true;

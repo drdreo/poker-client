@@ -1,13 +1,13 @@
 <div class="page-container">
     <h1 class="table_name">Table {{table}}</h1>
 
-    <div class="ready_message">
-        Everyone's in?
-        <button (click)="startGame()">Start</button>
+    <div class="ready-container" *ngIf="isPlayer">
+        <div class="ready-container__message">Everyone's in?</div>
+        <button class="button" (click)="startGame()">Start</button>
     </div>
 
 
-    <div class="game_controls">
+    <div class="game_controls" *ngIf="isPlayer">
         <button class="button" (click)="check()">Check</button>
         <button class="button" (click)="call()">Call</button>
         <button class="button" (click)="bet()">Bet</button>
@@ -25,9 +25,9 @@
         </div>
     </div>
 
-    <div class="overlay" [class.visible]="showOverlay">
-
-        <h2>Sorry, but the table does not exist</h2>
+    <div class="overlay" [class.visible]="showOverlay && false">
+        <h2>Sorry, but the table {{table}} does not exist</h2>
+        <a routerLink="/" class="link">Back to home?</a>
     </div>
 </div>
 
