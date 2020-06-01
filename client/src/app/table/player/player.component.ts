@@ -2,8 +2,8 @@ import { Component, Input, OnInit } from '@angular/core';
 
 interface Player {
 	name:string;
-	bank:number;
-	onTable:number;
+	chips:number;
+	bet:number;
 	color:string;
 }
 
@@ -34,23 +34,23 @@ export class PlayerComponent implements OnInit {
 
 	getCoinsFor(total: number, coin: number) {
 		// prep coins
-		const chips = this.coins.map(c => {
+		const coins = this.coins.map(c => {
 			return {amount:0, value:c}
 		});
 
 		let tmp_rest = total;
 
-		for (let chip of chips) {
+		for (let c of coins) {
 			if (tmp_rest <= 0) {
 				break;
 			}
 
-			while (tmp_rest - chip.value >= 0) {
-				tmp_rest -= chip.value;
-				chip.amount++;
+			while (tmp_rest - c.value >= 0) {
+				tmp_rest -= c.value;
+				c.amount++;
 			}
 		}
 
-		return chips.find(chip => chip.value === coin).amount;
+		return coins.find(c => c.value === coin).amount;
 	}
 }

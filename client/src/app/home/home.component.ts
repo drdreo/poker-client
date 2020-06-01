@@ -18,13 +18,13 @@ export class HomeComponent implements OnDestroy {
 
 	loginForm = new FormGroup({
 		username: new FormControl('', {
-			updateOn: 'change',
+			updateOn: 'blur',
 			validators: [
 				Validators.required,
 				Validators.minLength(4)],
 		}),
 		table: new FormControl('', {
-			updateOn: 'change',
+			updateOn: 'blur',
 			validators: [
 				Validators.required,
 				tableNameValidator(/^\w+$/i)],

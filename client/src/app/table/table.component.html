@@ -1,5 +1,5 @@
 <div class="page-container">
-    <h1 class="table_name">Table {{table}}</h1>
+    <h1 class="table_name">Table <span class="is-primary">{{table}}</span></h1>
 
     <div class="ready-container" *ngIf="isPlayer">
         <div class="ready-container__message">Everyone's in?</div>
@@ -25,8 +25,8 @@
         </div>
     </div>
 
-    <div class="overlay" [class.visible]="showOverlay && false">
-        <h2>Sorry, but the table {{table}} does not exist</h2>
+    <div class="overlay" [class.visible]="showOverlay">
+        <h2>Sorry, but the table <span class="is-primary">{{table}}</span> does not exist</h2>
         <a routerLink="/" class="link">Back to home?</a>
     </div>
 </div>

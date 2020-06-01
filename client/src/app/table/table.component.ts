@@ -8,12 +8,11 @@ import { Subject } from 'rxjs';
 	selector: 'app-table',
 	templateUrl: './table.component.html',
 	styleUrls: ['./table.component.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TableComponent implements OnInit, OnDestroy {
 
-	showOverlay: boolean = true;
-	isPlayer:boolean = false;
+	showOverlay: boolean = false;
+	isPlayer: boolean = false;
 
 
 	playerColors = [
@@ -69,7 +68,6 @@ export class TableComponent implements OnInit, OnDestroy {
 	unsubscribe$ = new Subject();
 
 	constructor(private route: ActivatedRoute, private pokerService: PokerService) {
-
 		// init players
 		this.players.push({name: 'rivy331', color: this.getColor(), bank: 228, onTable: 79, hasCards: true});
 		this.players.push({name: 'kattar2', color: this.getColor(), bank: 999, onTable: 0, hasCards: true});
@@ -93,7 +91,7 @@ export class TableComponent implements OnInit, OnDestroy {
 			.subscribe(table => {
 				console.log(table);
 				this.players = table.players;
-				this.isPlayer = table.players.some(player => player.id === localStorage.getItem("playerID"));
+				this.isPlayer = table.players.some(player => player.id === localStorage.getItem('playerID'));
 			}, error => {
 				console.log(error);
 				this.showOverlay = true;
