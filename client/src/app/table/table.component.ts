@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PokerService } from '../poker.service';
-import { catchError, switchMap, takeUntil } from 'rxjs/operators';
-import { of, Subject } from 'rxjs';
+import { switchMap, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Component({
 	selector: 'app-table',
@@ -11,6 +11,9 @@ import { of, Subject } from 'rxjs';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TableComponent implements OnInit, OnDestroy {
+
+	showOverlay: boolean = false;
+
 
 	playerColors = [
 		'#444444', '#3498db', '#9b59b6',
@@ -67,14 +70,14 @@ export class TableComponent implements OnInit, OnDestroy {
 	constructor(private route: ActivatedRoute, private pokerService: PokerService) {
 
 		// init players
-		this.players.push({name: 'rivy331', color: this.getColor(), bank: 100, onTable: 79, hasCards: true});
-		this.players.push({name: 'kattar2', color: this.getColor(), bank: 100, onTable: 20, hasCards: true});
-		this.players.push({name: 'mikelaire3', color: this.getColor(), bank: 100, onTable: 20, hasCards: true});
-		this.players.push({name: 'tomtom4', color: this.getColor(), bank: 100, onTable: 20, hasCards: true});
-		this.players.push({name: 'nana5', color: this.getColor(), bank: 100, onTable: 20, hasCards: true});
-		this.players.push({name: 'ionion6', color: this.getColor(), bank: 100, onTable: 20, hasCards: true});
-		this.players.push({name: 'ionion7', color: this.getColor(), bank: 100, onTable: 20, hasCards: true});
-		this.players.push({name: 'ionion8', color: this.getColor(), bank: 100, onTable: 20, hasCards: true});
+		this.players.push({name: 'rivy331', color: this.getColor(), bank: 228, onTable: 79, hasCards: true});
+		this.players.push({name: 'kattar2', color: this.getColor(), bank: 999, onTable: 0, hasCards: true});
+		this.players.push({name: 'mikelaire3', color: this.getColor(), bank: 100, onTable: 21, hasCards: true});
+		this.players.push({name: 'tomtom4', color: this.getColor(), bank: 100, onTable: 26, hasCards: true});
+		this.players.push({name: 'nana5', color: this.getColor(), bank: 999, onTable: 579, hasCards: true});
+		this.players.push({name: 'ionion6', color: this.getColor(), bank: 6, onTable: 5, hasCards: true});
+		this.players.push({name: 'ionion7', color: this.getColor(), bank: 1, onTable: 1, hasCards: true});
+		this.players.push({name: 'ionion8', color: this.getColor(), bank: 100, onTable: 22, hasCards: true});
 	}
 
 	ngOnInit() {
@@ -84,19 +87,14 @@ export class TableComponent implements OnInit, OnDestroy {
 					const table = params.get('tableName');
 					return this.pokerService.loadTable(table);
 				}),
-				catchError(e => {
-					console.log(e);
-					if (e.status === 404) {
-
-					}
-					return of(e);
-				}),
 				takeUntil(this.unsubscribe$))
 			.subscribe(table => {
-
-				console.log(typeof table);
+				console.log(table);
 				// this.table = table.name;
 				// this.players = table.players;
+			}, error => {
+				console.log(error);
+				this.showOverlay = true;
 			});
 
 	}

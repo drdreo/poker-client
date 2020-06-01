@@ -1,6 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
 @import "./assets/styles/utils";
 
+@import url('https://fonts.googleapis.com/css2?family=Balsamiq+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@700&display=swap');
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
@@ -24,10 +27,6 @@ body {
   height: 100vh;
 
   color: white;
-
-  &.game {
-    justify-content: normal;
-  }
 }
 
 
@@ -103,8 +102,6 @@ button {
   &:hover {
     color: darken($primary-color, 10);
   }
-
-
 }
 
 .is-hidden {

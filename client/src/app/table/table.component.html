@@ -21,9 +21,13 @@
         </div>
         <div class="players">
             <app-player *ngFor="let player of players; let i = index;" [player]="player" [index]="i" [currentPlayer]="player_playing">
-
             </app-player>
         </div>
+    </div>
+
+    <div class="overlay" [class.visible]="showOverlay">
+
+        <h2>Sorry, but the table does not exist</h2>
     </div>
 </div>
 

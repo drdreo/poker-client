@@ -1,5 +1,5 @@
 $name-font-family: 'Balsamiq Sans', cursive;
-$table-font-family: Arial;
+$table-font-family: 'Open Sans', sans-serif;
 
 
 .player {
@@ -191,15 +191,21 @@ $table-font-family: Arial;
     }
   }
 
+  .v-50 {
+    top: -2px;
+    right: -20px;
+    background-color: lightgray;
+  }
+
   .v-10 {
     top: -2px;
-    right: -2px;
+    right: -5px;
     background-color: crimson;
   }
 
   .v-5 {
     top: 15px;
-    right: 5px;
+    right: 10px;
     background-color: goldenrod;
   }
 
@@ -221,10 +227,10 @@ $table-font-family: Arial;
   .mise-value {
     position: absolute;
     font-family: $table-font-family;
-    right: -30px;
+    right: -37px;
     font-weight: bold;
     font-size: 12px;
-    color: #96e296;
+    color: #ffeb3b;
 
     &:after {
       content: "€";
@@ -233,6 +239,11 @@ $table-font-family: Arial;
 
   [class^="jeton-"] {
     position: absolute;
+  }
+
+  .jeton-50 {
+    top: -2px;
+    left: -22px;
   }
 
   .jeton-10 {
@@ -261,6 +272,10 @@ $table-font-family: Arial;
   border-radius: 100%;
   border: 2px white dotted;
   box-shadow: 2px 2px 0 rgba(0, 0, 0, .1);
+
+  &.v-50 {
+    background-color: lightgray;
+  }
 
   &.v-10 {
     background-color: crimson;
