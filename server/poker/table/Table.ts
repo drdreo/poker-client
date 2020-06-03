@@ -6,6 +6,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 export class Table {
+	private playerColors = [
+		'#444444', '#3498db', '#9b59b6',
+		'#e67e22', '#3ae374', '#16a085',
+		'crimson', '#227093', '#d1ccc0',
+		'#34495e', '#673ab7', '#cf6a87',
+	];
 
 	players: Player[] = [];
 	dealer: number = 0;	//Track the dealer position between games
@@ -53,6 +59,7 @@ export class Table {
 				chips: player.chips,
 				allIn: player.allIn,
 				folded: player.folded,
+				color: player.color,
 				disconnected: player.disconnected,
 			};
 		});
@@ -67,7 +74,7 @@ export class Table {
 		if (this.players.length < this.maxPlayers) {
 			// create and add a new player
 			const playerID = uuidv4();
-			this.players.push(new Player(playerID, playerName, chips));
+			this.players.push(new Player(playerID, playerName, this.getPlayerColor(), chips));
 			return playerID;
 		} else {
 			return null;
@@ -1270,6 +1277,9 @@ export class Table {
 		return {rank, message};
 	}
 
+	private getPlayerColor(): string {
+		return this.playerColors.pop();
+	}
 }
 
 function GetMax(bets) {

@@ -1,5 +1,6 @@
 @import "../../assets/styles/utils";
 
+
 .table_name {
   position: absolute;
   top: 10%;
@@ -12,8 +13,7 @@
 
   &__message {
     font-weight: bold;
-    margin-bottom: 1rem
-  ;
+    margin-bottom: 1rem;
   }
 }
 
@@ -44,6 +44,8 @@
   border-radius: 150px;
   border: 15px solid #a95555;
 
+  font-family: $table-font-family;
+
   &:before {
     content: '';
     border: 7px solid rgba(0, 0, 0, .1);
@@ -68,22 +70,54 @@
     left: 0;
   }
 
+
   .card-place {
-    border: 5px solid #63c763;
+    border: 5px solid $table-font-color;
     height: 100px;
-    width: 340px;
+
     position: absolute;
     border-radius: 10px;
     padding: 10px;
-    top: 50%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%);
     box-sizing: border-box;
 
-    app-card:not(:last-child) {
-      margin-right: 15px;
+    &.stack {
+      width: 85px;
+      top: 50%;
+      left: calc(50% - 220px);
+      transform: translateX(-50%) translateY(-50%);
+
+      app-card {
+        position: absolute;
+      }
+    }
+
+    &.board {
+      width: 340px;
+      top: 50%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-50%);
+
+      app-card:not(:last-child) {
+        margin-right: 15px;
+      }
     }
   }
+
+  .pot {
+    font-size: 30px;
+    color: $table-font-color;
+    position: absolute;
+    top: 45%;
+    left: 75%;
+    min-width: 80px;
+    transform: translateX(-50%) translateY(-50%);
+
+    .jetons {
+      display: inline-block;
+    }
+  }
+
+
 }
 
 .players {

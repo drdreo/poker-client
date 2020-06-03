@@ -35,6 +35,7 @@ interface PlayerOverview {
 	id: string;
 	name: string;
 	chips: number;
+	bet: number;
 	allIn: boolean;
 	folded: boolean;
 	disconnected: boolean;

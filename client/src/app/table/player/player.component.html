@@ -1,20 +1,20 @@
 <div class="player"
      [ngClass]="'player-'+ (index + 1)"
-     [class.playing]="currentPlayer === index">
+     [class.playing]="playing">
     <div class="bank">
         <div class="bank-value">{{ player.chips - player.bet }}</div>
-        <div class="jetons v-50"
-             *ngFor="let temp of getArray(getCoinsFor(player.chips - player.bet, 50)); let i = index;"
-             [ngStyle]="{'top.px': (15 + (i * 1))}"></div>
-        <div class="jetons v-10"
-             *ngFor="let temp of getArray(getCoinsFor(player.chips - player.bet, 10)); let i = index;"
-             [ngStyle]="{'top.px': (15 + (i * 1))}"></div>
-        <div class="jetons v-5"
-             *ngFor="let temp of getArray(getCoinsFor(player.chips - player.bet, 5)); let i = index;"
-             [ngStyle]="{'top.px': (15 + (i * 1))}"></div>
-        <div class="jetons v-1"
-             *ngFor="let temp of getArray(getCoinsFor(player.chips - player.bet, 1)); let i = index;"
-             [ngStyle]="{'top.px': (15 + (i * 1))}"></div>
+        <app-coins class="jetons-50"
+                   [amount]="player.chips - player.bet"
+                   [type]="50"></app-coins>
+        <app-coins class="jetons-10"
+                   [amount]="player.chips - player.bet"
+                   [type]="10"></app-coins>
+        <app-coins class="jetons-5"
+                   [amount]="player.chips - player.bet"
+                   [type]="5"></app-coins>
+        <app-coins class="jetons-1"
+                   [amount]="player.chips - player.bet"
+                   [type]="1"></app-coins>
     </div>
     <div class="avatar" [ngStyle]="{'background-color': player.color || 'dodgerblue'}"></div>
     <div class="name">{{player.name}}</div>
@@ -22,25 +22,20 @@
         <div class="mise-value">
             {{ player.bet }}
         </div>
-        <div class="jeton-50" *ngIf="getCoinsFor(player.bet, 50) >= 1">
-            <div class="jetons v-50"
-                 *ngFor="let temp of getArray(getCoinsFor(player.bet, 50)); let i = index;"
-                 [ngStyle]="{'top.px': (-2 + (i * 5))}"></div>
+        <div class="jetons jetons-50">
+            <app-coins [amount]="player.bet" [type]="50"></app-coins>
         </div>
-        <div class="jeton-10" *ngIf="getCoinsFor(player.bet, 10) >= 1">
-            <div class="jetons v-10"
-                 *ngFor="let temp of getArray(getCoinsFor(player.bet, 10)); let i = index;"
-                 [ngStyle]="{'top.px': (-2 + (i * 5))}"></div>
+        <div class="jetons jetons-10">
+            <app-coins [amount]="player.bet" [type]="10"></app-coins>
         </div>
-        <div class="jeton-5" *ngIf="getCoinsFor(player.bet, 5) >= 1">
-            <div class="jetons v-5"
-                 *ngFor="let temp of getArray(getCoinsFor(player.bet ,5)); let i = index;"
-                 [ngStyle]="{'top.px': (-2 + (i * 5))}"></div>
+        <div class="jetons jetons-5">
+            <app-coins [amount]="player.bet" [type]="5"></app-coins>
         </div>
-        <div class="jeton-1" *ngIf="getCoinsFor(player.bet, 1) >= 1">
-            <div class="jetons v-1"
-                 *ngFor="let temp of getArray(getCoinsFor(player.bet,1)); let i = index;"
-                 [ngStyle]="{'top.px': (-2 + (i * 5))}"></div>
+        <div class="jetons jetons-1">
+            <app-coins [amount]="player.bet" [type]="1"></app-coins>
         </div>
+    </div>
+    <div class="cards">
+        <app-card *ngFor="let card of player.cards" [figure]="card.figure" [value]="card.value"></app-card>
     </div>
 </div>

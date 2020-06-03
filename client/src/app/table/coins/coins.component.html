@@ -1,0 +1,32 @@
+<ng-container *ngIf="amount > 0">
+    <ng-container [ngSwitch]="type">
+        <ng-container *ngSwitchCase="50">
+            <div class="jeton-50" *ngIf="getCoinsFor(amount, 50) >= 1">
+                <div class="jetons v-50"
+                     *ngFor="let temp of getArray(getCoinsFor(amount, 50)); let i = index;"
+                     [ngStyle]="{'top.px': (-2 + (i * 5))}"></div>
+            </div>
+        </ng-container>
+        <ng-container *ngSwitchCase="10">
+            <div class="jeton-10" *ngIf="getCoinsFor(amount, 10) >= 1">
+                <div class="jetons v-10"
+                     *ngFor="let temp of getArray(getCoinsFor(amount, 10)); let i = index;"
+                     [ngStyle]="{'top.px': (-2 + (i * 5))}"></div>
+            </div>
+        </ng-container>
+        <ng-container *ngSwitchCase="5">
+            <div class="jeton-5" *ngIf="getCoinsFor(amount, 5) >= 1">
+                <div class="jetons v-5"
+                     *ngFor="let temp of getArray(getCoinsFor(amount ,5)); let i = index;"
+                     [ngStyle]="{'top.px': (-2 + (i * 5))}"></div>
+            </div>
+        </ng-container>
+        <ng-container *ngSwitchCase="1">
+            <div class="jeton-1" *ngIf="getCoinsFor(amount, 1) >= 1">
+                <div class="jetons v-1"
+                     *ngFor="let temp of getArray(getCoinsFor(amount,1)); let i = index;"
+                     [ngStyle]="{'top.px': (-2 + (i * 5))}"></div>
+            </div>
+        </ng-container>
+    </ng-container>
+</ng-container>

@@ -12,6 +12,6 @@ export class Player {
 	public allIn = false;
 	disconnected: boolean = false;
 
-	constructor(public id: string, public name: string, public chips: number) {
+	constructor(public id: string, public name: string, public color: string, public chips: number) {
 	}
 }

@@ -1,5 +1,5 @@
 <div class="page-container">
-    <h1 class="table_name">Table <span class="is-primary">{{table}}</span></h1>
+    <h1 class="table_name">Table <span class="is-primary">{{tableName}}</span></h1>
 
     <div class="ready-container" *ngIf="isPlayer">
         <div class="ready-container__message">Everyone's in?</div>
@@ -16,17 +16,39 @@
 
 
     <div class="table">
-        <div class="card-place">
-            <app-card *ngFor="let card of five_cards" [card]="card"></app-card>
+        <div class="stack card-place">
+            <app-card *ngFor="let card of getArray(45); let i = index;" figure="back"
+                      [ngStyle]="{'top.px': -0.5*i +5 }"></app-card>
+        </div>
+        <div class="board card-place">
+            <app-card *ngFor="let card of five_cards" [figure]="card.figure" [value]="card.value"></app-card>
         </div>
         <div class="players">
-            <app-player *ngFor="let player of players; let i = index;" [player]="player" [index]="i" [currentPlayer]="player_playing">
+            <app-player *ngFor="let player of players; let i = index;" [player]="player" [index]="i"
+                        [playing]="currentPlayer === i">
             </app-player>
+        </div>
+        <div class="pot">
+            <div class="pot__value">
+                {{pot}}€
+            </div>
+            <div class="jetons">
+                <app-coins [amount]="pot" [type]="50"></app-coins>
+            </div>
+            <div class="jetons">
+                <app-coins [amount]="pot" [type]="10"></app-coins>
+            </div>
+            <div class="jetons">
+                <app-coins [amount]="pot" [type]="5"></app-coins>
+            </div>
+            <div class="jetons">
+                <app-coins [amount]="pot" [type]="1"></app-coins>
+            </div>
         </div>
     </div>
 
-    <div class="overlay" [class.visible]="showOverlay">
-        <h2>Sorry, but the table <span class="is-primary">{{table}}</span> does not exist</h2>
+    <div class="overlay" [class.visible]="showOverlay && false">
+        <h2>Sorry, but the table <span class="is-primary">{{tableName}}</span> does not exist</h2>
         <a routerLink="/" class="link">Back to home?</a>
     </div>
 </div>

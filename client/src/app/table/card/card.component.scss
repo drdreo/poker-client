@@ -1,3 +1,6 @@
+:host {
+  display: inline-block;
+}
 
 .card {
   height: 70px;
@@ -6,11 +9,14 @@
   display: inline-block;
   position: relative;
   background-color: white;
-  font-family: "Houschka Rounded";
 
 
-  //background-image: url("~/assets/cards/7D.svg");
-  //background-size: contain;
+  &--back {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/4/43/Card_back_02.svg");
+    background-size: contain;
+    border: 2px solid white;
+  }
+
 
   &.figures-P, &.figures-C {
     color: #515260;

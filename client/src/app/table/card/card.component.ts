@@ -1,17 +1,23 @@
-import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+
+export interface Card {
+	value: number;
+	figure: string;
+}
 
 @Component({
-  selector: 'app-card',
-  templateUrl: './card.component.html',
-  styleUrls: ['./card.component.scss'],
+	selector: 'app-card',
+	templateUrl: './card.component.html',
+	styleUrls: ['./card.component.scss'],
 })
-export class CardComponent implements OnInit {
+export class CardComponent implements Card, OnInit {
 
-  @Input() card;
+	@Input() value: number;
+	@Input() figure: string;
 
-  constructor() { }
+	constructor() { }
 
-  ngOnInit() {
-  }
+	ngOnInit() {
+	}
 
 }

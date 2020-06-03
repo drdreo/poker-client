@@ -1,10 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { Card } from '../card/card.component';
 
-interface Player {
-	name:string;
-	chips:number;
-	bet:number;
-	color:string;
+export interface Player {
+	name: string;
+	chips: number;
+	bet: number;
+	color: string;
+	cards?: Card[];
 }
 
 @Component({
@@ -15,13 +17,8 @@ interface Player {
 export class PlayerComponent implements OnInit {
 
 	@Input() player: Player;
-	@Input() currentPlayer;
+	@Input() playing: boolean;
 	@Input() index;
-
-
-	// available coins
-	coins = [50, 10, 5, 1];
-
 
 	constructor() { }
 
@@ -29,28 +26,6 @@ export class PlayerComponent implements OnInit {
 	}
 
 	getArray(number: number) {
-		return Array(number).fill(0).map((x,i)=>i)
-	}
-
-	getCoinsFor(total: number, coin: number) {
-		// prep coins
-		const coins = this.coins.map(c => {
-			return {amount:0, value:c}
-		});
-
-		let tmp_rest = total;
-
-		for (let c of coins) {
-			if (tmp_rest <= 0) {
-				break;
-			}
-
-			while (tmp_rest - c.value >= 0) {
-				tmp_rest -= c.value;
-				c.amount++;
-			}
-		}
-
-		return coins.find(c => c.value === coin).amount;
+		return Array(number).fill(0).map((x, i) => i);
 	}
 }

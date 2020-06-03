@@ -1,5 +1,14 @@
-<div class="card" [ngClass]="['figures-' + card.f, 'values-' + card.v, card.v+card.f]">
-    <h1>{{card.v}}</h1>
-    <div class="figures" [ngClass]="[card.f]"></div>
-    <h1>{{card.v}}</h1>
+<div *ngIf="figure==='back'; then backCard else card">
+
 </div>
+<ng-template #backCard>
+    <div class="card card--back"></div>
+</ng-template>
+
+<ng-template #card>
+    <div class="card" [ngClass]="['figures-' + figure, 'values-' + value,value+figure]">
+        <h1>{{value}}</h1>
+        <div class="figures" [ngClass]="[figure]"></div>
+        <h1>{{value}}</h1>
+    </div>
+</ng-template>
