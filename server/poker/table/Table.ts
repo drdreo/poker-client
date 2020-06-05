@@ -1,8 +1,9 @@
 import { Hand, Player, PlayerPreview } from '../Player';
 import { WsException } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
-import { Game } from '../Game';
+import { Game, RoundType } from '../Game';
 import { v4 as uuidv4 } from 'uuid';
+import { Subject } from 'rxjs';
 
 
 export class Table {
@@ -15,8 +16,10 @@ export class Table {
 
 	players: Player[] = [];
 	dealer: number = 0;	//Track the dealer position between games
+	currentPlayer: number; // index of the current player
 	private game: Game | undefined;
-	private currentPlayer: number; // index of the current player
+
+	commands$: Subject<any>;
 
 	constructor(
 		public smallBlind: number,
@@ -31,7 +34,7 @@ export class Table {
 
 		//require at least two players to start a game.
 		if (minPlayers < 2) {
-			err = new Error('Parameter [minPlayers] must be a postive integer of a minimum value of 2.');
+			err = new Error('Parameter [minPlayers] must be a positive integer of a minimum value of 2.');
 		}
 
 		if (minPlayers > maxPlayers) {
@@ -51,6 +54,10 @@ export class Table {
 		return this.players.find(player => player.id === playerID);
 	}
 
+	public isPlayer(playerID: string): boolean {
+		return this.players.some(player => player.id === playerID);
+	}
+
 	public getPlayersPreview(): PlayerPreview[] {
 		return this.players.map(player => {
 			return {
@@ -65,7 +72,7 @@ export class Table {
 		});
 	}
 
-	public addPlayer(playerName: string, chips: number): string | null {
+	public addPlayer(playerName: string, chips: number): string {
 		//If there is no current game and we have enough players, start a new game.
 		if (this.game) {
 			throw new WsException('Game already started');
@@ -77,37 +84,48 @@ export class Table {
 			this.players.push(new Player(playerID, playerName, this.getPlayerColor(), chips));
 			return playerID;
 		} else {
-			return null;
+			throw new WsException('Table is already full!');
 		}
-		throw new WsException('Too many players!');
 	}
 
 	private setStartPlayer() {
 		this.currentPlayer = 0;
 	}
 
+	private removePlayerCards() {
+		for (let player of this.players) {
+			player.cards = [];
+		}
+	}
+
 	private nextPlayer() {
-		// if last player, continue with first
-		const newIndex = this.currentPlayer === this.players.length - 1 ? 0 : this.currentPlayer + 1;
-		this.currentPlayer = newIndex;
+		let nextIndex;
+		do {
+			// if last player, continue with first
+			nextIndex = this.currentPlayer === this.players.length - 1 ? 0 : this.currentPlayer + 1;
+		} while (this.players[nextIndex].folded);
+		this.currentPlayer = nextIndex;
+		this.commands$.next({cmd: 'game:next_player', table: this.name, data: {nextPlayerID: nextIndex}});
 	}
 
 	private getPlayerIndexByID(playerID: string) {
 		return this.players.findIndex(player => player.id === playerID);
 	}
 
-	public startGame() {
-		if (!this.game) {
-			this.game = new Game(this.smallBlind, this.bigBlind);
-			this.setStartPlayer();
-			this.putCards();
-		} else {
-			throw new WsException('Game already started!');
-		}
-
+	public newGame() {
+		this.game = new Game(this.smallBlind, this.bigBlind);
+		this.setStartPlayer();
+		this.dealCards();
+		this.commands$.next({
+			cmd: 'game_started',
+			table: this.name,
+			data: {players: this.players, currentPlayer: this.players[this.currentPlayer].id},
+		});
 	}
 
-	private putCards() {
+	private dealCards() {
+		this.removePlayerCards();
+
 		//Deal 2 cards to each player
 		for (let x = 0; x < 2; x++) {
 			for (let player of this.players) {
@@ -121,9 +139,9 @@ export class Table {
 		if (playerIndex !== this.currentPlayer) {
 			throw new WsException('Not your turn!');
 		}
-		let maxBet = GetMax(this.game.round.bets);
-		this.game.round.bets[playerIndex] = maxBet;
+		this.game.call(playerIndex);
 		this.progress();
+		this.nextPlayer();
 	}
 
 	public bet(playerID: string, bet: number) {
@@ -131,7 +149,7 @@ export class Table {
 		if (playerIndex !== this.currentPlayer) {
 			throw new WsException('Not your turn!');
 		}
-		this.game.round.bets[playerIndex] = bet;
+		this.game.bet(playerIndex, bet);
 		this.nextPlayer();
 	}
 
@@ -142,22 +160,35 @@ export class Table {
 			throw new WsException('Not your turn!');
 		}
 
-		let bet = this.game.round.bets[playerIndex];
+		if (!this.game.hasSmallAndBigBlind()) {
+			throw new WsException('You cant fold yet!');
+		}
+
+		let bet = this.game.getBet(playerIndex);
 		this.game.round.bets[playerIndex] = 0; // mark the bet like checked
 		this.game.pot += bet;
+		const player = this.getPlayer(playerID);
 		// reduce players chips
-		this.players[playerIndex].chips -= bet;
+		player.chips -= bet;
 		//Mark as folded
-		this.players[playerIndex].folded = true;
+		player.folded = true;
+
+		this.progress();
+		this.nextPlayer();
 	}
 
 	public check(playerID: string) {
 		const playerIndex = this.getPlayerIndexByID(playerID);
-		// TODO: check if current player
 		if (playerIndex !== this.currentPlayer) {
 			throw new WsException('Not your turn!');
 		}
-		this.game.round.bets[playerIndex] = 0;
+
+		if (!this.game.hasSmallAndBigBlind()) {
+			throw new WsException('You cant check yet!');
+		}
+
+		this.game.check(playerIndex);
+		this.nextPlayer();
 	}
 
 	/**
@@ -165,13 +196,13 @@ export class Table {
 	 *
 	 *
 	 */
-	private checkForEndOfRound() {
+	private endOfRound(): boolean {
 		let endOfRound = true;
-		const maxBet = GetMax(this.game.round.bets);
+		const maxBet = this.game.getMaxBet();
 		// check if each player has folded or everyone has bet
 		for (let i = 0; i < this.players.length; i++) {
 			if (this.players[i].folded == false) {
-				if (this.game.round.bets[i] != maxBet) {
+				if (this.game.getBet(i) != maxBet) {
 					endOfRound = false;
 				}
 			}
@@ -179,19 +210,46 @@ export class Table {
 		return endOfRound;
 	}
 
+	private endOfGame(): boolean {
+		// if everyone except one folded
+		return this.players.filter(player => !player.folded).length === 1;
+	}
+
 
 	private progress() {
-		if (this.checkForEndOfRound() == true) {
+		if (this.endOfRound()) {
 			//Move all bets to the pot
-			this.game.pot += this.game.round.bets.reduce((prev, cur) => prev + cur, 0);
-		}
-		if (this.game.round.name == 'Deal') {
-			this.game.newRound('Flop');
-			this.game.deck.pop(); //Burn a card
-			for (let i = 0; i < 3; i++) {
-				this.game.board[i] = this.game.deck.pop();
+			this.game.moveBetsToPot();
+
+			if (this.endOfGame()) {
+				this.gameEnded();
+			}
+			switch (this.game.round.type) {
+				case RoundType.Deal:
+					this.game.newRound(RoundType.Flop);
+					break;
+				case RoundType.Flop:
+					this.game.newRound(RoundType.Turn);
+					break;
+				case RoundType.Turn:
+					this.game.newRound(RoundType.River);
+					break;
+				default:
+					break;
 			}
 		}
+	}
+
+	private gameEnded() {
+		// announce winner
+		this.commands$.next({cmd: 'game_ended', table: this.name, data: {pot: this.game.pot, winner: this.players[this.currentPlayer].id}});
+
+
+		// reset player status
+		this.players.map(player => player.reset());
+
+		// create new game
+		this.newGame();
 	}
 
 	private rankHand(player: Player) {
@@ -1280,10 +1338,6 @@ export class Table {
 	private getPlayerColor(): string {
 		return this.playerColors.pop();
 	}
-}
-
-function GetMax(bets) {
-	return Math.max(...bets);
 }
 
 function RankKickers(ranks, noOfCards) {

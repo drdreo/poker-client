@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { HomeInfo, PokerService, PokerTable } from '../poker.service';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { HomeInfo, PokerService } from '../poker.service';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
 	selector: 'app-home',
@@ -11,9 +11,7 @@ import { Router } from '@angular/router';
 	styleUrls: ['./home.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeComponent implements OnDestroy {
-	totalPlayers: number = 0;
-	tables: PokerTable[];
+export class HomeComponent {
 	homeInfo$: Observable<HomeInfo>;
 
 	loginForm = new FormGroup({
@@ -39,27 +37,17 @@ export class HomeComponent implements OnDestroy {
 		return this.loginForm.get('table');
 	}
 
-	unsubscribe$ = new Subject();
-
+	private unsubscribe$ = new Subject();
 
 	constructor(private router: Router, private pokerService: PokerService) {
-		this.homeInfo$ = this.pokerService.fetchHomeInfo()
-							 .pipe(takeUntil(this.unsubscribe$));
-		// .subscribe((res) => {
-		// 	this.tables = res.tables;
-		// 	this.totalPlayers = res.players;
-		// });
+		this.homeInfo$ = this.pokerService.fetchHomeInfo();
 
 		this.pokerService.roomJoined()
-			.subscribe(playerID => {
+			.pipe(takeUntil(this.unsubscribe$))
+			.subscribe(({playerID}) => {
 				localStorage.setItem('playerID', playerID);
 				this.router.navigate(['/table', this.table.value]);
 			});
-	}
-
-	ngOnDestroy() {
-		this.unsubscribe$.next();
-		this.unsubscribe$.complete();
 	}
 
 	onTableClick(tableName: string) {

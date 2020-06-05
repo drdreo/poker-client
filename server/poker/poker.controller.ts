@@ -24,8 +24,6 @@ export class PokerController {
 	@Get('/table/:name')
 	getTable(@Param("name") name) {
 		const table = this.tableService.getTable(name);
-
-		console.log(table);
 		if (table) {
 			return {name: table.name, players: table.getPlayersPreview()};
 		}

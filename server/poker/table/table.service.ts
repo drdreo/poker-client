@@ -21,7 +21,8 @@ export class TableService {
 
 	createTable(name: string): Table {
 		this.logger.debug(`Table[${name}] created!`);
-		const table = new Table(50, 100, 2, 2, name, 1000, 1000);
+		const table = new Table(10, 20, 2, 2, name, 1000, 1000);
+		table.commands$ = this._tableCommands$;
 		this.tables.push(table);
 		return table;
 	}
@@ -74,17 +75,13 @@ export class TableService {
 		this.logger.debug(`Player[${playerName}] joining Table[${tableName}]!`);
 
 		const playerID = table.addPlayer(playerName, 1000);
-		if (!playerID) {
-			throw Error('This shouldnt ever happen!');
-		}
 
 		return {playerID};
 	}
 
 	startGame(tableName: string) {
 		const table = this.tables.find(table => table.name === tableName);
-		table.startGame();
-		this._tableCommands$.next({cmd: 'game_started', data: table.players});
+		table.newGame();
 	}
 
 

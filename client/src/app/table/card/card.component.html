@@ -6,6 +6,7 @@
 </ng-template>
 
 <ng-template #card>
+<!--    <img class="svg-card" src="{{'assets/cards/'+ value+figure +'.svg'}}"/>-->
     <div class="card" [ngClass]="['figures-' + figure, 'values-' + value,value+figure]">
         <h1>{{value}}</h1>
         <div class="figures" [ngClass]="[figure]"></div>

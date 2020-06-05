@@ -3,7 +3,7 @@ export interface Hand {
 	message: string;
 }
 
-export type  PlayerPreview = Omit<Player, 'cards' | 'hand'>;
+export type  PlayerPreview = Omit<Player, 'cards' | 'hand' | 'reset'>;
 
 export class Player {
 	public cards: string[] = [];
@@ -13,5 +13,12 @@ export class Player {
 	disconnected: boolean = false;
 
 	constructor(public id: string, public name: string, public color: string, public chips: number) {
+	}
+
+	reset() {
+		this.folded = false;
+		this.allIn = false;
+		this.hand = null;
+		this.cards = [];
 	}
 }

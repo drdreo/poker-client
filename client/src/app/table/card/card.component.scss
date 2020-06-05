@@ -2,6 +2,10 @@
   display: inline-block;
 }
 
+.svg-card{
+  width: 50px;
+}
+
 .card {
   height: 70px;
   width: 50px;
@@ -18,7 +22,7 @@
   }
 
 
-  &.figures-P, &.figures-C {
+  &.figures-S, &.figures-C {
     color: #515260;
   }
 
@@ -59,7 +63,7 @@
   background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/441095/clovers.svg');
   background-size: 40px;
 
-  &.P {
+  &.S {
     background-position: 0 0;
   }
 

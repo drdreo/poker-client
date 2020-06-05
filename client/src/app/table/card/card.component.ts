@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 
 export interface Card {
-	value: number;
+	value: string;
 	figure: string;
 }
 
@@ -12,8 +12,9 @@ export interface Card {
 })
 export class CardComponent implements Card, OnInit {
 
-	@Input() value: number;
+	@Input() value: string;
 	@Input() figure: string;
+	@Input() type: string;
 
 	constructor() { }
 

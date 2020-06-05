@@ -24,7 +24,6 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	@WebSocketServer() server: Server;
 
 	connections: Connection[] = [];
-	private unsubscribe$ = new Subject();
 
 	constructor(private logger: Logger, private tableService: TableService) {
 		this.logger.setContext('PokerGateway');
@@ -38,12 +37,15 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	handleConnection(socket: Client) {
+		this.logger.debug(`Player[${socket['playerID']}] joined!`)
+
 		this.connections.push({id: socket.id, playerID: null});
 	}
 
 	async handleDisconnect(socket: Client) {
 		this.connections = this.connections.filter(conn => conn.id !== socket.id);
 		this.tableService.playerLeft(socket['playerID']);
+		this.logger.debug(`Player[${socket['playerID']}] left!`)
 	}
 
 
@@ -52,21 +54,28 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	 */
 
 
-	private handleTableCommands({cmd, data}) {
-		console.log(cmd);
+	private handleTableCommands({cmd, data, table}) {
+		this.logger.verbose(`Table[${table}] - ${cmd}:`);
 		console.dir(data);
-		console.dir(this.connections);
 
 		switch (cmd) {
 			case 'game_started':
 				// tell every player his / her cards
-				for (let player of data) {
+				for (let player of data.players) {
 					const conn = this.connections.find(conn => conn.playerID === player.id);
-					this.sendTo(conn.id, 'server:game_started', player.cards);
+					this.sendTo(conn.id, 'server:game_started', {cards: player.cards, currentPlayer: data.currentPlayer});
 				}
 				break;
+
+			case 'game_ended':
+				this.sendTo(table, 'server:game_ended', {winner: data.winner, pot: data.pot});
+				break;
+
+			case 'game:next_player':
+				this.sendTo(table, 'server:game:next_player', {nextPlayerID: data.nextPlayerID});
+				break;
 			default:
-				this.logger.warn(`Commando[${cmd}] was not handled!`);
+				this.logger.warn(`Command[${cmd}] was not handled!`);
 				break;
 		}
 	}
@@ -93,8 +102,8 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		socket['table'] = roomName;
 		this.connections.find(conn => conn.id === socket.id).playerID = newPlayerID;
 
-		this.server.emit('playerJoined', playerName);
-		return {event: 'server:joined', data: {newPlayerID}};
+		this.sendTo(roomName, 'server:player_update', {players: this.tableService.getTable(roomName).getPlayersPreview()});
+		return {event: 'server:joined', data: {playerID: newPlayerID}};
 	}
 
 	@SubscribeMessage('startGame')

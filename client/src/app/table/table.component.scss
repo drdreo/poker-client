@@ -10,6 +10,8 @@
   display: flex;
   flex-direction: column;
   z-index: 1;
+  position: absolute;
+  bottom: 10%;
 
   &__message {
     font-weight: bold;
@@ -36,14 +38,14 @@
 .table {
   width: 1000px;
   height: 400px;
-  background-color: #4aad4a;
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translateX(-50%) translateY(-50%);
-  border-radius: 150px;
-  border: 15px solid #a95555;
 
+  border-radius: 150px;
+  border: 15px solid $table-border-color;
+  background-color: $table-background-color;
   font-family: $table-font-family;
 
   &:before {
