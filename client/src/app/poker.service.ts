@@ -4,6 +4,7 @@ import { map, takeUntil } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Player } from './table/player/player.component';
+import { Card } from './table/card/card.component';
 
 interface PlayerChecked {
 	playerID: string;
@@ -32,16 +33,6 @@ export interface HomeInfo {
 	players: number;
 }
 
-interface PlayerOverview {
-	id: string;
-	name: string;
-	color: string;
-	chips: number;
-	bet: number;
-	allIn: boolean;
-	folded: boolean;
-	disconnected: boolean;
-}
 
 export interface TableResponse {
 	name: string;
@@ -55,7 +46,6 @@ interface ServerJoined {
 
 interface GameStarted {
 	cards: string[];
-	currentPlayer: string;
 }
 
 interface GameEnded {
@@ -63,12 +53,27 @@ interface GameEnded {
 	pot: number;
 }
 
+interface PlayerOverview {
+	id: string;
+	name: string;
+	chips: number;
+	color: string;
+	cards?: Card[];
+	allIn: boolean;
+	folded: boolean;
+	disconnected: boolean;
+}
+
 interface GamePlayersUpdate {
-	players: Player[];
+	players: PlayerOverview[];
 }
 
 interface GameNextPlayer {
 	nextPlayerID: string;
+}
+
+interface GameRoundStarted {
+	board: string[];
 }
 
 @Injectable({
@@ -114,23 +119,31 @@ export class PokerService implements OnDestroy {
 		this.socket.emit('startGame');
 	}
 
-	gameStarted() {
-		return this.socket.fromEvent<GameStarted>('server:game_started')
-				   .pipe(takeUntil(this.unsubscribe$));
-	}
-
 	gameEnded() {
 		return this.socket.fromEvent<GameEnded>('server:game_ended')
 				   .pipe(takeUntil(this.unsubscribe$));
 	}
 
-	playersUpdate() {
-		return this.socket.fromEvent<GamePlayersUpdate>('server:player_update');
+	playersUpdate(): Observable<Player[]> {
+		return this.socket.fromEvent<GamePlayersUpdate>('server:player_update')
+				   .pipe(map(data => data.players));
 	}
 
 	nextPlayer(): Observable<string> {
 		return this.socket.fromEvent<GameNextPlayer>('server:game:next_player')
 				   .pipe(map(data => data.nextPlayerID));
+	}
+
+	boardUpdated(): Observable<Card[]> {
+		return this.socket.fromEvent<GameRoundStarted>('server:game:board_updated')
+				   .pipe(map(({board}) => {
+					   return board.map(card => {
+						   const c = card.split('');
+						   // remap T to 10
+						   c[0] = c[0] === 'T' ? '10' : c[0];
+						   return {value: c[0], figure: c[1]};
+					   });
+				   }));
 	}
 
 
@@ -143,11 +156,7 @@ export class PokerService implements OnDestroy {
 	}
 
 	playerChecked() {
-		return this.socket.fromEvent<PlayerChecked>('server:checked')
-				   .pipe(
-					   map(data => data),
-					   takeUntil(this.unsubscribe$),
-				   );
+		return this.socket.fromEvent<PlayerChecked>('server:checked');
 	}
 
 	call() {
@@ -155,11 +164,7 @@ export class PokerService implements OnDestroy {
 	}
 
 	playerCalled() {
-		return this.socket.fromEvent<PlayerCalled>('server:called')
-				   .pipe(
-					   map(data => data),
-					   takeUntil(this.unsubscribe$),
-				   );
+		return this.socket.fromEvent<PlayerCalled>('server:called');
 	}
 
 	bet(coins: number) {
@@ -167,11 +172,7 @@ export class PokerService implements OnDestroy {
 	}
 
 	playerBet() {
-		return this.socket.fromEvent<PlayerBet>('server:bet')
-				   .pipe(
-					   map(data => data),
-					   takeUntil(this.unsubscribe$),
-				   );
+		return this.socket.fromEvent<PlayerBet>('server:bet');
 	}
 
 	fold() {
@@ -179,11 +180,7 @@ export class PokerService implements OnDestroy {
 	}
 
 	playerFolded() {
-		return this.socket.fromEvent<PlayerFolded>('server:folded')
-				   .pipe(
-					   map(data => data),
-					   takeUntil(this.unsubscribe$),
-				   );
+		return this.socket.fromEvent<PlayerFolded>('server:folded');
 	}
 
 }

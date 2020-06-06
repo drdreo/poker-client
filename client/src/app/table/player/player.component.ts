@@ -5,7 +5,7 @@ export interface Player {
 	id: string;
 	name: string;
 	chips: number;
-	bet: number;
+	bet?: number;
 	color: string;
 	cards?: Card[];
 	allIn: boolean;

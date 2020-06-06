@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PokerService } from '../poker.service';
 import { switchMap, takeUntil, tap } from 'rxjs/operators';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
 import { Card } from './card/card.component';
 import { Player } from './player/player.component';
 
@@ -17,7 +17,9 @@ export class TableComponent implements OnInit, OnDestroy {
 	/***Comes from server*/
 	tableName: string;
 	currentPlayerID$: Observable<string>; // ID of the current player
-	players: Player[] = [];
+	board$: Observable<Card[]>;
+	_players$: BehaviorSubject<Player[]> = new BehaviorSubject<Player[]>([]);
+	players$: Observable<Player[]>;
 	pot: number = 524;
 	/***/
 
@@ -61,9 +63,9 @@ export class TableComponent implements OnInit, OnDestroy {
 		return cards;
 	}
 
-	get five_cards() {
+	test_cards(amount: number) {
 		let fives = [];
-		for (let i = 0; i < 5; i++) {
+		for (let i = 0; i < amount; i++) {
 			let rand_id = Math.floor(Math.random() * this.cards.length);
 			fives.push(this.cards[rand_id]);
 		}
@@ -74,64 +76,48 @@ export class TableComponent implements OnInit, OnDestroy {
 
 	constructor(private route: ActivatedRoute, public pokerService: PokerService) {
 		// init players
-		this.players.push({
+		let players = [];
+		players.push({
 			allIn: false, disconnected: false, folded: false,
 			id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: [],
 		});
-		this.players.push({
+		players.push({
 			allIn: false, disconnected: true, folded: false, id: '', name: 'DCer',
 			color: this.getColor(), chips: 667, bet: 579, cards: this.two_cards,
 		});
-		this.players.push({
+		players.push({
 			allIn: false, disconnected: false, folded: false,
 			id: '', name: 'DrDreo', color: this.getColor(), chips: 667, bet: 579, cards: [],
 		});
-		this.players.push({
+		players.push({
 			allIn: false, disconnected: false, folded: false,
 			id: '', name: 'Hackl', color: this.getColor(), chips: 667, bet: 579, cards: [],
 		});
-		this.players.push({
+		players.push({
 			allIn: false, disconnected: false, folded: false,
 			id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: [],
 		});
-		this.players.push({
+		players.push({
 			allIn: false, disconnected: false, folded: false,
 			id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: [],
 		});
-		this.players.push({
+		players.push({
 			allIn: false, disconnected: false, folded: false,
 			id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: [],
 		});
-		this.players.push({
+		players.push({
 			allIn: false, disconnected: false, folded: false,
 			id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: [],
 		});
 
-
+		this._players$.next(players);
 		this.currentPlayerID$ = this.pokerService.nextPlayer()
 									.pipe(
 										tap(currentPlayerID => this.isCurrentPlayer = currentPlayerID === this.clientPlayerID),
 									);
 
-		this.pokerService.playersUpdate()
-			.pipe(takeUntil(this.unsubscribe$))
-			.subscribe(({players}) => {
-				this.players = players;
-			});
-
-
-		this.pokerService.gameStarted()
-			.pipe(takeUntil(this.unsubscribe$))
-			.subscribe(({cards}) => {
-				console.log(cards);
-				this.players.find(player => player.id === this.clientPlayerID).cards = cards.map(card => {
-					const c = card.split('');
-					// remap T to 10
-					c[0] = c[0] === 'T' ? '10' : c[0];
-					return {value: c[0], figure: c[1]};
-				});
-			});
-
+		this.players$ = merge(this._players$, this.pokerService.playersUpdate());
+		this.board$ = this.pokerService.boardUpdated();
 	}
 
 	ngOnInit() {
@@ -145,7 +131,7 @@ export class TableComponent implements OnInit, OnDestroy {
 				takeUntil(this.unsubscribe$))
 			.subscribe(table => {
 				console.log(table);
-				this.players = table.players;
+				this._players$.next(table.players);
 				this.isPlayer = table.players.some(player => player.id === this.clientPlayerID);
 			}, error => {
 				console.log(error);
@@ -186,10 +172,6 @@ export class TableComponent implements OnInit, OnDestroy {
 
 	private getColor() {
 		return this.playerColors.pop();
-	}
-
-	private colorTaken(color) {
-		return this.players.some(player => player.color === color);
 	}
 
 	getArray(number: number) {

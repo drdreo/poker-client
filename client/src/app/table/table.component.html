@@ -10,7 +10,7 @@
     <div class="game_controls" *ngIf="isCurrentPlayer">
         <button class="button" (click)="check()">Check</button>
         <button class="button" (click)="call()">Call</button>
-        <input #betAmount type="number" />
+        <input #betAmount type="number"/>
         <button class="button" (click)="bet(+betAmount.value)">Bet</button>
         <button class="button" (click)="fold()">Fold</button>
     </div>
@@ -22,10 +22,11 @@
                       [ngStyle]="{'top.px': -0.5*i +5 }"></app-card>
         </div>
         <div class="board card-place">
-            <app-card *ngFor="let card of five_cards"  [type]="" [figure]="card.figure" [value]="card.value"></app-card>
+            <app-card *ngFor="let card of (board$ | async)" [type]="" [figure]="card.figure"
+                      [value]="card.value"></app-card>
         </div>
         <div class="players">
-            <app-player *ngFor="let player of players; let i = index;" [player]="player" [index]="i"
+            <app-player *ngFor="let player of (players$ | async); let i = index;" [player]="player" [index]="i"
                         [playing]="(currentPlayerID$ | async) === player.id">
             </app-player>
         </div>

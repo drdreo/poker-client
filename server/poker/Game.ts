@@ -7,6 +7,12 @@ export enum RoundType {
 	River
 }
 
+export enum BetType {
+	Bet,
+	Raise,
+	ReRaise,
+}
+
 export class Game {
 	public pot: number = 0;
 	public round: Round;
@@ -15,8 +21,9 @@ export class Game {
 
 	constructor(private smallBlind: number, private bigBlind: number) {
 		Logger.debug('Game started!');
-		this.newRound(RoundType.Deal); //Start the first round
 		this.fillDeck();
+
+		this.newRound(RoundType.Deal); //Start the first round
 	}
 
 	newRound(type: RoundType) {
@@ -27,13 +34,13 @@ export class Game {
 			for (let i = 0; i < 3; i++) {
 				this.board.push(this.deck.pop());
 			}
-		} else if (type === RoundType.Turn || RoundType.River) {
+		} else if (type === RoundType.Turn || type === RoundType.River) {
 			this.deck.pop(); //Burn a card
 			this.board.push(this.deck.pop());
 		}
 	}
 
-	getBet(playerIndex): number | undefined {
+	getBet(playerIndex: number): number | undefined {
 		return this.round.bets[playerIndex];
 	}
 
@@ -48,6 +55,10 @@ export class Game {
 
 	check(playerIndex: number) {
 		this.round.bets[playerIndex] = 0;
+	}
+
+	call(playerIndex: number) {
+		this.round.bets[playerIndex] = this.getMaxBet();
 	}
 
 	bet(playerIndex: number, bet: number) {
@@ -129,14 +140,14 @@ export class Game {
 		}
 	}
 
-	call(index: number) {
-		this.round.bets[index] = this.getMaxBet();
-	}
+
 }
 
-//name: Deal,Flop,Turn,River,Showdown
+// RoundTypes: Deal,Flop,Turn,River,Showdown
+// BetTypes: Bet,Raise,ReRaise, cap
 class Round {
-	bets = [];
-	betName = 'bet'; //bet,raise,re-raise,cap
+	bets: number[] = [];
+	betName: BetType = BetType.Bet;
+
 	constructor(public type: RoundType) { }
 }

@@ -11,7 +11,6 @@ import {
 import { Client, Server, Socket } from 'socket.io';
 import { TableService } from './table/table.service';
 import { Logger } from '@nestjs/common';
-import { Subject } from 'rxjs';
 
 interface Connection {
 	id: string;
@@ -37,7 +36,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	handleConnection(socket: Client) {
-		this.logger.debug(`Player[${socket['playerID']}] joined!`)
+		this.logger.debug(`A new connection arrived!`);
 
 		this.connections.push({id: socket.id, playerID: null});
 	}
@@ -45,7 +44,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	async handleDisconnect(socket: Client) {
 		this.connections = this.connections.filter(conn => conn.id !== socket.id);
 		this.tableService.playerLeft(socket['playerID']);
-		this.logger.debug(`Player[${socket['playerID']}] left!`)
+		this.logger.debug(`Player[${socket['playerID']}] left!`);
 	}
 
 
@@ -60,10 +59,20 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 		switch (cmd) {
 			case 'game_started':
-				// tell every player his / her cards
+				// tell every player his / her cards specifically
 				for (let player of data.players) {
 					const conn = this.connections.find(conn => conn.playerID === player.id);
-					this.sendTo(conn.id, 'server:game_started', {cards: player.cards, currentPlayer: data.currentPlayer});
+					const playersData = this.tableService.getTable(table).getPlayersPreview();
+					// find the player in the data again and map the cards
+					// also map the cards to the right client format {figure, value}
+					playersData.find(p => p.id === player.id)['cards'] = player.cards.map(card => {
+						const c = card.split('');
+						// remap T to 10
+						c[0] = c[0] === 'T' ? '10' : c[0];
+						return {value: c[0], figure: c[1]};
+					});
+
+					this.sendTo(conn.id, 'server:player_update', {players: playersData});
 				}
 				break;
 
@@ -73,6 +82,10 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 			case 'game:next_player':
 				this.sendTo(table, 'server:game:next_player', {nextPlayerID: data.nextPlayerID});
+				break;
+
+			case 'game:board_updated':
+				this.sendTo(table, 'server:game:board_updated', {board: data.board});
 				break;
 			default:
 				this.logger.warn(`Command[${cmd}] was not handled!`);

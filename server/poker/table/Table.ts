@@ -15,7 +15,7 @@ export class Table {
 	];
 
 	players: Player[] = [];
-	dealer: number = 0;	//Track the dealer position between games
+	dealer: number;	// index of the current dealer
 	currentPlayer: number; // index of the current player
 	private game: Game | undefined;
 
@@ -89,7 +89,15 @@ export class Table {
 	}
 
 	private setStartPlayer() {
-		this.currentPlayer = 0;
+		// just hardcoded dealer is always last and small blind is first, maybe do better
+		// check if dealer was set already, so move it further instead
+		if (this.dealer) {
+			this.dealer = getNextIndex(this.dealer, this.players);
+			this.currentPlayer = getNextIndex(this.dealer, this.players);
+		} else {
+			this.dealer = this.players.length - 1;
+			this.currentPlayer = 0;
+		}
 	}
 
 	private removePlayerCards() {
@@ -105,7 +113,7 @@ export class Table {
 			nextIndex = this.currentPlayer === this.players.length - 1 ? 0 : this.currentPlayer + 1;
 		} while (this.players[nextIndex].folded);
 		this.currentPlayer = nextIndex;
-		this.commands$.next({cmd: 'game:next_player', table: this.name, data: {nextPlayerID: nextIndex}});
+		this.commands$.next({cmd: 'game:next_player', table: this.name, data: {nextPlayerID: this.players[this.currentPlayer].id}});
 	}
 
 	private getPlayerIndexByID(playerID: string) {
@@ -113,14 +121,18 @@ export class Table {
 	}
 
 	public newGame() {
+		if (this.players.length < this.minPlayers) {
+			throw new WsException('Cant start game. Too less players are in');
+		}
 		this.game = new Game(this.smallBlind, this.bigBlind);
 		this.setStartPlayer();
 		this.dealCards();
 		this.commands$.next({
 			cmd: 'game_started',
 			table: this.name,
-			data: {players: this.players, currentPlayer: this.players[this.currentPlayer].id},
+			data: {players: this.players},
 		});
+		this.commands$.next({cmd: 'game:next_player', table: this.name, data: {nextPlayerID: this.players[this.currentPlayer].id}});
 	}
 
 	private dealCards() {
@@ -140,8 +152,10 @@ export class Table {
 			throw new WsException('Not your turn!');
 		}
 		this.game.call(playerIndex);
-		this.progress();
-		this.nextPlayer();
+		const next = this.progress();
+		if (next) {
+			this.nextPlayer();
+		}
 	}
 
 	public bet(playerID: string, bet: number) {
@@ -160,21 +174,21 @@ export class Table {
 			throw new WsException('Not your turn!');
 		}
 
-		if (!this.game.hasSmallAndBigBlind()) {
-			throw new WsException('You cant fold yet!');
-		}
+		const player = this.players[playerIndex];
 
 		let bet = this.game.getBet(playerIndex);
-		this.game.round.bets[playerIndex] = 0; // mark the bet like checked
-		this.game.pot += bet;
-		const player = this.getPlayer(playerID);
-		// reduce players chips
-		player.chips -= bet;
-		//Mark as folded
+		this.game.check(playerIndex); // mark the bet like checked
+		if (bet) {
+			this.game.pot += bet; // add bet to pot
+			player.chips -= bet; // reduce players chips
+		}
+
 		player.folded = true;
 
-		this.progress();
-		this.nextPlayer();
+		const next = this.progress();
+		if (next) {
+			this.nextPlayer();
+		}
 	}
 
 	public check(playerID: string) {
@@ -183,12 +197,12 @@ export class Table {
 			throw new WsException('Not your turn!');
 		}
 
-		if (!this.game.hasSmallAndBigBlind()) {
-			throw new WsException('You cant check yet!');
-		}
 
 		this.game.check(playerIndex);
-		this.nextPlayer();
+		const next = this.progress();
+		if (next) {
+			this.nextPlayer();
+		}
 	}
 
 	/**
@@ -199,11 +213,12 @@ export class Table {
 	private endOfRound(): boolean {
 		let endOfRound = true;
 		const maxBet = this.game.getMaxBet();
-		// check if each player has folded or everyone has bet
+		// check if each player has folded or everyone has called
 		for (let i = 0; i < this.players.length; i++) {
 			if (this.players[i].folded == false) {
 				if (this.game.getBet(i) != maxBet) {
 					endOfRound = false;
+					break;
 				}
 			}
 		}
@@ -216,13 +231,17 @@ export class Table {
 	}
 
 
-	private progress() {
+	private progress(): boolean {
 		if (this.endOfRound()) {
 			//Move all bets to the pot
 			this.game.moveBetsToPot();
 
+
 			if (this.endOfGame()) {
 				this.gameEnded();
+				// stop the game progress since we are done
+				Logger.debug('Game ended, starting a new one');
+				return false;
 			}
 			switch (this.game.round.type) {
 				case RoundType.Deal:
@@ -237,7 +256,16 @@ export class Table {
 				default:
 					break;
 			}
+			this.commands$.next({
+				cmd: 'game:board_updated',
+				table: this.name,
+				data: {board: this.game.board},
+			});
+			// let the small blind start again
+			this.currentPlayer = getNextIndex(this.dealer, this.players);
+			return false;
 		}
+		return true;
 	}
 
 	private gameEnded() {
@@ -1338,6 +1366,20 @@ export class Table {
 	private getPlayerColor(): string {
 		return this.playerColors.pop();
 	}
+
+
+	// Test utils method
+	public getRoundType(): RoundType {
+		return this.game.round.type;
+	}
+
+	public getGame(): Game {
+		return this.game;
+	}
+}
+
+function getNextIndex(currentIndex: number, array: any[]): number {
+	return currentIndex === array.length - 1 ? 0 : currentIndex + 1;
 }
 
 function RankKickers(ranks, noOfCards) {
