@@ -5,6 +5,7 @@ import { TableRoutingModule } from './table-routing.module';
 import { CardComponent } from './card/card.component';
 import { PlayerComponent } from './player/player.component';
 import { CoinsComponent } from './coins/coins.component';
+import { ControlsComponent } from './controls/controls.component';
 
 
 @NgModule({
@@ -13,6 +14,7 @@ import { CoinsComponent } from './coins/coins.component';
 		CardComponent,
 		PlayerComponent,
 		CoinsComponent,
+		ControlsComponent,
 	],
 	imports: [
 		CommonModule,

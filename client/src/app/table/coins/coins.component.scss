@@ -1,12 +1,6 @@
-$name-font-family: 'Balsamiq Sans', cursive;
-$table-font-family: 'Open Sans', sans-serif;
+@import "../../../assets/styles/utils";
 
-$currency-symbol: "€";
 
-$jeton-50-color: lightgrey;
-$jeton-10-color: crimson;
-$jeton-5-color: goldenrod;
-$jeton-1-color: #444;
 
 :host {
   width: 20px;

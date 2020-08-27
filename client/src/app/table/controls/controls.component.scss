@@ -1,0 +1,75 @@
+@import "../../../assets/styles/utils";
+
+$amount-coins: 4;
+$coin-size: 50px;
+$circle-size: 200px;
+
+@mixin on-half-circle($item-count, $circle-size, $item-size) {
+  width: $circle-size;
+  height: $circle-size;
+  padding: 0;
+  border-radius: 50%;
+  list-style: none;
+
+  > * {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: $item-size;
+    height: $item-size;
+    margin: -($item-size / 2);
+
+    $angle: (180 / $item-count);
+    $rot: -150;
+
+    @for $i from 1 through $item-count {
+      &:nth-of-type(#{$i}) {
+        transform: rotate($rot * 1deg) translate($circle-size / 2) rotate($rot * -1deg);
+      }
+
+      $rot: $rot + $angle;
+    }
+  }
+}
+
+.bets {
+  @include on-half-circle($amount-coins, $circle-size, $coin-size);
+
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY($circle-size);
+  transition: transform ease 300ms;
+
+  color: white;
+
+  &.is-shown {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .jetons {
+    width: $coin-size;
+    height: $coin-size;
+    border-radius: 100%;
+    border: 2px white dotted;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, .1);
+
+    &.v-50 {
+      background-color: $jeton-50-color;
+    }
+
+    &.v-10 {
+      background-color: $jeton-10-color;
+    }
+
+    &.v-5 {
+      background-color: $jeton-5-color;
+    }
+
+    &.v-1 {
+      background-color: $jeton-1-color;
+    }
+  }
+}
+
