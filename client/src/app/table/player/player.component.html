@@ -18,7 +18,7 @@
     </div>
     <div class="avatar" [ngStyle]="{'background-color': player.color || 'dodgerblue'}"></div>
     <div class="name">{{player.name}}</div>
-    <div class="mise">
+    <div class="mise" *ngIf="player.bet > 0">
         <div class="mise-value">
             {{ player.bet }}
         </div>
