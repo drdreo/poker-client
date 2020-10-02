@@ -43,8 +43,12 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	async handleDisconnect(socket: Client) {
 		this.connections = this.connections.filter(conn => conn.id !== socket.id);
-		this.tableService.playerLeft(socket['playerID']);
-		this.logger.debug(`Player[${socket['playerID']}] left!`);
+		if (socket['playerID']) {
+			this.tableService.playerLeft(socket['playerID']);
+			this.logger.debug(`Player[${socket['playerID']}] left!`);
+		}else{
+			this.logger.debug(`A stranger left!`);
+		}
 	}
 
 
