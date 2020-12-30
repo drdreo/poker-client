@@ -1,15 +1,14 @@
-import { Table } from './Table';
 import { Subject } from 'rxjs';
 import { RoundType } from '../Game';
+import { TableMock } from './Table.mock';
 
 describe('Table', () => {
-    let table: Table;
+    let table: TableMock;
     let smallBlind = 10;
     let bigBlind = 20;
 
     beforeEach(() => {
-        table = new Table(smallBlind, bigBlind, 2, 5, 'TestTable', 1000, 1000);
-        table.commands$ = new Subject();
+        table = new TableMock(smallBlind, bigBlind, 2, 5, 'TestTable');
     });
 
     it('should have no Game', () => {
@@ -101,6 +100,60 @@ describe('Table', () => {
             }).toThrow();
         });
 
+        it('should set correct next player after folding', () => {
+
+            table.bet(player1, smallBlind);
+            table.call(player2);
+            table.fold(player3);
+
+            let currentPlayer = table.getPlayerIndexByID(player1);
+            expect(table.currentPlayer).toBe(currentPlayer);
+        });
+
+        it('should set correct next player after folding as first player', () => {
+
+            table.bet(player1, smallBlind);
+            table.call(player2);
+            table.call(player3);
+            table.fold(player1);
+
+            let currentPlayer = table.getPlayerIndexByID(player2);
+            expect(table.currentPlayer).toBe(currentPlayer);
+
+            table.check(player2);
+
+            currentPlayer = table.getPlayerIndexByID(player3);
+            expect(table.currentPlayer).toBe(currentPlayer);
+
+            table.check(player3);
+
+            currentPlayer = table.getPlayerIndexByID(player2);
+            expect(table.currentPlayer).toBe(currentPlayer);
+        });
+
+        it('should set correct next player after raise', () => {
+            let currentPlayer = table.getPlayerIndexByID(player2);
+
+            table.bet(player1, smallBlind);
+            expect(table.currentPlayer).toBe(currentPlayer);
+
+            table.bet(player2, bigBlind);
+            currentPlayer = table.getPlayerIndexByID(player3);
+            expect(table.currentPlayer).toBe(currentPlayer);
+
+            table.bet(player3, 2 * bigBlind);
+            currentPlayer = table.getPlayerIndexByID(player1);
+            expect(table.currentPlayer).toBe(currentPlayer);
+
+            table.call(player1);
+            currentPlayer = table.getPlayerIndexByID(player2);
+            expect(table.currentPlayer).toBe(currentPlayer);
+
+            table.call(player2);
+            currentPlayer = table.getPlayerIndexByID(player1);
+            expect(table.currentPlayer).toBe(currentPlayer);
+        });
+
         it('should not have a board', () => {
             expect(table.getGame().board.length).toEqual(0);
         });
@@ -108,12 +161,13 @@ describe('Table', () => {
         it('should set correct bets', () => {
             table.bet(player1, smallBlind);
             table.bet(player2, bigBlind);
-            table.bet(player3, bigBlind);
+            table.bet(player3, bigBlind * 2);
 
             expect(table.getGame().getBet(0)).toBe(smallBlind);
             expect(table.getGame().getBet(1)).toBe(bigBlind);
-            expect(table.getGame().getBet(2)).toBe(bigBlind);
+            expect(table.getGame().getBet(2)).toBe(bigBlind * 2);
         });
+
 
         it('should start a new Round(Flop) after everyone called the blinds', () => {
             expect(table.getRoundType()).toBe(RoundType.Deal);
@@ -154,12 +208,76 @@ describe('Table', () => {
             expect(table.getRoundType()).toBe(RoundType.Flop);
         });
 
+        it('should stay in Round(Deal) after Re-Raise', () => {
+            table.bet(player1, smallBlind);
+            table.bet(player2, bigBlind);
+            table.bet(player3, bigBlind * 2);
+            table.bet(player1, bigBlind * 3);
+            table.call(player2);
+
+            expect(table.getRoundType()).toBe(RoundType.Deal);
+        });
+
+        it('should continue with Round(Flop) after Re-Raise was called', () => {
+            table.bet(player1, smallBlind);
+            table.bet(player2, bigBlind);
+            table.bet(player3, bigBlind * 2);
+            table.bet(player1, bigBlind * 3);
+            table.call(player2);
+            table.call(player3);
+
+            expect(table.getRoundType()).toBe(RoundType.Flop);
+        });
+
+        it('should stay in Round(Deal) after Re-Raise', () => {
+            table.bet(player1, smallBlind);
+            table.bet(player2, bigBlind);
+            table.bet(player3, bigBlind * 2);
+            table.bet(player1, bigBlind * 3);
+            table.bet(player2, bigBlind * 4);
+            table.call(player3);
+
+            expect(table.getRoundType()).toBe(RoundType.Deal);
+        });
+
+        it('should continue with Round(Flop) after Re-Raise was called', () => {
+            table.bet(player1, smallBlind);
+            table.bet(player2, bigBlind);
+            table.bet(player3, bigBlind * 2);
+            table.bet(player1, bigBlind * 3);
+            table.bet(player2, bigBlind * 4);
+            table.call(player3);
+            table.call(player1);
+
+            expect(table.getRoundType()).toBe(RoundType.Flop);
+        });
+
         describe('Round(Flop)', () => {
             beforeEach(() => {
+                // Round(Deal)
                 table.bet(player1, smallBlind);
                 table.bet(player2, bigBlind);
                 table.call(player3);
                 table.call(player1);
+            });
+
+            it('should have 60 coins in the pot', () => {
+                expect(table.getGame().pot).toEqual(60);
+            });
+
+            it('should have 60 coins in the pot after checking', () => {
+                table.check(player1);
+                table.check(player2);
+                table.check(player3);
+                expect(table.getGame().pot).toEqual(60);
+            });
+
+            it('should have 120 coins in the pot after raising', () => {
+                table.bet(player1, smallBlind);
+                table.bet(player2, bigBlind);
+                table.call(player3);
+                table.call(player1);
+                expect(table.getGame().pot).toEqual(120);
             });
 
             it('should have 3 cards on the board', () => {
@@ -212,10 +330,30 @@ describe('Table', () => {
 
             describe('Round(Turn)', () => {
                 beforeEach(() => {
+                    // Round(Flop)
                     table.bet(player1, smallBlind);
                     table.bet(player2, bigBlind);
                     table.call(player3);
                     table.call(player1);
+                });
+
+                it('should have 120 coins in the pot', () => {
+                    expect(table.getGame().pot).toEqual(120);
+                });
+
+                it('should have 120 coins in the pot after checking', () => {
+                    table.check(player1);
+                    table.check(player2);
+                    table.check(player3);
+                    expect(table.getGame().pot).toEqual(120);
+                });
+
+                it('should have 160 coins in the pot after one folded', () => {
+                    table.bet(player1, bigBlind);
+                    table.call(player2);
+                    table.fold(player3);
+
+                    expect(table.getGame().pot).toEqual(160);
                 });
 
                 it('should have 4 cards on the board', () => {
@@ -224,14 +362,35 @@ describe('Table', () => {
 
                 describe('Round(River)', () => {
                     beforeEach(() => {
+                        // Round(Turn)
                         table.bet(player1, smallBlind);
                         table.bet(player2, bigBlind);
                         table.call(player3);
                         table.call(player1);
                     });
 
+                    it('should have 180 coins in the pot', () => {
+                        expect(table.getGame().pot).toEqual(180);
+                    });
+
                     it('should have 5 cards in the board', () => {
                         expect(table.getGame().board.length).toEqual(5);
+                    });
+
+                    it('should have a pot of 180 after checking', () => {
+                        table.check(player1);
+                        table.check(player2);
+                        table.check(player3);
+
+                        expect(table.getGame().pot).toEqual(180);
+                    });
+
+                    it('should have a pot of 240', () => {
+                        table.bet(player1, bigBlind);
+                        table.call(player2);
+                        table.call(player3);
+
+                        expect(table.getGame().pot).toEqual(240);
                     });
 
                     it('should have ended when everyone checks', done => {
@@ -241,71 +400,27 @@ describe('Table', () => {
                             }
                         });
 
-                        table.check(player1);
-                        table.check(player2);
-                        table.check(player3);
-                    },1000);
+                        table.bet(player1, bigBlind);
+                        table.call(player2);
+                        table.call(player3);
+                    }, 1000);
 
-                    it('should have added the pot to the winner', done => {
-
+                    it('should have added the pot to the winner after a delay', done => {
                         table.commands$.subscribe((command) => {
                             if (command.cmd === 'game_ended') {
                                 const { winners } = command.data;
-                                winners[0].chips = 1060;
+                                expect(winners[0].chips).toEqual(1160);
                                 done();
                             }
                         });
 
-                        table.check(player1);
-                        table.check(player2);
-                        table.check(player3);
-                    },1000);
+                        table.bet(player1, bigBlind);
+                        table.call(player2);
+                        table.call(player3);
+                    }, 1000);
                 });
             });
         });
 
-        it('should stay in Round(Deal) after Re-Raise', () => {
-            table.bet(player1, smallBlind);
-            table.bet(player2, bigBlind);
-            table.bet(player3, bigBlind * 2);
-            table.bet(player1, bigBlind * 3);
-            table.call(player2);
-
-            expect(table.getRoundType()).toBe(RoundType.Deal);
-        });
-
-        it('should continue with Round(Flop) after Re-Raise was called', () => {
-            table.bet(player1, smallBlind);
-            table.bet(player2, bigBlind);
-            table.bet(player3, bigBlind * 2);
-            table.bet(player1, bigBlind * 3);
-            table.call(player2);
-            table.call(player3);
-
-            expect(table.getRoundType()).toBe(RoundType.Flop);
-        });
-
-        it('should stay in Round(Deal) after Re-Raise', () => {
-            table.bet(player1, smallBlind);
-            table.bet(player2, bigBlind);
-            table.bet(player3, bigBlind * 2);
-            table.bet(player1, bigBlind * 3);
-            table.bet(player2, bigBlind * 4);
-            table.call(player3);
-
-            expect(table.getRoundType()).toBe(RoundType.Deal);
-        });
-
-        it('should continue with Round(Flop) after Re-Raise was called', () => {
-            table.bet(player1, smallBlind);
-            table.bet(player2, bigBlind);
-            table.bet(player3, bigBlind * 2);
-            table.bet(player1, bigBlind * 3);
-            table.bet(player2, bigBlind * 4);
-            table.call(player3);
-            table.call(player1);
-
-            expect(table.getRoundType()).toBe(RoundType.Flop);
-        });
     });
 });

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Table } from './Table';
+import { Table, TableCommand } from './Table';
 import { Subject } from 'rxjs';
 import { WsException } from '@nestjs/websockets';
 
@@ -8,7 +8,7 @@ export class TableService {
 
     tables: Table[] = [];
 
-    private _tableCommands$ = new Subject();
+    private _tableCommands$ = new Subject<TableCommand>();
     tableCommands$ = this._tableCommands$.asObservable();
 
     constructor(private logger: Logger) {
@@ -21,7 +21,7 @@ export class TableService {
 
     createTable(name: string): Table {
         this.logger.debug(`Table[${ name }] created!`);
-        const table = new Table(10, 20, 2, 2, name, 1000, 1000);
+        const table = new Table(10, 20, 2, 2, name);
         table.commands$ = this._tableCommands$;
         this.tables.push(table);
         return table;
@@ -35,6 +35,16 @@ export class TableService {
 
     getTable(roomName: string): Table {
         return this.tables.find(table => table.name === roomName);
+    }
+
+    getAllTables() {
+        return this.tables.map(table => {
+            return { name: table.name, started: table.hasGame() };
+        });
+    }
+
+    getPlayersCount() {
+        return this.tables.reduce((prev, cur) => prev + cur.players.length, 0);
     }
 
     playerLeft(playerID: string) {
@@ -147,15 +157,5 @@ export class TableService {
         } else {
             throw new WsException(`Table[${ tableName }] does no longer exist!`);
         }
-    }
-
-    getAllTables() {
-        return this.tables.map(table => {
-            return { name: table.name, started: table.hasGame() };
-        });
-    }
-
-    getPlayersCount() {
-        return this.tables.reduce((prev, cur) => prev + cur.players.length, 0);
     }
 }

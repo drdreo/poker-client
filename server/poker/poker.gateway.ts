@@ -4,6 +4,7 @@ import {
 import { Client, Server, Socket } from 'socket.io';
 import { TableService } from './table/table.service';
 import { Logger } from '@nestjs/common';
+import { TableCommand } from './table/Table';
 
 interface Connection {
     id: string;
@@ -21,7 +22,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.logger.setContext('PokerGateway');
 
         this.tableService.tableCommands$
-            .subscribe((data: any) => this.handleTableCommands(data));
+            .subscribe((cmd: TableCommand) => this.handleTableCommands(cmd));
     }
 
     private sendTo(room: string, event: string, data: any) {
@@ -49,8 +50,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
      *    Table Actions
      */
 
-
-    private handleTableCommands({ cmd, data, table }) {
+    private handleTableCommands({ cmd, data, table }: TableCommand) {
         this.logger.verbose(`Table[${ table }] - ${ cmd }:`);
         console.dir(data);
 
@@ -60,8 +60,12 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 this.sendPlayerUpdate(table, data);
                 break;
 
+            case 'players_cards':
+                this.sendTo(table, 'server:players_cards', { players: data.players });
+                break;
+
             case 'game_ended':
-                this.sendTo(table, 'server:game_ended', { winner: data.winner, pot: data.pot });
+                this.sendTo(table, 'server:game_ended', { winners: data.winners, pot: data.pot });
                 break;
 
             case 'game:next_player':
@@ -71,6 +75,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
             case 'game:board_updated':
                 this.sendTo(table, 'server:game:board_updated', { board: data.board });
                 break;
+
             default:
                 this.logger.warn(`Command[${ cmd }] was not handled!`);
                 break;

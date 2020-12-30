@@ -6,6 +6,18 @@ import { v4 as uuidv4 } from 'uuid';
 import { Subject } from 'rxjs';
 import * as PokerEvaluator from 'poker-evaluator';
 
+export interface TableCommand {
+    cmd: string;
+    table: string;
+    data: {
+        players?,
+        nextPlayerID?: string,
+        pot? : number,
+        board?: string[],
+        winners?: Player[]
+    };
+}
+
 export class Table {
     private playerColors = [
         '#444444', '#3498db', '#9b59b6',
@@ -19,30 +31,25 @@ export class Table {
     currentPlayer: number; // index of the current player
     private game: Game | undefined;
 
-    commands$: Subject<any>;
+    commands$: Subject<TableCommand>;
+
+    protected gameEndDelay = 1500;
 
     constructor(
         public smallBlind: number,
         public bigBlind: number,
         public minPlayers: number,
         public maxPlayers: number,
-        public name: string,
-        public minBuyIn: number,
-        public maxBuyIn: number) {
-        Logger.debug('created!');
-        let err;
+        public name: string) {
+        Logger.debug(`Table[${ name }]created!`);
 
         //require at least two players to start a game.
         if (minPlayers < 2) {
-            err = new Error('Parameter [minPlayers] must be a positive integer of a minimum value of 2.');
+            throw new Error('Parameter [minPlayers] must be a positive integer of a minimum value of 2.');
         }
 
         if (minPlayers > maxPlayers) {
-            err = new Error('Parameter [minPlayers] must be less than or equal to [maxPlayers].');
-        }
-
-        if (err) {
-            throw err;
+            throw new Error('Parameter [minPlayers] must be less than or equal to [maxPlayers].');
         }
     }
 
@@ -58,12 +65,13 @@ export class Table {
         return this.players.some(player => player.id === playerID);
     }
 
-    public getPlayersPreview(): PlayerPreview[] {
+    public getPlayersPreview(showCards = false): PlayerPreview[] {
         return this.players.map(player => {
             return {
                 id: player.id,
                 name: player.name,
                 chips: player.chips,
+                cards: showCards ? remapCards(player.cards) : undefined,
                 allIn: player.allIn,
                 folded: player.folded,
                 color: player.color,
@@ -100,6 +108,14 @@ export class Table {
         }
     }
 
+    private showPlayersCards() {
+        this.commands$.next({
+            cmd: 'players_cards',
+            table: this.name,
+            data: { players: this.getPlayersPreview(true) }
+        });
+    }
+
     private removePlayerCards() {
         for (let player of this.players) {
             player.cards = [];
@@ -107,16 +123,21 @@ export class Table {
     }
 
     private nextPlayer() {
-        let nextIndex;
+        let maxTries = 0;
+
         do {
+            if (maxTries++ > this.players.length) {
+                throw Error('Infinity loop detected in nextPlayer()');
+            }
+
             // if last player, continue with first
-            nextIndex = this.currentPlayer === this.players.length - 1 ? 0 : this.currentPlayer + 1;
-        } while (this.players[nextIndex].folded);
-        this.currentPlayer = nextIndex;
+            this.currentPlayer = this.currentPlayer === this.players.length - 1 ? 0 : this.currentPlayer + 1;
+        } while (this.players[this.currentPlayer].folded);
+
         this.commands$.next({ cmd: 'game:next_player', table: this.name, data: { nextPlayerID: this.players[this.currentPlayer].id } });
     }
 
-    private getPlayerIndexByID(playerID: string) {
+    public getPlayerIndexByID(playerID: string): number {
         return this.players.findIndex(player => player.id === playerID);
     }
 
@@ -160,7 +181,11 @@ export class Table {
             throw new WsException('Not your turn!');
         }
 
-        this.players[playerIndex].bet(this.game.getMaxBet());
+        const existingBet = this.game.getBet(playerIndex);
+        const maxBet = this.game.getMaxBet();
+        let betToPay = existingBet ? maxBet - existingBet : maxBet;
+
+        this.players[playerIndex].pay(betToPay);
         this.game.call(playerIndex);
 
         this.playersUpdate();
@@ -177,7 +202,7 @@ export class Table {
             throw new WsException('Not your turn!');
         }
 
-        this.players[playerIndex].bet(bet);
+        this.players[playerIndex].pay(bet);
         this.game.bet(playerIndex, bet);
 
         this.playersUpdate();
@@ -232,17 +257,28 @@ export class Table {
         return endOfRound;
     }
 
+    private hasEveryoneElseFolded(): boolean {
+        return this.players.filter(player => !player.folded).length === 1;
+    }
+
     private progress(): boolean {
         if (this.isEndOfRound()) {
+
             this.game.moveBetsToPot();
 
             const round = this.game.round.type;
 
-            // if we are in the last round and everyone has either folded or called
-            if (round === RoundType.River) {
-                this.gameEnded();
+            // if we are in the last round and everyone has either called or folded
+            if (round === RoundType.River || this.hasEveryoneElseFolded()) {
+
+                this.showPlayersCards();
+                // delay the end game reveal
+                setTimeout(() => {
+                    Logger.debug('Game ended, starting a new one');
+                    this.gameEnded();
+                }, this.gameEndDelay);
+
                 // stop the game progress since we are done
-                Logger.debug('Game ended, starting a new one');
                 return false;
             }
 
@@ -272,15 +308,15 @@ export class Table {
 
     private gameEnded() {
 
-        const winners = this.calculateWinners();
-        let earnings = this.game.pot;
+        const winners = this.getWinners();
+        let pot = this.game.pot;
 
         if (winners.length === 1) {
-            Logger.debug(`Player[${ winners[0].name }] has won the game and receives ${ earnings }!`);
-            winners[0].chips += earnings;
+            Logger.debug(`Player[${ winners[0].name }] has won the game and receives ${ pot }!`);
+            winners[0].chips += pot;
         } else {
             let winnerNames = winners.reduce((prev, cur) => prev + ', ' + cur.name, '');
-            earnings = Math.round(earnings / winners.length);
+            let earnings = Math.round(pot / winners.length);
             Logger.debug(`Players[${ winnerNames }] have a tie and split the pot for ${ earnings } each!`);
 
             for (const winner of winners) {
@@ -293,7 +329,7 @@ export class Table {
         this.commands$.next({
             cmd: 'game_ended',
             table: this.name,
-            data: { pot: this.game.pot, winners }
+            data: { pot, winners }
         });
 
         // reset player status
@@ -303,12 +339,12 @@ export class Table {
         this.newGame();
     }
 
-    private calculateWinners(): Player[] {
+    private getWinners(): Player[] {
         this.rankAllHands();
 
         // first find the highest hand
         const winner = this.players.reduce((prev, cur) => {
-            return (prev.hand.value > cur.hand.value) ? prev : cur;
+            return (prev.hand?.value > cur.hand.value) ? prev : cur;
         });
 
         // then return all players with that hand
@@ -321,7 +357,10 @@ export class Table {
 
     private rankAllHands() {
         for (let player of this.players) {
-            this.rankHand(player);
+            // only rank players still in the game
+            if (!player.folded) {
+                this.rankHand(player);
+            }
         }
     }
 
@@ -341,4 +380,13 @@ export class Table {
 
 function getNextIndex(currentIndex: number, array: any[]): number {
     return currentIndex === array.length - 1 ? 0 : currentIndex + 1;
+}
+
+function remapCards(cards) {
+    return cards.map(card => {
+        const c = card.split('');
+        // remap T to 10
+        c[0] = c[0] === 'T' ? '10' : c[0];
+        return { value: c[0], figure: c[1] };
+    });
 }
