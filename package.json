@@ -26,6 +26,8 @@
     "@nestjs/platform-express": "^7.0.0",
     "@nestjs/platform-socket.io": "^7.1.0",
     "@nestjs/websockets": "^7.1.0",
+    "@types/poker-evaluator": "^0.3.3",
+    "poker-evaluator": "^2.0.5",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.5.4",

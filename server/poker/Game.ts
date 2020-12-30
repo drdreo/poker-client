@@ -44,7 +44,7 @@ export class Game {
 		return this.round.bets[playerIndex];
 	}
 
-	getMaxBet() {
+	getMaxBet(): number {
 		return Math.max(...this.round.bets);
 	}
 
