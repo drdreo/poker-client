@@ -11,5 +11,12 @@
     "baseUrl": "./",
     "incremental": true
   },
-  "exclude": ["node_modules", "dist", "client"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "client/**/*"
+  ],
+  "files": [
+    "server/main.ts"
+  ],
 }

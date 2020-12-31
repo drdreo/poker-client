@@ -63,6 +63,9 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
             case 'players_cards':
                 this.sendTo(table, 'server:players_cards', { players: data.players });
                 break;
+            case 'pot_update':
+                this.sendTo(table, 'server:pot_update', { pot: data.pot });
+                break;
 
             case 'game_ended':
                 this.sendTo(table, 'server:game_ended', { winners: data.winners, pot: data.pot });
@@ -85,23 +88,26 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
     sendPlayerUpdate(table, data) {
         // tell every player his / her cards specifically
         for (let player of data.players) {
-            const conn = this.connections.find(conn => conn.playerID === player.id);
-            const playersData = this.tableService.getTable(table).getPlayersPreview();
-            // find the player in the data again and map the cards
-            // also map the cards to the right client format {figure, value}
-            playersData.find(p => p.id === player.id)['cards'] = player.cards.map(card => {
-                const c = card.split('');
-                // remap T to 10
-                c[0] = c[0] === 'T' ? '10' : c[0];
-                return { value: c[0], figure: c[1] };
-            });
+            // only tell currently connected players the update
+            if (!player.disconnected) {
+                const conn = this.connections.find(conn => conn.playerID === player.id);
+                const playersData = this.tableService.getTable(table).getPlayersPreview();
+                // find the player in the data again and map the cards
+                // also map the cards to the right client format {figure, value}
+                playersData.find(p => p.id === player.id)['cards'] = player.cards.map(card => {
+                    const c = card.split('');
+                    // remap T to 10
+                    c[0] = c[0] === 'T' ? '10' : c[0];
+                    return { value: c[0], figure: c[1] };
+                });
 
-            this.sendTo(conn.id, 'server:player_update', { players: playersData });
+                this.sendTo(conn.id, 'server:player_update', { players: playersData });
+            }
         }
     }
 
     @SubscribeMessage('joinRoom')
-    joinRoom(@ConnectedSocket() socket: Socket, @MessageBody() { playerID, playerName, roomName }): WsResponse<unknown> {
+    joinRoom(@ConnectedSocket() socket: Socket, @MessageBody() { playerID, roomName, playerName }): WsResponse<unknown> {
         socket.join(roomName);
         let newPlayerID;
 

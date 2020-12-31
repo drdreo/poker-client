@@ -59,7 +59,7 @@ export class HomeComponent {
 			console.log('Joining Room');
 			const username = this.username.value;
 			const table = this.table.value;
-			this.pokerService.createOrJoinRoom(username, table);
+			this.pokerService.createOrJoinRoom(table, username);
 		}
 	}
 }

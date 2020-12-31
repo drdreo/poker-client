@@ -91,6 +91,9 @@ export class TableService {
 
     startGame(tableName: string) {
         const table = this.tables.find(table => table.name === tableName);
+        if (!table) {
+            throw new WsException(`Can not start game on Table[${ tableName }] because it does not exist.`);
+        }
         table.newGame();
     }
 
@@ -103,11 +106,11 @@ export class TableService {
         const table = this.tables.find(table => table.name === tableName);
 
         if (table) {
-            if (table.hasGame()) {
+            if (table.hasGame() || table.isGameEnded()) {
                 this.logger.debug(`Player[${ playerID }] checked!`);
                 table.check(playerID);
             } else {
-                throw new WsException(`Can't act before the game has started!`);
+                throw new WsException(`Game has not started or has ended!`);
             }
         } else {
             throw new WsException(`Table[${ tableName }] does no longer exist!`);
@@ -118,11 +121,11 @@ export class TableService {
         const table = this.tables.find(table => table.name === tableName);
 
         if (table) {
-            if (table.hasGame()) {
+            if (table.hasGame() || table.isGameEnded()) {
                 this.logger.debug(`Player[${ playerID }] called!`);
                 table.call(playerID);
             } else {
-                throw new WsException(`Can't act before the game has started!`);
+                throw new WsException(`Game has not started or has ended!`);
             }
         } else {
             throw new WsException(`Table[${ tableName }] does no longer exist!`);
@@ -133,11 +136,11 @@ export class TableService {
         const table = this.tables.find(table => table.name === tableName);
 
         if (table) {
-            if (table.hasGame()) {
+            if (table.hasGame() || table.isGameEnded()) {
                 this.logger.debug(`Player[${ playerID }] bet [${ coins }]!`);
                 table.bet(playerID, coins);
             } else {
-                throw new WsException(`Can't act before the game has started!`);
+                throw new WsException(`Game has not started or has ended!`);
             }
         } else {
             throw new WsException(`Table[${ tableName }] does no longer exist!`);
@@ -148,11 +151,11 @@ export class TableService {
         const table = this.tables.find(table => table.name === tableName);
 
         if (table) {
-            if (table.hasGame()) {
+            if (table.hasGame() || table.isGameEnded()) {
                 this.logger.debug(`Player[${ playerID }] folded!`);
                 table.fold(playerID);
             } else {
-                throw new WsException(`Can't act before the game has started!`);
+                throw new WsException(`Game has not started or has ended!`);
             }
         } else {
             throw new WsException(`Table[${ tableName }] does no longer exist!`);

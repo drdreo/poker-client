@@ -18,6 +18,7 @@ export class Game {
     public round: Round;
     public deck: string[] = [];
     public board: string[] = [];
+    public ended: boolean = false;
 
     constructor(private smallBlind: number, private bigBlind: number) {
         Logger.debug('Game started!');
@@ -140,7 +141,9 @@ export class Game {
         }
     }
 
-
+    end() {
+        this.ended = true;
+    }
 }
 
 // RoundTypes: Deal,Flop,Turn,River,Showdown

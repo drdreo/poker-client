@@ -1,5 +1,6 @@
 <div class="page-container">
     <h1 class="table_name">Table <span class="is-primary">{{tableName}}</span></h1>
+    <h3 class="table__action" *ngIf="notification.action$ | async as currentAction">{{currentAction}}</h3>
 
     <div class="ready-container" *ngIf="isPlayer">
         <div class="ready-container__message">Everyone's in?</div>
@@ -18,19 +19,23 @@
 
     <div class="table">
         <div class="stack card-place">
-            <app-card *ngFor="let card of getArray(45); let i = index;" figure="back"
+            <app-card *ngFor="let card of getArray(45); let i = index;"
+                      figure="back"
                       [ngStyle]="{'top.px': -0.5*i +5 }"></app-card>
         </div>
         <div class="board card-place">
-            <app-card *ngFor="let card of (board$ | async)" [type]="" [figure]="card.figure"
+            <app-card *ngFor="let card of (board$ | async)"
+                      [type]=""
+                      [figure]="card.figure"
                       [value]="card.value"></app-card>
         </div>
         <div class="players">
-            <app-player *ngFor="let player of (players$ | async); let i = index;" [player]="player" [index]="i"
-                        [playing]="(currentPlayerID$ | async) === player.id">
-            </app-player>
+            <app-player *ngFor="let player of (players$ | async); let i = index;"
+                        [player]="player"
+                        [index]="i"
+                        [playing]="(currentPlayerID$ | async) === player.id"></app-player>
         </div>
-        <div class="pot">
+        <div class="pot" *ngIf="pot$ | async as pot">
             <div class="pot__value">
                 {{pot}}€
             </div>

@@ -93,6 +93,7 @@ describe('Table', () => {
             table.newGame();
         });
 
+
         it('should throw a not your turn error', () => {
             table.bet(player1, smallBlind);
             expect(() => {
@@ -414,10 +415,11 @@ describe('Table', () => {
                             }
                         });
 
+
                         table.bet(player1, bigBlind);
                         table.call(player2);
                         table.call(player3);
-                    }, 1000);
+                    }, 1500);
                 });
             });
         });

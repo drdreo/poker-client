@@ -12,7 +12,7 @@ export interface TableCommand {
     data: {
         players?,
         nextPlayerID?: string,
-        pot? : number,
+        pot?: number,
         board?: string[],
         winners?: Player[]
     };
@@ -57,6 +57,10 @@ export class Table {
         return !!this.game;
     }
 
+    public isGameEnded(): boolean {
+        return this.game.ended;
+    }
+
     public getPlayer(playerID: string): Player {
         return this.players.find(player => player.id === playerID);
     }
@@ -65,13 +69,14 @@ export class Table {
         return this.players.some(player => player.id === playerID);
     }
 
+
     public getPlayersPreview(showCards = false): PlayerPreview[] {
         return this.players.map(player => {
             return {
                 id: player.id,
                 name: player.name,
                 chips: player.chips,
-                cards: showCards ? remapCards(player.cards) : undefined,
+                cards: showCards && !player.folded ? remapCards(player.cards) : undefined,
                 allIn: player.allIn,
                 folded: player.folded,
                 color: player.color,
@@ -106,6 +111,7 @@ export class Table {
             this.dealer = this.players.length - 1;
             this.currentPlayer = 0;
         }
+        this.sendNextPlayer();
     }
 
     private showPlayersCards() {
@@ -134,14 +140,14 @@ export class Table {
             this.currentPlayer = this.currentPlayer === this.players.length - 1 ? 0 : this.currentPlayer + 1;
         } while (this.players[this.currentPlayer].folded);
 
-        this.commands$.next({ cmd: 'game:next_player', table: this.name, data: { nextPlayerID: this.players[this.currentPlayer].id } });
+        this.sendNextPlayer();
     }
 
     public getPlayerIndexByID(playerID: string): number {
         return this.players.findIndex(player => player.id === playerID);
     }
 
-    private playersUpdate() {
+    private sendPlayersUpdate() {
         this.commands$.next({
             cmd: 'player_update',
             table: this.name,
@@ -149,19 +155,34 @@ export class Table {
         });
     }
 
+    private sendPotUpdate() {
+        this.commands$.next({
+            cmd: 'pot_update',
+            table: this.name,
+            data: { pot: this.game.pot }
+        });
+    }
+
+    private sendNextPlayer() {
+        this.commands$.next({ cmd: 'game:next_player', table: this.name, data: { nextPlayerID: this.players[this.currentPlayer].id } });
+    }
+
     public newGame() {
         if (this.players.length < this.minPlayers) {
             throw new WsException('Cant start game. Too less players are in.');
         }
+
         this.game = new Game(this.smallBlind, this.bigBlind);
+        this.players.map(player => player.reset());
         this.setStartPlayer();
         this.dealCards();
+
         this.commands$.next({
             cmd: 'game_started',
             table: this.name,
             data: { players: this.players }
         });
-        this.commands$.next({ cmd: 'game:next_player', table: this.name, data: { nextPlayerID: this.players[this.currentPlayer].id } });
+        this.sendPotUpdate();
     }
 
     private dealCards() {
@@ -183,12 +204,16 @@ export class Table {
 
         const existingBet = this.game.getBet(playerIndex);
         const maxBet = this.game.getMaxBet();
+        if (!maxBet || maxBet - existingBet === 0) {
+            throw new WsException(`Can't call. No bet to call.`);
+        }
+
         let betToPay = existingBet ? maxBet - existingBet : maxBet;
 
         this.players[playerIndex].pay(betToPay);
         this.game.call(playerIndex);
 
-        this.playersUpdate();
+        this.sendPlayersUpdate();
 
         const next = this.progress();
         if (next) {
@@ -205,7 +230,7 @@ export class Table {
         this.players[playerIndex].pay(bet);
         this.game.bet(playerIndex, bet);
 
-        this.playersUpdate();
+        this.sendPlayersUpdate();
         this.nextPlayer();
     }
 
@@ -220,7 +245,7 @@ export class Table {
 
         this.game.check(playerIndex); // mark the bet like checked
 
-        this.playersUpdate();
+        this.sendPlayersUpdate();
 
         const next = this.progress();
         if (next) {
@@ -262,19 +287,23 @@ export class Table {
     }
 
     private progress(): boolean {
-        if (this.isEndOfRound()) {
+        if (this.isEndOfRound() || this.hasEveryoneElseFolded()) {
 
             this.game.moveBetsToPot();
-
+            this.sendPotUpdate();
             const round = this.game.round.type;
 
             // if we are in the last round and everyone has either called or folded
             if (round === RoundType.River || this.hasEveryoneElseFolded()) {
 
-                this.showPlayersCards();
+                // only show cards if it was the last betting round
+                if (round === RoundType.River) {
+                    this.showPlayersCards();
+                }
+
                 // delay the end game reveal
                 setTimeout(() => {
-                    Logger.debug('Game ended, starting a new one');
+                    Logger.debug('Game ended!');
                     this.gameEnded();
                 }, this.gameEndDelay);
 
@@ -325,6 +354,7 @@ export class Table {
         }
 
 
+        this.game.end();
         // announce winner
         this.commands$.next({
             cmd: 'game_ended',
@@ -332,23 +362,26 @@ export class Table {
             data: { pot, winners }
         });
 
-        // reset player status
-        this.players.map(player => player.reset());
 
-        // auto-create new game
-        this.newGame();
+        // // reset player status
+        // this.players.map(player => player.reset());
+        // this.sendPlayersUpdate();
+        //
+        // // auto-create new game
+        // this.newGame();
     }
 
     private getWinners(): Player[] {
         this.rankAllHands();
 
-        // first find the highest hand
-        const winner = this.players.reduce((prev, cur) => {
-            return (prev.hand?.value > cur.hand.value) ? prev : cur;
+        // first find the highest hand from not folded players
+        const availablePLayers = this.players.filter(player => !player.folded);
+        const winner = availablePLayers.reduce((prev, cur) => {
+            return (prev.hand.value > cur.hand.value) ? prev : cur;
         });
 
         // then return all players with that hand
-        return this.players.filter(player => player.hand.value === winner.hand.value);
+        return this.players.filter(player => player.hand?.value === winner.hand.value);
     }
 
     private rankHand(player: Player) {
