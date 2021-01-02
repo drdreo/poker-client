@@ -67,8 +67,8 @@ interface GamePlayersUpdate {
     players: PlayerOverview[];
 }
 
-interface GameNextPlayer {
-    nextPlayerID: string;
+interface GameCurrentPlayer {
+    currentPlayerID: string;
 }
 
 interface GameRoundStarted {
@@ -145,17 +145,17 @@ export class PokerService implements OnDestroy {
     }
 
     gameStarted() {
-        return this.socket.fromEvent<undefined>('server:game_started')
+        return this.socket.fromEvent<undefined>('server:game:started')
                    .pipe(takeUntil(this.unsubscribe$));
     }
 
     gameEnded() {
-        return this.socket.fromEvent<GameEnded>('server:game_ended')
+        return this.socket.fromEvent<GameEnded>('server:game:ended')
                    .pipe(takeUntil(this.unsubscribe$));
     }
 
     playersUpdate(): Observable<Player[]> {
-        return this.socket.fromEvent<GamePlayersUpdate>('server:player_update')
+        return this.socket.fromEvent<GamePlayersUpdate>('server:players_update')
                    .pipe(map(data => data.players));
     }
 
@@ -165,9 +165,9 @@ export class PokerService implements OnDestroy {
                    .pipe(map(data => data.players));
     }
 
-    nextPlayer(): Observable<string> {
-        return this.socket.fromEvent<GameNextPlayer>('server:game:next_player')
-                   .pipe(map(data => data.nextPlayerID));
+    currentPlayer(): Observable<string> {
+        return this.socket.fromEvent<GameCurrentPlayer>('server:game:current_player')
+                   .pipe(map(data => data.currentPlayerID));
     }
 
     boardUpdated(): Observable<Card[]> {

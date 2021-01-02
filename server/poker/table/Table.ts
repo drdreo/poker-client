@@ -11,7 +11,7 @@ export interface TableCommand {
     table: string;
     data: {
         players?,
-        nextPlayerID?: string,
+        currentPlayerID?: string,
         pot?: number,
         board?: string[],
         winners?: Player[]
@@ -112,7 +112,7 @@ export class Table {
             this.dealer = this.players.length - 1;
             this.currentPlayer = 0;
         }
-        this.sendNextPlayer();
+        this.sendCurrentPlayer();
     }
 
     private showPlayersCards() {
@@ -141,14 +141,14 @@ export class Table {
             this.currentPlayer = this.currentPlayer === this.players.length - 1 ? 0 : this.currentPlayer + 1;
         } while (this.players[this.currentPlayer].folded);
 
-        this.sendNextPlayer();
+        this.sendCurrentPlayer();
     }
 
     public getPlayerIndexByID(playerID: string): number {
         return this.players.findIndex(player => player.id === playerID);
     }
 
-    private sendPlayersUpdate() {
+    public sendPlayersUpdate() {
         this.commands$.next({
             cmd: 'player_update',
             table: this.name,
@@ -156,7 +156,7 @@ export class Table {
         });
     }
 
-    private sendPotUpdate() {
+    public sendPotUpdate() {
         this.commands$.next({
             cmd: 'pot_update',
             table: this.name,
@@ -164,8 +164,8 @@ export class Table {
         });
     }
 
-    private sendNextPlayer() {
-        this.commands$.next({ cmd: 'game:next_player', table: this.name, data: { nextPlayerID: this.players[this.currentPlayer].id } });
+    public sendCurrentPlayer() {
+        this.commands$.next({ cmd: 'game:current_player', table: this.name, data: { currentPlayerID: this.players[this.currentPlayer].id } });
     }
 
     public newGame() {

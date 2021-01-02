@@ -1,11 +1,11 @@
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { PokerService } from '../poker.service';
-import { switchMap, takeUntil, tap } from 'rxjs/operators';
 import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
+import { switchMap, takeUntil, tap } from 'rxjs/operators';
+import { PokerService } from '../poker.service';
+import { NotificationService } from '../utils/notification.service';
 import { Card } from './card/card.component';
 import { Player } from './player/player.component';
-import { NotificationService } from '../utils/notification.service';
 
 @Component({
     selector: 'app-table',
@@ -128,9 +128,9 @@ export class TableComponent implements OnInit, OnDestroy {
         });
 
         this._players$.next(players);
-        this.currentPlayerID$ = this.pokerService.nextPlayer()
+        this.currentPlayerID$ = this.pokerService.currentPlayer()
                                     .pipe(
-                                        tap(currentPlayerID => this.isCurrentPlayer = currentPlayerID === this.clientPlayerID)
+                                        tap(playerID => this.isCurrentPlayer = playerID === this.clientPlayerID)
                                     );
 
         this.players$ = merge(

@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Table, TableCommand } from './Table';
-import { Subject } from 'rxjs';
 import { WsException } from '@nestjs/websockets';
+import { Subject } from 'rxjs';
+import { Table, TableCommand } from './Table';
 
 @Injectable()
 export class TableService {
@@ -52,11 +52,14 @@ export class TableService {
             const player = table.players.find(player => player.id === playerID);
             if (player) {
                 player.disconnected = true;
-                // if every player disconnected, remove the table
-                if (table.players.every(player => player.disconnected)) {
-                    this.logger.debug(`Table[${ table.name }] removed!`);
-                    this.tables = this.tables.filter(t => t.name !== table.name);
-                }
+                // if every player disconnected, remove the table after 2s
+                setTimeout(() => {
+                    if (table.players.every(player => player.disconnected)) {
+                        this.logger.debug(`Table[${ table.name }] removed!`);
+                        this.tables = this.tables.filter(t => t.name !== table.name);
+                    }
+                }, 2000);
+                return;
             }
         }
     }
@@ -94,6 +97,7 @@ export class TableService {
         if (!table) {
             throw new WsException(`Can not start game on Table[${ tableName }] because it does not exist.`);
         }
+        // TODO: prevent starting a new game if current is in progress
         table.newGame();
     }
 
