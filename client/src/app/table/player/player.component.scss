@@ -3,6 +3,13 @@
 $name-font-family: 'Balsamiq Sans', cursive;
 $currency-symbol: "€";
 
+:host(.client-player) {
+  .player .name {
+    color: $yellow;
+    border-color: $yellow;
+  }
+}
+
 .player {
   position: absolute;
   font-family: $player-font-family;
@@ -51,6 +58,7 @@ $currency-symbol: "€";
     position: absolute;
     top: -20px;
     z-index: 20;
+    display: inline-flex;
 
     app-card:first-child {
       margin-right: 20px;

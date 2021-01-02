@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PokerService } from '../poker.service';
 import { switchMap, takeUntil, tap } from 'rxjs/operators';
@@ -10,7 +10,8 @@ import { NotificationService } from '../utils/notification.service';
 @Component({
     selector: 'app-table',
     templateUrl: './table.component.html',
-    styleUrls: ['./table.component.scss']
+    styleUrls: ['./table.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableComponent implements OnInit, OnDestroy {
 
@@ -21,13 +22,27 @@ export class TableComponent implements OnInit, OnDestroy {
     board$: Observable<Card[]>;
     _players$: BehaviorSubject<Player[]> = new BehaviorSubject<Player[]>([]);
     players$: Observable<Player[]>;
-    _pot$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
     pot$: Observable<number>;
     /***/
 
+    // set if the current client is a player of the table
+    _player$ = new BehaviorSubject<Player>(null);
+    player$ = this._player$.asObservable();
+
+    get player(): Player | null {
+        return this._player$.getValue();
+    }
+
     showOverlay: boolean = false;
-    isPlayer: boolean = false; // if the current client is part of the table
     isCurrentPlayer: boolean = false; // if its the current clients turn
+    gameStatus: 'waiting' | 'started' | 'ended' = 'waiting';
+
+    _betAmount$: BehaviorSubject<number> = new BehaviorSubject(0);
+    betAmount$ = this._betAmount$.asObservable();
+
+    get betAmount(): number {
+        return this._betAmount$.getValue();
+    }
 
     get clientPlayerID(): string {
         return localStorage.getItem('playerID');
@@ -118,9 +133,27 @@ export class TableComponent implements OnInit, OnDestroy {
                                         tap(currentPlayerID => this.isCurrentPlayer = currentPlayerID === this.clientPlayerID)
                                     );
 
-        this.players$ = merge(this._players$, this.pokerService.playersUpdate(), this.pokerService.playersCards());
+        this.players$ = merge(
+            this._players$,
+            this.pokerService.playersUpdate(),
+            this.pokerService.playersCards())
+            .pipe(tap(players => {
+                // look for the current player instance if is one
+                if (this.clientPlayerID) {
+                    this._player$.next(players.find(player => player.id === this.clientPlayerID) || null);
+                }
+            }));
+
         this.board$ = this.pokerService.boardUpdated();
         this.pot$ = this.pokerService.potUpdate();
+
+        this.pokerService.gameStarted()
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe(() => this.gameStatus = 'started');
+
+        this.pokerService.gameEnded()
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe(() => this.gameStatus = 'ended');
     }
 
     ngOnInit() {
@@ -134,14 +167,16 @@ export class TableComponent implements OnInit, OnDestroy {
                 takeUntil(this.unsubscribe$))
             .subscribe(table => {
                 console.log(table);
-                this._players$.next(table.players);
-                const currPlayer = table.players.find(player => player.id === this.clientPlayerID);
-                this.isPlayer = !!currPlayer || false;
 
-                const disconnected = this.isPlayer ? currPlayer.disconnected : false;
+                this._players$.next(table.players);
+
+                const disconnected = this.player?.disconnected || false;
                 if (disconnected) {
                     console.log('Player was disconnected. Try to reconnect!');
                     // reconnect if loading site directly
+                    this.pokerService.createOrJoinRoom(this.tableName);
+                } else if (!this.clientPlayerID) {
+                    // if a new user just joined the table without being at the home screen, join as spectator
                     this.pokerService.createOrJoinRoom(this.tableName);
                 }
 
@@ -169,8 +204,8 @@ export class TableComponent implements OnInit, OnDestroy {
         this.pokerService.call();
     }
 
-    bet(amount: number) {
-        this.pokerService.bet(amount);
+    bet() {
+        this.pokerService.bet(this.betAmount);
     }
 
     fold() {
@@ -190,4 +225,8 @@ export class TableComponent implements OnInit, OnDestroy {
         return Array(number).fill(0).map((x, i) => i);
     }
 
+    onBetChange($event: Event) {
+        const amount = +(<HTMLInputElement>$event.target).value;
+        this._betAmount$.next(amount);
+    }
 }

@@ -76,7 +76,8 @@ export class Table {
                 id: player.id,
                 name: player.name,
                 chips: player.chips,
-                cards: showCards && !player.folded ? remapCards(player.cards) : undefined,
+                bet: player.bet,
+                cards: showCards && !player.folded ? remapCards(player.cards) : hideCards(player.cards),
                 allIn: player.allIn,
                 folded: player.folded,
                 color: player.color,
@@ -177,12 +178,14 @@ export class Table {
         this.setStartPlayer();
         this.dealCards();
 
+
+        this.sendPlayersUpdate();
+        this.sendPotUpdate();
         this.commands$.next({
             cmd: 'game_started',
             table: this.name,
             data: { players: this.players }
         });
-        this.sendPotUpdate();
     }
 
     private dealCards() {
@@ -210,15 +213,18 @@ export class Table {
 
         let betToPay = existingBet ? maxBet - existingBet : maxBet;
 
-        this.players[playerIndex].pay(betToPay);
-        this.game.call(playerIndex);
+        const player = this.players[playerIndex];
+        player.bet += betToPay;
+        player.pay(betToPay);
 
-        this.sendPlayersUpdate();
+        this.game.call(playerIndex);
 
         const next = this.progress();
         if (next) {
             this.nextPlayer();
         }
+
+        this.sendPlayersUpdate();
     }
 
     public bet(playerID: string, bet: number) {
@@ -227,11 +233,14 @@ export class Table {
             throw new WsException('Not your turn!');
         }
 
-        this.players[playerIndex].pay(bet);
+        const player = this.players[playerIndex];
+        player.bet = bet;
+        player.pay(bet);
+
         this.game.bet(playerIndex, bet);
 
-        this.sendPlayersUpdate();
         this.nextPlayer();
+        this.sendPlayersUpdate();
     }
 
     public fold(playerID: string) {
@@ -245,12 +254,12 @@ export class Table {
 
         this.game.check(playerIndex); // mark the bet like checked
 
-        this.sendPlayersUpdate();
-
         const next = this.progress();
         if (next) {
             this.nextPlayer();
         }
+
+        this.sendPlayersUpdate();
     }
 
     public check(playerID: string) {
@@ -265,6 +274,7 @@ export class Table {
         if (next) {
             this.nextPlayer();
         }
+        this.sendPlayersUpdate();
     }
 
     private isEndOfRound(): boolean {
@@ -290,7 +300,9 @@ export class Table {
         if (this.isEndOfRound() || this.hasEveryoneElseFolded()) {
 
             this.game.moveBetsToPot();
+            this.resetPlayerBets();
             this.sendPotUpdate();
+
             const round = this.game.round.type;
 
             // if we are in the last round and everyone has either called or folded
@@ -409,10 +421,24 @@ export class Table {
     public getGame(): Game {
         return this.game;
     }
+
+    private resetPlayerBets() {
+        this.players.map(player => player.bet = null);
+    }
 }
 
 function getNextIndex(currentIndex: number, array: any[]): number {
     return currentIndex === array.length - 1 ? 0 : currentIndex + 1;
+}
+
+function hideCards(cards) {
+    if (!cards) {
+        return undefined;
+    }
+
+    return cards.map(() => {
+        return { value: 0, figure: 'back' };
+    });
 }
 
 function remapCards(cards) {

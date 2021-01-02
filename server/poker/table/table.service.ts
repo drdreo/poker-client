@@ -21,7 +21,7 @@ export class TableService {
 
     createTable(name: string): Table {
         this.logger.debug(`Table[${ name }] created!`);
-        const table = new Table(10, 20, 2, 2, name);
+        const table = new Table(10, 20, 2, 8, name);
         table.commands$ = this._tableCommands$;
         this.tables.push(table);
         return table;

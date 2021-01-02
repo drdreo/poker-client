@@ -6,7 +6,7 @@
   top: 10%;
 }
 
-.table__action{
+.table__action {
   position: absolute;
   top: 15%;
 }
@@ -27,15 +27,20 @@
 .game_controls {
   position: absolute;
   bottom: 5%;
+  display: flex;
+  align-items: center;
 
-  button {
-    color: white;
-    background-color: lighten($primary-background-color, 5%);
-    margin: 3px;
+  .button {
+    padding: 1rem 1.5rem;
 
-    &:hover {
-      background-color: lighten($primary-background-color, 2%);
+    &.check {
+      color: white;
+      background-color: lighten($primary-background-color, 5%);
+      margin: 3px;
 
+      &:hover {
+        background-color: lighten($primary-background-color, 2%);
+      }
     }
   }
 }

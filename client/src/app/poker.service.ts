@@ -144,6 +144,11 @@ export class PokerService implements OnDestroy {
         this.socket.emit('startGame');
     }
 
+    gameStarted() {
+        return this.socket.fromEvent<undefined>('server:game_started')
+                   .pipe(takeUntil(this.unsubscribe$));
+    }
+
     gameEnded() {
         return this.socket.fromEvent<GameEnded>('server:game_ended')
                    .pipe(takeUntil(this.unsubscribe$));

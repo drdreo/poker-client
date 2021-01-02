@@ -2,18 +2,24 @@
     <h1 class="table_name">Table <span class="is-primary">{{tableName}}</span></h1>
     <h3 class="table__action" *ngIf="notification.action$ | async as currentAction">{{currentAction}}</h3>
 
-    <div class="ready-container" *ngIf="isPlayer">
+    <div class="ready-container" *ngIf="gameStatus == 'waiting' && player$ | async">
         <div class="ready-container__message">Everyone's in?</div>
         <button class="button" (click)="startGame()">Start</button>
     </div>
+    <div class="ready-container" *ngIf="gameStatus == 'ended' && player$ | async">
+        <div class="ready-container__message">Go next?</div>
+        <button class="button" (click)="startGame()">Start</button>
+    </div>
 
-
-    <div class="game_controls" *ngIf="isCurrentPlayer">
-        <button class="button" (click)="check()">Check</button>
+    <div class="game_controls" *ngIf="isCurrentPlayer && player$ | async as player">
+        <button class="button danger" (click)="fold()">Fold</button>
+        <button class="button check" (click)="check()">Check</button>
         <button class="button" (click)="call()">Call</button>
-        <input #betAmount type="number"/>
-        <button class="button" (click)="bet(+betAmount.value)">Bet</button>
-        <button class="button" (click)="fold()">Fold</button>
+        <div class="game_controls__bet-amount">
+            <input (input)="onBetChange($event)" type="range" step="10" min="10" [max]="player.chips"/>
+            {{betAmount$ | async}}
+            <button class="button" (click)="bet();">Raise</button>
+        </div>
     </div>
 
 
@@ -31,6 +37,7 @@
         </div>
         <div class="players">
             <app-player *ngFor="let player of (players$ | async); let i = index;"
+                        [class.client-player]="player.id === (player$|async)?.id"
                         [player]="player"
                         [index]="i"
                         [playing]="(currentPlayerID$ | async) === player.id"></app-player>

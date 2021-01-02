@@ -5,10 +5,11 @@ import { WsException } from '@nestjs/websockets';
 export type PlayerPreview = Omit<Player, 'cards' | 'hand' | 'reset' | 'pay'>;
 
 export class Player {
-    public cards: string[] = [];
-    public hand: EvaluatedHand | null;
-    public folded = false;
-    public allIn = false;
+    cards: string[] = [];
+    hand: EvaluatedHand | null;
+    bet: number | null = 0;
+    folded = false;
+    allIn = false;
     disconnected: boolean = false;
 
     constructor(public id: string, public name: string, public color: string, public chips: number) {
@@ -19,6 +20,7 @@ export class Player {
         this.allIn = false;
         this.hand = null;
         this.cards = [];
+        this.bet = null;
     }
 
     pay(bet: number) {

@@ -25,7 +25,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
             .subscribe((cmd: TableCommand) => this.handleTableCommands(cmd));
     }
 
-    private sendTo(room: string, event: string, data: any) {
+    private sendTo(room: string, event: string, data?: any) {
         this.server.to(room).emit(event, data);
     }
 
@@ -56,6 +56,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         switch (cmd) {
             case 'game_started':
+                this.sendTo(table, 'server:game_started');
             case 'player_update':
                 this.sendPlayerUpdate(table, data);
                 break;
@@ -101,6 +102,8 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     return { value: c[0], figure: c[1] };
                 });
 
+
+
                 this.sendTo(conn.id, 'server:player_update', { players: playersData });
             }
         }
@@ -117,9 +120,11 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
             newPlayerID = playerID;
             this.tableService.playerReconnected(playerID);
 
-        } else {
+        } else if (playerName) {
             const response = this.tableService.createOrJoinTable(roomName, playerName);
             newPlayerID = response.playerID;
+        } else {
+            this.logger.debug(`Spectator joined!`);
         }
 
         // connect the socket with its playerID
