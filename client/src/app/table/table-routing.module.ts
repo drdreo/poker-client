@@ -4,18 +4,19 @@ import { TableComponent } from './table.component';
 
 
 const routes: Routes = [
-	{
-		path: ':tableName',
-		component: TableComponent,
-	},
-	{path: '', redirectTo: '/', pathMatch: 'full'},
-	{path: '**', redirectTo: ''},
+    {
+        path: ':tableName',
+        component: TableComponent,
+        data: { animation: 'TablePage' }
+    },
+    { path: '', redirectTo: '/', pathMatch: 'full' },
+    { path: '**', redirectTo: '' }
 
 ];
 
 @NgModule({
-	imports: [RouterModule.forChild(routes)],
-	exports: [RouterModule],
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule]
 })
 export class TableRoutingModule {
 }

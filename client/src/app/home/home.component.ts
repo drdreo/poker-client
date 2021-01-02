@@ -22,7 +22,6 @@ export class HomeComponent {
 				Validators.minLength(4)],
 		}),
 		table: new FormControl('', {
-			updateOn: 'blur',
 			validators: [
 				Validators.required,
 				tableNameValidator(/^\w+$/i)],
