@@ -11,7 +11,7 @@ interface Connection {
     playerID: string | null;
 }
 
-@WebSocketGateway(8988)
+@WebSocketGateway()
 export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     @WebSocketServer() server: Server;

@@ -5,7 +5,7 @@
 export const environment = {
 	production: false,
 	poker_api: 'http://localhost:3000/api/poker',
-	socket_url: 'http://localhost:8988',
+	socket_url: 'ws://localhost:3000',
 };
 
 /*
