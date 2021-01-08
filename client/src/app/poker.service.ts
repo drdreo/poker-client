@@ -3,6 +3,7 @@ import { Socket } from 'ngx-socket-io';
 import { map, takeUntil } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../environments/environment';
 import { Player } from './table/player/player.component';
 import { Card } from './table/card/card.component';
 import { NotificationService } from './utils/notification.service';
@@ -43,10 +44,6 @@ interface ServerJoined {
     playerID: string;
 }
 
-interface GameStarted {
-    cards: string[];
-}
-
 interface GameEnded {
     winner: string;
     pot: number;
@@ -78,6 +75,9 @@ interface GameRoundStarted {
 interface GamePotUpdate {
     pot: number;
 }
+
+
+const POKER_API = environment.poker_api;
 
 @Injectable({
     providedIn: 'root'
@@ -125,11 +125,11 @@ export class PokerService implements OnDestroy {
     }
 
     fetchHomeInfo(): Observable<HomeInfo> {
-        return this.http.get<HomeInfo>('/api/poker/home');
+        return this.http.get<HomeInfo>(POKER_API + '/home');
     }
 
     loadTable(tableName: string) {
-        return this.http.get<TableResponse>('/api/poker/table/' + tableName).toPromise();
+        return this.http.get<TableResponse>(POKER_API + '/table/' + tableName).toPromise();
     }
 
     createOrJoinRoom(tableName: string, username?: string) {
