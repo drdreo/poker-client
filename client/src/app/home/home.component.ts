@@ -55,7 +55,6 @@ export class HomeComponent {
 
 	joinTable() {
 		if (this.loginForm.valid) {
-			console.log('Joining Room');
 			const username = this.username.value;
 			const table = this.table.value;
 			this.pokerService.createOrJoinRoom(table, username);
