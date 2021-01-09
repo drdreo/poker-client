@@ -11,9 +11,7 @@ interface Connection {
     playerID: string | null;
 }
 
-const port: number = +process.env.PORT;
-
-@WebSocketGateway(port)
+@WebSocketGateway()
 export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     @WebSocketServer() server: Server;
