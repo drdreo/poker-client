@@ -4,35 +4,35 @@
 
     <div class="table-infos">
         <h1 class="table__name">Table <span class="is-primary">{{tableName}}</span></h1>
-        <ul>
-            <li class="table__player" *ngFor="let player of (players$ | async)"> {{player.name}}
-                <ng-container *ngIf="(currentPlayerID$ | async) === player.id">- {{player.id}}</ng-container>
-            </li>
-        </ul>
+<!--        <ul>-->
+<!--            <li class="table__player" *ngFor="let player of (players$ | async)"> {{player.name}}-->
+<!--                <ng-container *ngIf="(currentPlayerID$ | async) === player.id">- {{player.id}}</ng-container>-->
+<!--            </li>-->
+<!--        </ul>-->
 
-        <div class="table__time">{{playDuration$ | async }}s</div>
+        <div class="table__time">Play time: {{playDuration$ | async }}s</div>
     </div>
 
     <h3 class="table__action" *ngIf="notification.action$ | async as currentAction">{{currentAction}}</h3>
 
-    <div class="ready-container" *ngIf="gameStatus == 'waiting' && player$ | async">
-        <div class="ready-container__message">Everyone's in?</div>
+    <div class="ready-container" *ngIf="(gameStatus$ | async) == 'waiting' && player$ | async">
+        <div class="ready-container__message">Everyone's ready?</div>
         <button class="button" (click)="startGame()">Start</button>
     </div>
 
-    <div class="ready-container" *ngIf="gameStatus == 'ended' && player$ | async">
-        <div class="ready-container__message">Go next?</div>
-        <button class="button" (click)="startGame()">Start</button>
-    </div>
+<!--    <div class="ready-container" *ngIf="(gameStatus$ | async) == 'ended' && player$ | async">-->
+<!--        <div class="ready-container__message">Go next?</div>-->
+<!--        <button class="button" (click)="startGame()">Start</button>-->
+<!--    </div>-->
 
-    <div class="game_controls" *ngIf="gameStatus == 'started' && isCurrentPlayer && player$ | async as player">
+    <div class="game_controls" *ngIf="(gameStatus$ | async) == 'started' && isCurrentPlayer && player$ | async as player">
         <button class="button danger" (click)="fold()">Fold</button>
         <button class="button check" (click)="check()">Check</button>
         <button class="button" (click)="call()">Call</button>
         <div class="game_controls__bet-amount">
             <input (input)="onBetChange($event)" type="range" step="10" min="10" [max]="player.chips"/>
             {{betAmount$ | async}}
-            <button class="button" (click)="bet();">Raise</button>
+            <button class="button" (click)="bet();">Bet</button>
         </div>
     </div>
 

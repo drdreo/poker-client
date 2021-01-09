@@ -69,6 +69,12 @@ export class Table {
         return this.players.some(player => player.id === playerID);
     }
 
+    public getGameStatus() {
+        if (this.game) {
+            return this.game.ended ? 'ended' : 'started';
+        }
+        return 'waiting';
+    }
 
     public getPlayersPreview(showCards = false): PlayerPreview[] {
         return this.players.map(player => {
@@ -164,6 +170,14 @@ export class Table {
         });
     }
 
+    public sendGameBoardUpdate() {
+        this.commands$.next({
+            cmd: 'board_updated',
+            table: this.name,
+            data: { board: this.game.board }
+        });
+    }
+
     private sendGameEnded() {
         this.commands$.next({
             cmd: 'game_ended',
@@ -173,7 +187,7 @@ export class Table {
 
     public sendCurrentPlayer() {
         this.commands$.next({
-            cmd: 'game:current_player',
+            cmd: 'current_player',
             table: this.name,
             data: { currentPlayerID: this.players[this.currentPlayer].id }
         });
@@ -345,16 +359,14 @@ export class Table {
                 default:
                     break;
             }
-            this.commands$.next({
-                cmd: 'game:board_updated',
-                table: this.name,
-                data: { board: this.game.board }
-            });
+            this.sendGameBoardUpdate();
             // let the small blind start again
             this.currentPlayer = this.dealer;
         }
         return true;
     }
+
+
 
     private processWinners() {
 

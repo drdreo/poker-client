@@ -6,6 +6,7 @@ import { map } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { Card } from './table/card/card.component';
 import { Player } from './table/player/player.component';
+import { GameStatus } from './table/table.component';
 
 interface PlayerChecked {
     playerID: string;
@@ -126,10 +127,18 @@ export class PokerService implements OnDestroy {
         return this.socket.fromEvent<undefined>('server:game:ended');
     }
 
+    gameStatus(): Observable<GameStatus> {
+        return this.socket.fromEvent<GameStatus>('server:game:status');
+    }
+
+
     gameWinners(): Observable<GameWinners> {
         return this.socket.fromEvent<GameWinners>('server:game:winners');
     }
 
+    leave() {
+        this.socket.emit('player:leave');
+    }
 
     playerleft(): Observable<PlayerLeft> {
         return this.socket.fromEvent<PlayerLeft>('server:player:left');
@@ -203,5 +212,4 @@ export class PokerService implements OnDestroy {
     playerFolded() {
         return this.socket.fromEvent<PlayerFolded>('server:folded');
     }
-
 }

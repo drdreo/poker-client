@@ -1,70 +1,73 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HomeInfo, PokerService } from '../poker.service';
-import { Observable, Subject } from 'rxjs';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { HomeInfo, PokerService } from '../poker.service';
 
 @Component({
-	selector: 'app-home',
-	templateUrl: './home.component.html',
-	styleUrls: ['./home.component.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-home',
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent {
-	homeInfo$: Observable<HomeInfo>;
+    homeInfo$: Observable<HomeInfo>;
 
-	loginForm = new FormGroup({
-		username: new FormControl('', {
-			updateOn: 'blur',
-			validators: [
-				Validators.required,
-				Validators.minLength(4)],
-		}),
-		table: new FormControl('', {
-			validators: [
-				Validators.required,
-				tableNameValidator(/^\w+$/i)],
-		}),
-	});
+    loginForm = new FormGroup({
+        username: new FormControl('', {
+            updateOn: 'blur',
+            validators: [
+                Validators.required,
+                Validators.minLength(4)]
+        }),
+        table: new FormControl('', {
+            validators: [
+                Validators.required,
+                tableNameValidator(/^\w+$/i)]
+        })
+    });
 
-	get username() {
-		return this.loginForm.get('username');
-	}
+    get username() {
+        return this.loginForm.get('username');
+    }
 
-	get table() {
-		return this.loginForm.get('table');
-	}
+    get table() {
+        return this.loginForm.get('table');
+    }
 
-	private unsubscribe$ = new Subject();
+    private unsubscribe$ = new Subject();
 
-	constructor(private router: Router, private pokerService: PokerService) {
-		this.homeInfo$ = this.pokerService.fetchHomeInfo();
+    constructor(private router: Router, private pokerService: PokerService) {
 
-		this.pokerService.roomJoined()
-			.pipe(takeUntil(this.unsubscribe$))
-			.subscribe(({playerID}) => {
-				localStorage.setItem('playerID', playerID);
-				this.router.navigate(['/table', this.table.value]);
-			});
-	}
+        this.pokerService.leave(); // try to leave if a player comes from a table
 
-	onTableClick(tableName: string) {
-		this.table.patchValue(tableName);
-	}
+        this.homeInfo$ = this.pokerService.fetchHomeInfo();
 
-	joinTable() {
-		if (this.loginForm.valid) {
-			const username = this.username.value;
-			const table = this.table.value;
-			this.pokerService.createOrJoinRoom(table, username);
-		}
-	}
+        this.pokerService.roomJoined()
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe(({ playerID }) => {
+                localStorage.setItem('playerID', playerID);
+                this.router.navigate(['/table', this.table.value]);
+            });
+    }
+
+    onTableClick(tableName: string) {
+        this.table.patchValue(tableName);
+    }
+
+    joinTable() {
+        if (this.loginForm.valid) {
+            const username = this.username.value;
+            const table = this.table.value;
+            this.pokerService.createOrJoinRoom(table, username);
+        }
+    }
 }
 
 function tableNameValidator(nameRe: RegExp): ValidatorFn {
-	return (control: AbstractControl): { [key: string]: any } | null => {
-		const allowed = nameRe.test(control.value);
-		return allowed ? null : {'forbiddenName': {value: control.value}};
-	};
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        const allowed = nameRe.test(control.value);
+        return allowed ? null : { 'forbiddenName': { value: control.value } };
+    };
 }

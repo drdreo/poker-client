@@ -8,6 +8,8 @@ import { Card } from './card/card.component';
 import { MessageType } from './feed/feed-message/feed-message.component';
 import { Player } from './player/player.component';
 
+export type GameStatus = 'waiting' | 'started' | 'ended';
+
 @Component({
     selector: 'app-table',
     templateUrl: './table.component.html',
@@ -41,7 +43,9 @@ export class TableComponent implements OnInit, OnDestroy {
 
     showOverlay: boolean = false;
     isCurrentPlayer: boolean = false; // if its the current clients turn
-    gameStatus: 'waiting' | 'started' | 'ended' = 'waiting';
+
+    private _gameStatus$ = new BehaviorSubject<GameStatus>('waiting');
+    gameStatus$ = this._gameStatus$.asObservable();
 
     _betAmount$: BehaviorSubject<number> = new BehaviorSubject(0);
     betAmount$ = this._betAmount$.asObservable();
@@ -140,11 +144,22 @@ export class TableComponent implements OnInit, OnDestroy {
 
         this.pokerService.gameStarted()
             .pipe(takeUntil(this.unsubscribe$))
-            .subscribe(() => this.gameStatus = 'started');
+            .subscribe(() => this._gameStatus$.next('started'));
 
         this.pokerService.gameEnded()
             .pipe(takeUntil(this.unsubscribe$))
-            .subscribe(() => this.gameStatus = 'ended');
+            .subscribe(() => this._gameStatus$.next('ended'));
+
+        this.pokerService.gameStatus()
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe((status) => {
+                console.log(status);
+                if (status == 'started' || status == 'ended') {
+                    this._gameStatus$.next(status);
+                } else {
+                    this._gameStatus$.next('waiting');
+                }
+            });
 
         this.pokerService.gameWinners()
             .pipe(takeUntil(this.unsubscribe$))
