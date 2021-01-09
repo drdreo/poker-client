@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
 import { Socket } from 'ngx-socket-io';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { MessageType, FeedMessage } from '../table/feed/feed-message/feed-message.component';
 
 export interface WsError {
     message: string;
@@ -15,8 +16,10 @@ export class NotificationService {
     private _action$ = new BehaviorSubject<string>('');
     action$ = this._action$.asObservable();
 
-    constructor(private socket: Socket) {
+    private _newFeedMessage$ = new Subject<FeedMessage>();
+    newFeedMessage$ = this._newFeedMessage$.asObservable();
 
+    constructor(private socket: Socket) {
         this.socketError().subscribe((error) => {
             console.error(error);
         });
@@ -26,6 +29,9 @@ export class NotificationService {
         this._action$.next(message);
     }
 
+    addFeedMessage(content: string, type?: MessageType) {
+        this._newFeedMessage$.next({ content, type });
+    }
 
     private socketError(): Observable<WsError> {
         return this.socket.fromEvent<WsError>('exception');

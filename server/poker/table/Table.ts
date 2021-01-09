@@ -1,15 +1,15 @@
-import { Player, PlayerPreview } from '../Player';
-import { WsException } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
-import { Game, RoundType } from '../Game';
-import { v4 as uuidv4 } from 'uuid';
-import { Subject } from 'rxjs';
+import { WsException } from '@nestjs/websockets';
 import * as PokerEvaluator from 'poker-evaluator';
+import { Subject } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
+import { Game, RoundType } from '../Game';
+import { Player, PlayerPreview } from '../Player';
 
 export interface TableCommand {
     cmd: string;
     table: string;
-    data: {
+    data?: {
         players?,
         currentPlayerID?: string,
         pot?: number,
@@ -164,8 +164,19 @@ export class Table {
         });
     }
 
+    private sendGameEnded() {
+        this.commands$.next({
+            cmd: 'game_ended',
+            table: this.name
+        });
+    }
+
     public sendCurrentPlayer() {
-        this.commands$.next({ cmd: 'game:current_player', table: this.name, data: { currentPlayerID: this.players[this.currentPlayer].id } });
+        this.commands$.next({
+            cmd: 'game:current_player',
+            table: this.name,
+            data: { currentPlayerID: this.players[this.currentPlayer].id }
+        });
     }
 
     public newGame() {
@@ -178,8 +189,6 @@ export class Table {
         this.setStartPlayer();
         this.dealCards();
 
-
-        this.sendPlayersUpdate();
         this.sendPotUpdate();
         this.commands$.next({
             cmd: 'game_started',
@@ -222,9 +231,8 @@ export class Table {
         const next = this.progress();
         if (next) {
             this.nextPlayer();
+            this.sendPlayersUpdate();
         }
-
-        this.sendPlayersUpdate();
     }
 
     public bet(playerID: string, bet: number) {
@@ -257,9 +265,8 @@ export class Table {
         const next = this.progress();
         if (next) {
             this.nextPlayer();
+            this.sendPlayersUpdate();
         }
-
-        this.sendPlayersUpdate();
     }
 
     public check(playerID: string) {
@@ -273,8 +280,8 @@ export class Table {
         const next = this.progress();
         if (next) {
             this.nextPlayer();
+            this.sendPlayersUpdate();
         }
-        this.sendPlayersUpdate();
     }
 
     private isEndOfRound(): boolean {
@@ -308,6 +315,9 @@ export class Table {
             // if we are in the last round and everyone has either called or folded
             if (round === RoundType.River || this.hasEveryoneElseFolded()) {
 
+                Logger.debug('Game ended!');
+                this.sendGameEnded();
+
                 // only show cards if it was the last betting round
                 if (round === RoundType.River) {
                     this.showPlayersCards();
@@ -315,8 +325,7 @@ export class Table {
 
                 // delay the end game reveal
                 setTimeout(() => {
-                    Logger.debug('Game ended!');
-                    this.gameEnded();
+                    this.processWinners();
                 }, this.gameEndDelay);
 
                 // stop the game progress since we are done
@@ -347,7 +356,7 @@ export class Table {
         return true;
     }
 
-    private gameEnded() {
+    private processWinners() {
 
         const winners = this.getWinners();
         let pot = this.game.pot;
@@ -366,10 +375,9 @@ export class Table {
         }
 
 
-        this.game.end();
         // announce winner
         this.commands$.next({
-            cmd: 'game_ended',
+            cmd: 'game_winners',
             table: this.name,
             data: { pot, winners }
         });
@@ -441,7 +449,7 @@ function hideCards(cards) {
     });
 }
 
-function remapCards(cards) {
+export function remapCards(cards) {
     return cards.map(card => {
         const c = card.split('');
         // remap T to 10

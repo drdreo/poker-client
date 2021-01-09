@@ -6,6 +6,8 @@ import { CardComponent } from './card/card.component';
 import { PlayerComponent } from './player/player.component';
 import { CoinsComponent } from './coins/coins.component';
 import { ControlsComponent } from './controls/controls.component';
+import { FeedComponent } from './feed/feed.component';
+import { FeedMessageComponent } from './feed/feed-message/feed-message.component';
 
 
 @NgModule({
@@ -15,6 +17,8 @@ import { ControlsComponent } from './controls/controls.component';
 		PlayerComponent,
 		CoinsComponent,
 		ControlsComponent,
+		FeedComponent,
+		FeedMessageComponent,
 	],
 	imports: [
 		CommonModule,

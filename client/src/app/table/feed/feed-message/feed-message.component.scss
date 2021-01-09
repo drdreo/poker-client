@@ -1,0 +1,12 @@
+@import "../../../../assets/styles/utils";
+
+.message {
+
+  &__played {
+    color: $primary-color;
+  }
+
+  &__won {
+    color: $warning-color;
+  }
+}

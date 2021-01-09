@@ -1,10 +1,16 @@
 @import "../../assets/styles/utils";
 
 
-.table_name {
+.table-infos {
   position: absolute;
-  top: 10%;
+  top: 0;
+  left: 5%;
+
+  .table_name {
+
+  }
 }
+
 
 .table__action {
   position: absolute;

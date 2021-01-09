@@ -1,12 +1,11 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
-import { map, takeUntil } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs/operators';
 import { environment } from '../environments/environment';
-import { Player } from './table/player/player.component';
 import { Card } from './table/card/card.component';
-import { NotificationService } from './utils/notification.service';
+import { Player } from './table/player/player.component';
 
 interface PlayerChecked {
     playerID: string;
@@ -44,8 +43,12 @@ interface ServerJoined {
     playerID: string;
 }
 
-interface GameEnded {
-    winner: string;
+interface PlayerLeft {
+    playerID: string;
+}
+
+interface GameWinners {
+    winners: PlayerOverview[];
     pot: number;
 }
 
@@ -86,38 +89,9 @@ export class PokerService implements OnDestroy {
 
     private unsubscribe$ = new Subject();
 
-    constructor(private socket: Socket, private http: HttpClient, private notification: NotificationService) {
-        this.gameEnded().subscribe(console.log);
+    constructor(private socket: Socket, private http: HttpClient) {
 
-        this.playerChecked()
-            .pipe(takeUntil(this.unsubscribe$))
-            .subscribe(res => {
-                console.log(res);
-                this.notification.showAction(`Player[${ res }] checked`);
-            });
-
-        this.playerCalled()
-            .pipe(takeUntil(this.unsubscribe$))
-            .subscribe(res => {
-                console.log(res);
-                this.notification.showAction(`Player[${ res }] called`);
-            });
-
-        this.playerBet()
-            .pipe(takeUntil(this.unsubscribe$))
-            .subscribe(res => {
-                console.log(res);
-                this.notification.showAction(`Player[${ res }] bet`);
-            });
-
-        this.playerFolded()
-            .pipe(takeUntil(this.unsubscribe$))
-            .subscribe(res => {
-                console.log(res);
-                this.notification.showAction(`Player[${ res }] folded`);
-            });
     }
-
 
     ngOnDestroy(): void {
         this.unsubscribe$.next();
@@ -145,13 +119,20 @@ export class PokerService implements OnDestroy {
     }
 
     gameStarted() {
-        return this.socket.fromEvent<undefined>('server:game:started')
-                   .pipe(takeUntil(this.unsubscribe$));
+        return this.socket.fromEvent<undefined>('server:game:started');
     }
 
-    gameEnded() {
-        return this.socket.fromEvent<GameEnded>('server:game:ended')
-                   .pipe(takeUntil(this.unsubscribe$));
+    gameEnded(): Observable<undefined> {
+        return this.socket.fromEvent<undefined>('server:game:ended');
+    }
+
+    gameWinners(): Observable<GameWinners> {
+        return this.socket.fromEvent<GameWinners>('server:game:winners');
+    }
+
+
+    playerleft(): Observable<PlayerLeft> {
+        return this.socket.fromEvent<PlayerLeft>('server:player:left');
     }
 
     playersUpdate(): Observable<Player[]> {

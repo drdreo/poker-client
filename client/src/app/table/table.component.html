@@ -1,17 +1,31 @@
 <div class="page-container">
-    <h1 class="table_name">Table <span class="is-primary">{{tableName}}</span></h1>
+
+    <app-feed></app-feed>
+
+    <div class="table-infos">
+        <h1 class="table__name">Table <span class="is-primary">{{tableName}}</span></h1>
+        <ul>
+            <li class="table__player" *ngFor="let player of (players$ | async)"> {{player.name}}
+                <ng-container *ngIf="(currentPlayerID$ | async) === player.id">- {{player.id}}</ng-container>
+            </li>
+        </ul>
+
+        <div class="table__time">{{playDuration$ | async }}s</div>
+    </div>
+
     <h3 class="table__action" *ngIf="notification.action$ | async as currentAction">{{currentAction}}</h3>
 
     <div class="ready-container" *ngIf="gameStatus == 'waiting' && player$ | async">
         <div class="ready-container__message">Everyone's in?</div>
         <button class="button" (click)="startGame()">Start</button>
     </div>
+
     <div class="ready-container" *ngIf="gameStatus == 'ended' && player$ | async">
         <div class="ready-container__message">Go next?</div>
         <button class="button" (click)="startGame()">Start</button>
     </div>
 
-    <div class="game_controls" *ngIf="isCurrentPlayer && player$ | async as player">
+    <div class="game_controls" *ngIf="gameStatus == 'started' && isCurrentPlayer && player$ | async as player">
         <button class="button danger" (click)="fold()">Fold</button>
         <button class="button check" (click)="check()">Check</button>
         <button class="button" (click)="call()">Call</button>
@@ -40,7 +54,8 @@
                         [class.client-player]="player.id === (player$|async)?.id"
                         [player]="player"
                         [index]="i"
-                        [playing]="(currentPlayerID$ | async) === player.id"></app-player>
+                        [class.playing]="player.id === (currentPlayerID$ | async)"
+                        [playing]="player.id === (currentPlayerID$ | async)"></app-player>
         </div>
         <div class="pot" *ngIf="pot$ | async as pot">
             <div class="pot__value">

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, OnChanges, SimpleChanges } from '@angular/core';
 import { Card } from '../card/card.component';
 
 export interface Player {
@@ -16,17 +16,18 @@ export interface Player {
 @Component({
     selector: 'app-player',
     templateUrl: './player.component.html',
-    styleUrls: ['./player.component.scss']
+    styleUrls: ['./player.component.scss'],
 })
-export class PlayerComponent implements OnInit {
+export class PlayerComponent implements OnChanges{
 
     @Input() player: Player;
-    @Input() playing: boolean;
+    @Input() playing: boolean = false;
     @Input() index;
 
     constructor() { }
 
-    ngOnInit() {
+    ngOnChanges(changes: SimpleChanges) {
+
     }
 
     getArray(number: number) {

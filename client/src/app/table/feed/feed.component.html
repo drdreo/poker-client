@@ -1,0 +1,3 @@
+<div #scrollContainer class="feed">
+    <feed-message *ngFor="let message of messages$ | async" [message]="message"></feed-message>
+</div>

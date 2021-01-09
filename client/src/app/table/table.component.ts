@@ -1,10 +1,11 @@
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
-import { switchMap, takeUntil, tap } from 'rxjs/operators';
+import { BehaviorSubject, merge, Observable, Subject, interval } from 'rxjs';
+import { switchMap, takeUntil, tap, shareReplay } from 'rxjs/operators';
 import { PokerService } from '../poker.service';
 import { NotificationService } from '../utils/notification.service';
 import { Card } from './card/card.component';
+import { MessageType } from './feed/feed-message/feed-message.component';
 import { Player } from './player/player.component';
 
 @Component({
@@ -20,10 +21,15 @@ export class TableComponent implements OnInit, OnDestroy {
     tableName: string;
     currentPlayerID$: Observable<string>; // ID of the current player
     board$: Observable<Card[]>;
-    _players$: BehaviorSubject<Player[]> = new BehaviorSubject<Player[]>([]);
-    players$: Observable<Player[]>;
     pot$: Observable<number>;
     /***/
+
+    _players$: BehaviorSubject<Player[]> = new BehaviorSubject<Player[]>([]);
+    players$: Observable<Player[]> = this._players$.asObservable();
+
+    get players(): Player[] {
+        return this._players$.getValue();
+    }
 
     // set if the current client is a player of the table
     _player$ = new BehaviorSubject<Player>(null);
@@ -43,6 +49,8 @@ export class TableComponent implements OnInit, OnDestroy {
     get betAmount(): number {
         return this._betAmount$.getValue();
     }
+
+    playDuration$ = interval(1000);
 
     get clientPlayerID(): string {
         return localStorage.getItem('playerID');
@@ -92,60 +100,43 @@ export class TableComponent implements OnInit, OnDestroy {
     unsubscribe$ = new Subject();
 
     constructor(private route: ActivatedRoute, public notification: NotificationService, public pokerService: PokerService) {
-        // init players
-        let players = [];
-        players.push({
-            allIn: false, disconnected: false, folded: false,
-            id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: []
-        });
-        players.push({
-            allIn: false, disconnected: true, folded: false, id: '', name: 'DCer',
-            color: this.getColor(), chips: 667, bet: 579, cards: this.two_cards
-        });
-        players.push({
-            allIn: false, disconnected: false, folded: false,
-            id: '', name: 'DrDreo', color: this.getColor(), chips: 667, bet: 579, cards: []
-        });
-        players.push({
-            allIn: false, disconnected: false, folded: false,
-            id: '', name: 'Hackl', color: this.getColor(), chips: 667, bet: 579, cards: []
-        });
-        players.push({
-            allIn: false, disconnected: false, folded: false,
-            id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: []
-        });
-        players.push({
-            allIn: false, disconnected: false, folded: false,
-            id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: []
-        });
-        players.push({
-            allIn: false, disconnected: false, folded: false,
-            id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: []
-        });
-        players.push({
-            allIn: false, disconnected: false, folded: false,
-            id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: []
-        });
 
-        this._players$.next(players);
+        this.loadDevPlayers();
+
         this.currentPlayerID$ = this.pokerService.currentPlayer()
                                     .pipe(
-                                        tap(playerID => this.isCurrentPlayer = playerID === this.clientPlayerID)
+                                        tap(console.log),
+                                        tap(playerID => this.isCurrentPlayer = playerID === this.clientPlayerID),
+                                        shareReplay(1)  // got to shareReplay due to late subscriptions inside the template
                                     );
+        // this.currentPlayerID$.subscribe(playerID => {
+        //     console.log(playerID);
+        //     this.isCurrentPlayer = playerID === this.clientPlayerID;
+        // });
 
-        this.players$ = merge(
-            this._players$,
+        merge(
             this.pokerService.playersUpdate(),
-            this.pokerService.playersCards())
-            .pipe(tap(players => {
-                // look for the current player instance if is one
-                if (this.clientPlayerID) {
-                    this._player$.next(players.find(player => player.id === this.clientPlayerID) || null);
-                }
-            }));
+            this.pokerService.playersCards()
+        ).subscribe(players => {
+            this._players$.next(players);
+        });
+
+        this.players$.subscribe(players => {
+            // look for the current player instance if is one
+            if (this.clientPlayerID) {
+                this._player$.next(players.find(player => player.id === this.clientPlayerID) || null);
+            }
+        });
 
         this.board$ = this.pokerService.boardUpdated();
         this.pot$ = this.pokerService.potUpdate();
+
+        this.pokerService.playerleft()
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe((res) => {
+                const player = this.getPlayerById(res.playerID);
+                this.notification.addFeedMessage(`${ player.name } left the table`, MessageType.Left);
+            });
 
         this.pokerService.gameStarted()
             .pipe(takeUntil(this.unsubscribe$))
@@ -154,6 +145,64 @@ export class TableComponent implements OnInit, OnDestroy {
         this.pokerService.gameEnded()
             .pipe(takeUntil(this.unsubscribe$))
             .subscribe(() => this.gameStatus = 'ended');
+
+        this.pokerService.gameWinners()
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe((res) => {
+                console.log(res);
+                const { winners, pot } = res;
+
+                const winnerNames = winners.reduce((prev, cur) => prev + ' ' + cur.name, '');
+
+                this.notification.showAction(`${ winnerNames } won the pot of ${ pot }`);
+                this.notification.addFeedMessage(`${ winnerNames } won the pot of ${ pot }`, MessageType.Won);
+            });
+
+        this.pokerService.playerChecked()
+            .pipe(
+                tap(console.log),
+                takeUntil(this.unsubscribe$)
+            )
+            .subscribe(res => {
+                const player = this.getPlayerById(res.playerID);
+                this.notification.showAction(`${ player.name } checked`);
+                this.notification.addFeedMessage(`${ player.name } checked`, MessageType.Played);
+            });
+
+        this.pokerService.playerCalled()
+            .pipe(
+                tap(console.log),
+                takeUntil(this.unsubscribe$)
+            )
+            .subscribe(res => {
+                const player = this.getPlayerById(res.playerID);
+                this.notification.showAction(`${ player.name } called`);
+                this.notification.addFeedMessage(`${ player.name } called`, MessageType.Played);
+            });
+
+        this.pokerService.playerBet()
+            .pipe(
+                tap(console.log),
+                takeUntil(this.unsubscribe$)
+            )
+            .subscribe(res => {
+                const player = this.getPlayerById(res.playerID);
+
+                this.notification.showAction(`${ player.name } bet ${ res.coins }`);
+                this.notification.addFeedMessage(`${ player.name } bet ${ res.coins }`, MessageType.Played);
+            });
+
+        this.pokerService.playerFolded()
+            .pipe(
+                tap(console.log),
+                takeUntil(this.unsubscribe$)
+            )
+            .subscribe(res => {
+                const player = this.getPlayerById(res.playerID);
+
+                this.notification.showAction(`${ player.name } folded`);
+                this.notification.addFeedMessage(`${ player.name } folded`, MessageType.Played);
+            });
     }
 
     ngOnInit() {
@@ -216,6 +265,9 @@ export class TableComponent implements OnInit, OnDestroy {
      * HELPER
      */
 
+    private getPlayerById(playerID: string): Player {
+        return this.players.find(player => player.id === playerID);
+    }
 
     private getColor() {
         return this.playerColors.pop();
@@ -228,5 +280,44 @@ export class TableComponent implements OnInit, OnDestroy {
     onBetChange($event: Event) {
         const amount = +(<HTMLInputElement>$event.target).value;
         this._betAmount$.next(amount);
+    }
+
+    private loadDevPlayers() {
+        // init players
+        let players = [];
+        players.push({
+            allIn: false, disconnected: false, folded: false,
+            id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: []
+        });
+        players.push({
+            allIn: false, disconnected: true, folded: false, id: '', name: 'DCer',
+            color: this.getColor(), chips: 667, bet: 579, cards: this.two_cards
+        });
+        players.push({
+            allIn: false, disconnected: false, folded: false,
+            id: '', name: 'DrDreo', color: this.getColor(), chips: 667, bet: 579, cards: []
+        });
+        players.push({
+            allIn: false, disconnected: false, folded: false,
+            id: '', name: 'Hackl', color: this.getColor(), chips: 667, bet: 579, cards: []
+        });
+        players.push({
+            allIn: false, disconnected: false, folded: false,
+            id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: []
+        });
+        players.push({
+            allIn: false, disconnected: false, folded: false,
+            id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: []
+        });
+        players.push({
+            allIn: false, disconnected: false, folded: false,
+            id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: []
+        });
+        players.push({
+            allIn: false, disconnected: false, folded: false,
+            id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: []
+        });
+
+        this._players$.next(players);
     }
 }
