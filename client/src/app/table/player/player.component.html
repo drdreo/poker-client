@@ -1,6 +1,6 @@
-<div class="player" [ngClass]="'player-'+ (index + 1)" [class.playing]="playing">
+<div class="player" [ngClass]="'player-'+ (index + 1)" [class.playing]="playing" [class.dealer]="dealer">
     <div class="bank">
-        <div class="bank-value">{{ player.chips   }}</div>
+        <div class="bank-value">{{ player.chips }}</div>
         <app-coins class="jetons-50" [amount]="player.chips" [type]="50"></app-coins>
         <app-coins class="jetons-10" [amount]="player.chips" [type]="10"></app-coins>
         <app-coins class="jetons-5" [amount]="player.chips" [type]="5"></app-coins>
@@ -8,6 +8,7 @@
     </div>
     <div class="avatar" [ngStyle]="{'background-color': player.color || 'dodgerblue'}"></div>
     <div class="name">{{player.name}}</div>
+    <div class="dealer-btn">D</div>
     <div class="mise" *ngIf="player.bet > 0">
         <div class="mise-value">
             {{ player.bet }}

@@ -65,6 +65,25 @@ $currency-symbol: "€";
     }
   }
 
+  .dealer-btn {
+    display: none;
+    position: absolute;
+    background-color: white;
+    color: black;
+    width: 30px;
+    height: 30px;
+    border-radius: 30px;
+    align-items: center;
+    bottom: 10px;
+    justify-content: center;
+  }
+
+  &.dealer {
+    .dealer-btn {
+      display: flex;
+    }
+  }
+
   &.playing:before {
     content: ' .';
     animation: dots 1.5s steps(5) infinite;

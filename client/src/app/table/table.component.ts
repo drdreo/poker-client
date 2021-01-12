@@ -115,7 +115,8 @@ export class TableComponent implements OnInit, OnDestroy {
                                         shareReplay(1)  // got to shareReplay due to late subscriptions inside the template
                                     );
 
-        this.dealerPlayerID$ = this.pokerService.dealerUpdate();
+        this.dealerPlayerID$ = this.pokerService.dealerUpdate()
+                                   .pipe(shareReplay(1));
         // this.currentPlayerID$.subscribe(playerID => {
         //     console.log(playerID);
         //     this.isCurrentPlayer = playerID === this.clientPlayerID;
@@ -333,7 +334,7 @@ export class TableComponent implements OnInit, OnDestroy {
         });
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: []
+            id: 'dealer', name: 'Dealer', color: this.getColor(), chips: 667, bet: 579, cards: []
         });
 
         this._players$.next(players);

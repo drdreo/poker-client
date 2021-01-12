@@ -4,11 +4,11 @@
 
     <div class="table-infos">
         <h1 class="table__name">Table <span class="is-primary">{{tableName}}</span></h1>
-<!--        <ul>-->
-<!--            <li class="table__player" *ngFor="let player of (players$ | async)"> {{player.name}}-->
-<!--                <ng-container *ngIf="(currentPlayerID$ | async) === player.id">- {{player.id}}</ng-container>-->
-<!--            </li>-->
-<!--        </ul>-->
+        <!--        <ul>-->
+        <!--            <li class="table__player" *ngFor="let player of (players$ | async)"> {{player.name}}-->
+        <!--                <ng-container *ngIf="(currentPlayerID$ | async) === player.id">- {{player.id}}</ng-container>-->
+        <!--            </li>-->
+        <!--        </ul>-->
 
         <div class="table__time">Play time: {{playDuration$ | async }}s</div>
     </div>
@@ -20,12 +20,13 @@
         <button class="button" (click)="startGame()">Start</button>
     </div>
 
-<!--    <div class="ready-container" *ngIf="(gameStatus$ | async) == 'ended' && player$ | async">-->
-<!--        <div class="ready-container__message">Go next?</div>-->
-<!--        <button class="button" (click)="startGame()">Start</button>-->
-<!--    </div>-->
+    <!--    <div class="ready-container" *ngIf="(gameStatus$ | async) == 'ended' && player$ | async">-->
+    <!--        <div class="ready-container__message">Go next?</div>-->
+    <!--        <button class="button" (click)="startGame()">Start</button>-->
+    <!--    </div>-->
 
-    <div class="game_controls" *ngIf="(gameStatus$ | async) == 'started' && isCurrentPlayer && player$ | async as player">
+    <div class="game_controls"
+         *ngIf="(gameStatus$ | async) == 'started' && isCurrentPlayer && player$ | async as player">
         <button class="button danger" (click)="fold()">Fold</button>
         <button class="button check" (click)="check()">Check</button>
         <button class="button" (click)="call()">Call</button>
@@ -54,7 +55,7 @@
                         [class.client-player]="player.id === (player$|async)?.id"
                         [player]="player"
                         [index]="i"
-                        [class.playing]="player.id === (currentPlayerID$ | async)"
+                        [dealer]="player.id === (dealerPlayerID$ | async)"
                         [playing]="player.id === (currentPlayerID$ | async)"></app-player>
         </div>
         <div class="pot" *ngIf="pot$ | async as pot">
