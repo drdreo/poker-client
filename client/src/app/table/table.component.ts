@@ -22,6 +22,7 @@ export class TableComponent implements OnInit, OnDestroy {
     /***Comes from server*/
     tableName: string;
     currentPlayerID$: Observable<string>; // ID of the current player
+    dealerPlayerID$: Observable<string>; // ID of the dealer
     board$: Observable<Card[]>;
     pot$: Observable<number>;
     /***/
@@ -113,6 +114,8 @@ export class TableComponent implements OnInit, OnDestroy {
                                         tap(playerID => this.isCurrentPlayer = playerID === this.clientPlayerID),
                                         shareReplay(1)  // got to shareReplay due to late subscriptions inside the template
                                     );
+
+        this.dealerPlayerID$ = this.pokerService.dealerUpdate();
         // this.currentPlayerID$.subscribe(playerID => {
         //     console.log(playerID);
         //     this.isCurrentPlayer = playerID === this.clientPlayerID;

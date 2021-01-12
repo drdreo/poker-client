@@ -46,7 +46,9 @@ export class Game {
     }
 
     getMaxBet(): number {
-        return Math.max(...this.round.bets);
+        return this.round.bets.reduce((p, c) => {
+            return (p > c ? p : c);
+        });
     }
 
     hasSmallAndBigBlind(): boolean {

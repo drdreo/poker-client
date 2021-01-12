@@ -12,9 +12,11 @@ export interface TableCommand {
     data?: {
         players?,
         currentPlayerID?: string,
+        dealerPlayerID?: string,
         pot?: number,
         board?: string[],
-        winners?: Player[]
+        winners?: Player[],
+        gameStatus?: string
     };
 }
 
@@ -33,7 +35,8 @@ export class Table {
 
     commands$: Subject<TableCommand>;
 
-    protected gameEndDelay = 1500;
+    protected endGameDelay = 1500;
+    protected nextGameDelay = 5000;
 
     constructor(
         public smallBlind: number,
@@ -119,6 +122,7 @@ export class Table {
             this.currentPlayer = 0;
         }
         this.sendCurrentPlayer();
+        this.sendDealerUpdate();
     }
 
     private showPlayersCards() {
@@ -135,6 +139,18 @@ export class Table {
         }
     }
 
+
+    /***
+     * Player Turn logic:
+
+     first after dealer starts
+     - if bet was not called by everyone, next player who did not fold
+
+
+     Heads Up (1vs1):
+     - dealer is small blind
+
+     */
     private nextPlayer() {
         let maxTries = 0;
 
@@ -185,11 +201,28 @@ export class Table {
         });
     }
 
+    private sendGameStatusUpdate() {
+        this.commands$.next({
+            cmd: 'game_status',
+            table: this.name,
+            data: { gameStatus: this.getGameStatus() }
+        });
+    }
+
     public sendCurrentPlayer() {
         this.commands$.next({
             cmd: 'current_player',
             table: this.name,
             data: { currentPlayerID: this.players[this.currentPlayer].id }
+        });
+    }
+
+
+    public sendDealerUpdate() {
+        this.commands$.next({
+            cmd: 'dealer',
+            table: this.name,
+            data: { dealerPlayerID: this.players[this.dealer].id }
         });
     }
 
@@ -204,6 +237,7 @@ export class Table {
         this.dealCards();
 
         this.sendPotUpdate();
+
         this.commands$.next({
             cmd: 'game_started',
             table: this.name,
@@ -318,7 +352,8 @@ export class Table {
     }
 
     private progress(): boolean {
-        if (this.isEndOfRound() || this.hasEveryoneElseFolded()) {
+        const everyoneElseFolded = this.hasEveryoneElseFolded();
+        if (this.isEndOfRound() || everyoneElseFolded) {
 
             this.game.moveBetsToPot();
             this.resetPlayerBets();
@@ -327,7 +362,7 @@ export class Table {
             const round = this.game.round.type;
 
             // if we are in the last round and everyone has either called or folded
-            if (round === RoundType.River || this.hasEveryoneElseFolded()) {
+            if (round === RoundType.River || everyoneElseFolded) {
 
                 Logger.debug('Game ended!');
                 this.sendGameEnded();
@@ -337,10 +372,15 @@ export class Table {
                     this.showPlayersCards();
                 }
 
-                // delay the end game reveal
+                // wait for the winner announcement
                 setTimeout(() => {
-                    this.processWinners();
-                }, this.gameEndDelay);
+                    this.processWinners(everyoneElseFolded);
+                }, this.endGameDelay);
+
+                // auto-create new game
+                setTimeout(() => {
+                    this.newGame();
+                }, this.nextGameDelay);
 
                 // stop the game progress since we are done
                 return false;
@@ -360,17 +400,16 @@ export class Table {
                     break;
             }
             this.sendGameBoardUpdate();
-            // let the small blind start again
+            // let player after dealer start, so set it to the dealer
             this.currentPlayer = this.dealer;
         }
         return true;
     }
 
 
+    private processWinners(everyoneElseFolded: boolean) {
 
-    private processWinners() {
-
-        const winners = this.getWinners();
+        const winners = this.getWinners(everyoneElseFolded);
         let pot = this.game.pot;
 
         if (winners.length === 1) {
@@ -399,16 +438,22 @@ export class Table {
         // this.players.map(player => player.reset());
         // this.sendPlayersUpdate();
         //
-        // // auto-create new game
-        // this.newGame();
+
     }
 
-    private getWinners(): Player[] {
+    private getWinners(everyoneElseFolded: boolean): Player[] {
+
+        // find the highest hand from not folded players
+        const availablePlayers = this.players.filter(player => !player.folded);
+
+        // if everyone folded, no need to rank hands
+        if (everyoneElseFolded) {
+            return availablePlayers;
+        }
+
         this.rankAllHands();
 
-        // first find the highest hand from not folded players
-        const availablePLayers = this.players.filter(player => !player.folded);
-        const winner = availablePLayers.reduce((prev, cur) => {
+        const winner = availablePlayers.reduce((prev, cur) => {
             return (prev.hand.value > cur.hand.value) ? prev : cur;
         });
 

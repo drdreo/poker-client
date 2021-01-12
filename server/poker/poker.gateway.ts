@@ -84,12 +84,20 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 this.sendTo(table, 'server:game:ended');
                 break;
 
+            case 'game_status':
+                this.sendTo(table, 'server:game:status', data.gameStatus);
+                break;
+
             case 'game_winners':
                 this.sendTo(table, 'server:game:winners', { winners: data.winners, pot: data.pot });
                 break;
 
             case 'current_player':
                 this.sendTo(table, 'server:game:current_player', { currentPlayerID: data.currentPlayerID });
+                break;
+
+            case 'dealer':
+                this.sendTo(table, 'server:game:dealer', { dealerPlayerID: data.dealerPlayerID });
                 break;
 
             case 'board_updated':
