@@ -1,5 +1,13 @@
 <ng-container *ngIf="amount > 0">
     <ng-container [ngSwitch]="type">
+        <ng-container *ngSwitchCase="100">
+            <div class="jeton-100" *ngIf="getCoinsFor(amount, 100) >= 1">
+                <div class="jetons v-100"
+                     *ngFor="let temp of getArray(getCoinsFor(amount, 100)); let i = index;"
+                     [ngStyle]="{'top.px': (-2 + (i * 5))}"></div>
+            </div>
+        </ng-container>
+
         <ng-container *ngSwitchCase="50">
             <div class="jeton-50" *ngIf="getCoinsFor(amount, 50) >= 1">
                 <div class="jetons v-50"

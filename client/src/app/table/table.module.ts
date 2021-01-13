@@ -5,7 +5,6 @@ import { TableRoutingModule } from './table-routing.module';
 import { CardComponent } from './card/card.component';
 import { PlayerComponent } from './player/player.component';
 import { CoinsComponent } from './coins/coins.component';
-import { ControlsComponent } from './controls/controls.component';
 import { FeedComponent } from './feed/feed.component';
 import { FeedMessageComponent } from './feed/feed-message/feed-message.component';
 
@@ -16,7 +15,6 @@ import { FeedMessageComponent } from './feed/feed-message/feed-message.component
 		CardComponent,
 		PlayerComponent,
 		CoinsComponent,
-		ControlsComponent,
 		FeedComponent,
 		FeedMessageComponent,
 	],

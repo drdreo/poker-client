@@ -13,7 +13,7 @@ export class CoinsComponent implements OnInit, OnChanges {
 	@HostBinding('class.inactive') inactive: boolean = false;
 
 	// available coins
-	private coins = [50, 10, 5, 1];
+	private coins = [100, 50, 10, 5, 1];
 
 	constructor() { }
 

@@ -57,6 +57,14 @@ export class TableComponent implements OnInit, OnDestroy {
 
     playDuration$ = interval(1000);
 
+    // maybe refactor to better data structure if more come up
+    private _maxBet$ = new BehaviorSubject<number>(0);
+    maxBet$ = this._maxBet$.asObservable();
+
+    get maxBet(): number {
+        return this._maxBet$.getValue();
+    }
+
     get clientPlayerID(): string {
         return localStorage.getItem('playerID');
     }
@@ -146,13 +154,21 @@ export class TableComponent implements OnInit, OnDestroy {
                 this.notification.addFeedMessage(`${ player.name } left the table`, MessageType.Left);
             });
 
+        this.pokerService.roundUpdate()
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe((round) => {
+                this._maxBet$.next(0);
+            });
+
         this.pokerService.gameStarted()
             .pipe(takeUntil(this.unsubscribe$))
             .subscribe(() => this._gameStatus$.next('started'));
 
         this.pokerService.gameEnded()
             .pipe(takeUntil(this.unsubscribe$))
-            .subscribe(() => this._gameStatus$.next('ended'));
+            .subscribe(() => {
+                this._gameStatus$.next('ended');
+            });
 
         this.pokerService.gameStatus()
             .pipe(takeUntil(this.unsubscribe$))
@@ -173,8 +189,13 @@ export class TableComponent implements OnInit, OnDestroy {
 
                 const winnerNames = winners.reduce((prev, cur) => prev + ' ' + cur.name, '');
 
-                this.notification.showAction(`${ winnerNames } won the pot of ${ pot }`);
-                this.notification.addFeedMessage(`${ winnerNames } won the pot of ${ pot }`, MessageType.Won);
+                let message = `${ winnerNames } won the pot of ${ pot }`;
+                if (winners[0].hand) {
+                    message += ` with ${ winners[0].hand.handName }`;
+                }
+
+                this.notification.showAction(message);
+                this.notification.addFeedMessage(message, MessageType.Won);
             });
 
         this.pokerService.playerChecked()
@@ -206,6 +227,8 @@ export class TableComponent implements OnInit, OnDestroy {
             )
             .subscribe(res => {
                 const player = this.getPlayerById(res.playerID);
+                const maxBet = this.maxBet > res.coins ? this.maxBet : res.coins;
+                this._maxBet$.next(maxBet);
 
                 this.notification.showAction(`${ player.name } bet ${ res.coins }`);
                 this.notification.addFeedMessage(`${ player.name } bet ${ res.coins }`, MessageType.Played);
@@ -338,5 +361,95 @@ export class TableComponent implements OnInit, OnDestroy {
         });
 
         this._players$.next(players);
+    }
+
+    getPlayerSeat(index: number) {
+        const totalPlayers = this.players.length;
+
+        // hardcode the placement of players to their seat
+        switch (totalPlayers) {
+            case 2:
+                if (index === 0) {
+                    return 1;
+                } else if (index === 1) {
+                    return 5;
+                }
+                break;
+
+            case 3:
+                if (index === 0) {
+                    return 1;
+                } else if (index === 1) {
+                    return 3;
+                } else if (index === 2) {
+                    return 5;
+                }
+                break;
+
+            case 4:
+                if (index === 0) {
+                    return 1;
+                } else if (index === 1) {
+                    return 3;
+                } else if (index === 2) {
+                    return 5;
+                } else if (index === 3) {
+                    return 7;
+                }
+                break;
+
+            case 5:
+                if (index === 0) {
+                    return 1;
+                } else if (index === 1) {
+                    return 2;
+                } else if (index === 2) {
+                    return 3;
+                } else if (index === 3) {
+                    return 5;
+                } else if (index === 4) {
+                    return 7;
+                }
+                break;
+
+            case 6:
+                if (index === 0) {
+                    return 1;
+                } else if (index === 1) {
+                    return 2;
+                } else if (index === 2) {
+                    return 3;
+                } else if (index === 3) {
+                    return 5;
+                } else if (index === 4) {
+                    return 6;
+                } else if (index === 5) {
+                    return 7;
+                }
+                break;
+
+            case 7:
+                if (index === 0) {
+                    return 1;
+                } else if (index === 1) {
+                    return 2;
+                } else if (index === 2) {
+                    return 3;
+                } else if (index === 3) {
+                    return 4;
+                } else if (index === 4) {
+                    return 5;
+                } else if (index === 5) {
+                    return 6;
+                } else if (index === 6) {
+                    return 7;
+                }
+                break;
+
+            case 8:
+            default:
+                return index + 1;
+        }
+
     }
 }

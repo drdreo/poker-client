@@ -23,7 +23,7 @@ export class PlayerComponent implements OnChanges {
     @Input() player: Player;
     @Input() playing: boolean = false;
     @Input() dealer: boolean = false;
-    @Input() index;
+    @Input() seat: number;
 
     constructor() { }
 

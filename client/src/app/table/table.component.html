@@ -28,8 +28,15 @@
     <div class="game_controls"
          *ngIf="(gameStatus$ | async) == 'started' && isCurrentPlayer && player$ | async as player">
         <button class="button danger" (click)="fold()">Fold</button>
-        <button class="button check" (click)="check()">Check</button>
-        <button class="button" (click)="call()">Call</button>
+        <ng-container *ngIf="{ maxBet: maxBet$ | async} as data">
+            <button *ngIf="data.maxBet == 0; else callBtn" class="button check" (click)="check()">Check</button>
+            <ng-template #callBtn>
+                <button *ngIf="data.maxBet !== player.bet" class="button" (click)="call()">
+                    Call ({{ maxBet - player.bet}})
+                </button>
+            </ng-template>
+
+        </ng-container>
         <div class="game_controls__bet-amount">
             <input (input)="onBetChange($event)" type="range" step="10" min="10" [max]="player.chips"/>
             {{betAmount$ | async}}
@@ -54,7 +61,7 @@
             <app-player *ngFor="let player of (players$ | async); let i = index;"
                         [class.client-player]="player.id === (player$|async)?.id"
                         [player]="player"
-                        [index]="i"
+                        [seat]="getPlayerSeat(i)"
                         [dealer]="player.id === (dealerPlayerID$ | async)"
                         [playing]="player.id === (currentPlayerID$ | async)"></app-player>
         </div>

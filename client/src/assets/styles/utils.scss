@@ -45,10 +45,11 @@ $table-background-color: #4aad4a;
 $table-border-color: #a95555;
 
 /** JETONS **/
-$jeton-50-color: lightgrey;
+$jeton-100-color: #444;
+$jeton-50-color: goldenrod;
 $jeton-10-color: crimson;
-$jeton-5-color: goldenrod;
-$jeton-1-color: #444;
+$jeton-5-color: $button-background-color;
+$jeton-1-color: lightgrey;
 
 /** PLAYER **/
 $player-font-family: $table-font-family;

@@ -49,7 +49,7 @@ interface PlayerLeft {
 }
 
 interface GameWinners {
-    winners: PlayerOverview[];
+    winners: Winner[];
     pot: number;
 }
 
@@ -64,6 +64,13 @@ interface PlayerOverview {
     disconnected: boolean;
 }
 
+interface Winner extends PlayerOverview {
+    hand?: {
+        handName: string;
+        handType: number;
+    }
+}
+
 interface GamePlayersUpdate {
     players: PlayerOverview[];
 }
@@ -76,12 +83,16 @@ interface GameDealerUpdate {
     dealerPlayerID: string;
 }
 
-interface GameRoundStarted {
+interface GameBoardUpdate {
     board: string[];
 }
 
 interface GamePotUpdate {
     pot: number;
+}
+
+interface GameRoundUpdate {
+    round: any;
 }
 
 
@@ -169,7 +180,7 @@ export class PokerService implements OnDestroy {
     }
 
     boardUpdated(): Observable<Card[]> {
-        return this.socket.fromEvent<GameRoundStarted>('server:game:board_updated')
+        return this.socket.fromEvent<GameBoardUpdate>('server:game:board_updated')
                    .pipe(map(({ board }) => {
                        return board.map(card => {
                            const c = card.split('');
@@ -183,6 +194,12 @@ export class PokerService implements OnDestroy {
     potUpdate(): Observable<number> {
         return this.socket.fromEvent<GamePotUpdate>('server:pot_update')
                    .pipe(map(data => data.pot));
+    }
+
+
+    roundUpdate(): Observable<any> {
+        return this.socket.fromEvent<GameRoundUpdate>('server:game:new_round')
+                   .pipe(map(data => data.round));
     }
 
     /********************

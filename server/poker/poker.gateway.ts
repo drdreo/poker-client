@@ -72,6 +72,10 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 this.sendPlayerUpdate(table, data.players);
                 break;
 
+            case 'player_bet':
+                this.sendTo(table, 'server:bet', { playerID: data.playerID, coins: data.coins });
+                break;
+
             case 'players_cards':
                 this.sendTo(table, 'server:players_cards', { players: data.players });
                 break;
@@ -102,6 +106,10 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
             case 'board_updated':
                 this.sendTo(table, 'server:game:board_updated', { board: data.board });
+                break;
+
+            case 'new_round':
+                this.sendTo(table, 'server:game:new_round', { round: data.round });
                 break;
 
             default:
@@ -200,7 +208,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const playerID = socket['playerID'];
         const table = socket['table'];
         this.tableService.bet(table, playerID, coins);
-        this.sendTo(table, 'server:bet', { playerID, coins });
+        // this.sendTo(table, 'server:bet', { playerID, coins });
     }
 
     @SubscribeMessage('player:fold')

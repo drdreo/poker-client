@@ -4,9 +4,17 @@ $name-font-family: 'Balsamiq Sans', cursive;
 $currency-symbol: "€";
 
 :host(.client-player) {
-  .player .name {
-    color: $yellow;
-    border-color: $yellow;
+  .player {
+    .name {
+      color: $yellow;
+      border-color: $yellow;
+    }
+
+    .cards.folded {
+      display: block;
+      filter: grayscale(1);
+      opacity: 0.8;
+    }
   }
 }
 
@@ -63,6 +71,10 @@ $currency-symbol: "€";
     app-card:first-child {
       margin-right: 20px;
     }
+
+    &.folded {
+      display: none;
+    }
   }
 
   .dealer-btn {
@@ -108,26 +120,12 @@ $currency-symbol: "€";
   }
 
   &.player-2 {
-    bottom: 0;
-    left: 50%;
-    transform: translatex(-50%) translatey(50%) rotatez(180deg);
-
-    .name, .cards, .bank-value, .mise-value {
-      transform: rotatez(180deg);
-    }
+    top: 0;
+    left: 75%;
+    transform: translatex(-50%) translatey(-50%);
   }
 
   &.player-3 {
-    top: 50%;
-    left: 0;
-    transform: translatex(-50%) translatey(-50%) rotatez(-90deg);
-
-    .name {
-      transform: rotatez(0deg);
-    }
-  }
-
-  &.player-4 {
     top: 50%;
     right: 0;
     transform: translatex(50%) translatey(-50%) rotatez(90deg);
@@ -137,37 +135,52 @@ $currency-symbol: "€";
     }
   }
 
-  &.player-5 {
-    top: 0;
-    left: 25%;
-    transform: translatex(-50%) translatey(-50%);
-  }
-
-  &.player-6 {
+  &.player-4 {
     bottom: 0;
     left: 75%;
     transform: translatex(-50%) translatey(50%) rotatez(180deg);
 
-    .name, .cards, .bank-value, .mise-value {
+    .name, .cards, .bank-value, .mise-value, .dealer-btn {
+      transform: rotatez(180deg);
+    }
+  }
+
+  &.player-5 {
+    bottom: 0;
+    left: 50%;
+    transform: translatex(-50%) translatey(50%) rotatez(180deg);
+
+    .name, .cards, .bank-value, .mise-value, .dealer-btn {
+      transform: rotatez(180deg);
+    }
+  }
+
+  &.player-6 {
+    bottom: 0;
+    left: 25%;
+    transform: translatex(-50%) translatey(50%) rotatez(180deg);
+
+    .name, .cards, .bank-value, .mise-value, .dealer-btn  {
       transform: rotatez(180deg);
     }
   }
 
   &.player-7 {
-    top: 0;
-    left: 75%;
-    transform: translatex(-50%) translatey(-50%);
+    top: 50%;
+    left: 0;
+    transform: translatex(-50%) translatey(-50%) rotatez(-90deg);
+
+    .name {
+      transform: rotatez(0deg);
+    }
   }
 
   &.player-8 {
-    bottom: 0;
+    top: 0;
     left: 25%;
-    transform: translatex(-50%) translatey(50%) rotatez(180deg);
-
-    .name, .cards, .bank-value, .mise-value {
-      transform: rotatez(180deg);
-    }
+    transform: translatex(-50%) translatey(-50%);
   }
+
 
   &.player-9 {
     top: 5%;
@@ -219,19 +232,24 @@ $currency-symbol: "€";
   }
 
   .jetons {
-    &-50 {
+    &-100 {
       top: -15px;
       left: 45px;
     }
 
-    &-10 {
-      top: -10px;
+    &-50 {
+      top: -15px;
       left: 25px;
+    }
+
+    &-10 {
+      top: 0;
+      left: 17px;
     }
 
     &-5 {
       top: 10px;
-      left: 10px;
+      left: 5px;
     }
 
     &-1 {
@@ -265,20 +283,24 @@ $currency-symbol: "€";
   .jetons {
     position: absolute;
 
+    &-100 {
+      left: -35px;
+    }
+
     &-50 {
-      left: -22px;
+      left: -15px;
     }
 
     &-10 {
-      left: 0;
+      left: 5px;
     }
 
     &-5 {
-      left: 22px;
+      left: 25px;
     }
 
     &-1 {
-      left: 44px;
+      left: 45px;
     }
   }
 }

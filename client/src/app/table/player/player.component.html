@@ -1,6 +1,7 @@
-<div class="player" [ngClass]="'player-'+ (index + 1)" [class.playing]="playing" [class.dealer]="dealer">
+<div class="player" [ngClass]="'player-'+ (seat)" [class.playing]="playing" [class.dealer]="dealer">
     <div class="bank">
         <div class="bank-value">{{ player.chips }}</div>
+        <app-coins class="jetons-100" [amount]="player.chips" [type]="100"></app-coins>
         <app-coins class="jetons-50" [amount]="player.chips" [type]="50"></app-coins>
         <app-coins class="jetons-10" [amount]="player.chips" [type]="10"></app-coins>
         <app-coins class="jetons-5" [amount]="player.chips" [type]="5"></app-coins>
@@ -12,6 +13,10 @@
     <div class="mise" *ngIf="player.bet > 0">
         <div class="mise-value">
             {{ player.bet }}
+        </div>
+
+        <div class="jetons jetons-100">
+            <app-coins [amount]="player.bet" [type]="100"></app-coins>
         </div>
         <div class="jetons jetons-50">
             <app-coins [amount]="player.bet" [type]="50"></app-coins>
@@ -26,7 +31,7 @@
             <app-coins [amount]="player.bet" [type]="1"></app-coins>
         </div>
     </div>
-    <div class="cards">
+    <div class="cards" [class.folded]="player.folded">
         <app-card *ngFor="let card of player.cards" [figure]="card.figure" [value]="card.value"></app-card>
     </div>
 </div>

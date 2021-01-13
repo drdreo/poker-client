@@ -3,7 +3,7 @@ import { WsException } from '@nestjs/websockets';
 import * as PokerEvaluator from 'poker-evaluator';
 import { Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { Game, RoundType } from '../Game';
+import { Game, Round, RoundType } from '../Game';
 import { Player, PlayerPreview } from '../Player';
 
 export interface TableCommand {
@@ -11,10 +11,13 @@ export interface TableCommand {
     table: string;
     data?: {
         players?,
+        playerID?: string,
         currentPlayerID?: string,
         dealerPlayerID?: string,
         pot?: number,
+        coins?: number,
         board?: string[],
+        round?: Round,
         winners?: Player[],
         gameStatus?: string
     };
@@ -178,6 +181,14 @@ export class Table {
         });
     }
 
+    public sendPlayerBet(playerID: string, coins: number) {
+        this.commands$.next({
+            cmd: 'player_bet',
+            table: this.name,
+            data: { playerID, coins }
+        });
+    }
+
     public sendPotUpdate() {
         this.commands$.next({
             cmd: 'pot_update',
@@ -191,6 +202,14 @@ export class Table {
             cmd: 'board_updated',
             table: this.name,
             data: { board: this.game.board }
+        });
+    }
+
+    public sendGameRoundUpdate() {
+        this.commands$.next({
+            cmd: 'new_round',
+            table: this.name,
+            data: { round: this.game.round }
         });
     }
 
@@ -237,12 +256,18 @@ export class Table {
         this.dealCards();
 
         this.sendPotUpdate();
+        this.sendGameBoardUpdate();
+        this.sendGameRoundUpdate();
 
         this.commands$.next({
             cmd: 'game_started',
             table: this.name,
             data: { players: this.players }
         });
+
+        // auto bet blinds
+        this.bet(this.players[this.currentPlayer].id, this.smallBlind);
+        this.bet(this.players[this.currentPlayer].id, this.bigBlind);
     }
 
     private dealCards() {
@@ -297,6 +322,7 @@ export class Table {
 
         this.nextPlayer();
         this.sendPlayersUpdate();
+        this.sendPlayerBet(playerID, bet);
     }
 
     public fold(playerID: string) {
@@ -399,6 +425,7 @@ export class Table {
                 default:
                     break;
             }
+            this.sendGameRoundUpdate();
             this.sendGameBoardUpdate();
             // let player after dealer start, so set it to the dealer
             this.currentPlayer = this.dealer;

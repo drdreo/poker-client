@@ -150,9 +150,9 @@ export class Game {
 
 // RoundTypes: Deal,Flop,Turn,River,Showdown
 // BetTypes: Bet,Raise,ReRaise, cap
-class Round {
+export class Round {
     bets: number[] = [];
-    betName: BetType = BetType.Bet;
+    // betName: BetType = BetType.Bet;
 
     constructor(public type: RoundType) { }
 }

@@ -1,7 +1,6 @@
 @import "../../../assets/styles/utils";
 
 
-
 :host {
   width: 20px;
   height: 20px;
@@ -33,6 +32,10 @@
   border-radius: 100%;
   border: 2px white dotted;
   box-shadow: 2px 2px 0 rgba(0, 0, 0, .1);
+
+  &.v-100 {
+    background-color: $jeton-100-color;
+  }
 
   &.v-50 {
     background-color: $jeton-50-color;
