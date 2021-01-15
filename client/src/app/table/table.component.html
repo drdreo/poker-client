@@ -37,8 +37,8 @@
             </ng-template>
 
         </ng-container>
-        <div class="game_controls__bet-amount">
-            <input (input)="onBetChange($event)" type="range" step="10" min="10" [max]="player.chips"/>
+        <div *ngIf="player.chips > 0" class="game_controls__bet-amount">
+            <input (input)="onBetChange($event)" [value]="player.chips / 2" type="range" step="10" min="10" [max]="player.chips"/>
             {{betAmount$ | async}}
             <button class="button" (click)="bet();">Bet</button>
         </div>
@@ -84,7 +84,7 @@
         </div>
     </div>
 
-    <div class="overlay" [class.visible]="showOverlay && false">
+    <div class="overlay" [class.visible]="showOverlay && inProduction">
         <h2>Sorry, but the table <span class="is-primary">{{tableName}}</span> does not exist</h2>
         <a routerLink="/" class="link">Back to home?</a>
     </div>

@@ -22,7 +22,7 @@ interface PlayerFolded {
 
 interface PlayerBet {
     playerID: string;
-    coins: number;
+    bet: number;
 }
 
 export interface PokerTable {
@@ -202,6 +202,10 @@ export class PokerService implements OnDestroy {
                    .pipe(map(data => data.round));
     }
 
+    tableClosed(): Observable<undefined> {
+        return this.socket.fromEvent<undefined>('server:table:closed');
+    }
+
     /********************
      * Game Actions
      ********************/
@@ -222,8 +226,8 @@ export class PokerService implements OnDestroy {
         return this.socket.fromEvent<PlayerCalled>('server:called');
     }
 
-    bet(coins: number) {
-        this.socket.emit('player:bet', coins);
+    bet(amount: number) {
+        this.socket.emit('player:bet', amount);
     }
 
     playerBet() {

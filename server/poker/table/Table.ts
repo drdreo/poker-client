@@ -15,7 +15,7 @@ export interface TableCommand {
         currentPlayerID?: string,
         dealerPlayerID?: string,
         pot?: number,
-        coins?: number,
+        bet?: number,
         board?: string[],
         round?: Round,
         winners?: Player[],
@@ -181,11 +181,11 @@ export class Table {
         });
     }
 
-    public sendPlayerBet(playerID: string, coins: number) {
+    public sendPlayerBet(playerID: string, bet: number) {
         this.commands$.next({
             cmd: 'player_bet',
             table: this.name,
-            data: { playerID, coins }
+            data: { playerID, bet }
         });
     }
 
@@ -213,12 +213,28 @@ export class Table {
         });
     }
 
+    public sendGameStarted() {
+        this.commands$.next({
+            cmd: 'game_started',
+            table: this.name,
+            data: { players: this.players }
+        });
+    }
+
     private sendGameEnded() {
         this.commands$.next({
             cmd: 'game_ended',
             table: this.name
         });
     }
+
+    public sendTableClosed() {
+        this.commands$.next({
+            cmd: 'table_closed',
+            table: this.name
+        });
+    }
+
 
     private sendGameStatusUpdate() {
         this.commands$.next({
@@ -246,26 +262,32 @@ export class Table {
     }
 
     public newGame() {
+
         if (this.players.length < this.minPlayers) {
             throw new WsException('Cant start game. Too less players are in.');
         }
 
-        this.game = new Game(this.smallBlind, this.bigBlind);
+        this.removePoorPlayers();
+
+        // check if we removed everyone but the winner due to money issue
+        if (this.players.length === 1) {
+            this.sendTableClosed();
+            return;
+        }
+
+
         this.players.map(player => player.reset());
         this.setStartPlayer();
+
+        this.game = new Game(this.smallBlind, this.bigBlind);
         this.dealCards();
 
         this.sendPotUpdate();
         this.sendGameBoardUpdate();
         this.sendGameRoundUpdate();
+        this.sendGameStarted();
 
-        this.commands$.next({
-            cmd: 'game_started',
-            table: this.name,
-            data: { players: this.players }
-        });
-
-        // auto bet blinds
+        // auto bet small & big blind
         this.bet(this.players[this.currentPlayer].id, this.smallBlind);
         this.bet(this.players[this.currentPlayer].id, this.bigBlind);
     }
@@ -517,9 +539,24 @@ export class Table {
     private resetPlayerBets() {
         this.players.map(player => player.bet = null);
     }
+
+    private removePoorPlayers() {
+        this.players = this.players.filter(player => {
+            if (player.chips > this.bigBlind) {
+                return true;
+            }
+            Logger.verbose(`Removing player[${ player.name }] from the table because chips[${ player.chips }] are not enough.`);
+            return false;
+        });
+
+        this.sendPlayersUpdate();
+    }
 }
 
 function getNextIndex(currentIndex: number, array: any[]): number {
+    if (currentIndex >= array.length) {
+        return 0;
+    }
     return currentIndex === array.length - 1 ? 0 : currentIndex + 1;
 }
 

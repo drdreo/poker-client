@@ -1,4 +1,4 @@
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
@@ -8,6 +8,7 @@ import { environment } from '../environments/environment';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { ErrorService } from './error.service';
 import { ErrorComponent } from './error/error.component';
 import { HomeComponent } from './home/home.component';
 import { TableModule } from './table/table.module';
@@ -30,7 +31,9 @@ const config: SocketIoConfig = { url: environment.socket_url, options: {} };
         SocketIoModule.forRoot(config),
         TableModule
     ],
-    providers: [],
+    providers: [
+        { provide: HTTP_INTERCEPTORS, useClass: ErrorService, multi: true  }
+    ],
     bootstrap: [AppComponent]
 })
 export class AppModule {

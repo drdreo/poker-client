@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Observable, Subject, of, BehaviorSubject } from 'rxjs';
+import { takeUntil, catchError } from 'rxjs/operators';
+import { ErrorService } from '../error.service';
 import { HomeInfo, PokerService } from '../poker.service';
 
 @Component({
@@ -13,6 +14,8 @@ import { HomeInfo, PokerService } from '../poker.service';
 })
 export class HomeComponent {
     homeInfo$: Observable<HomeInfo>;
+
+    connectionError$: Observable<any>;
 
     loginForm = new FormGroup({
         username: new FormControl('', {
@@ -38,9 +41,11 @@ export class HomeComponent {
 
     private unsubscribe$ = new Subject();
 
-    constructor(private router: Router, private pokerService: PokerService) {
+    constructor(private router: Router, private error: ErrorService, private pokerService: PokerService) {
 
         this.pokerService.leave(); // try to leave if a player comes from a table
+
+        this.connectionError$ = this.error.socketConnectionError$;
 
         this.homeInfo$ = this.pokerService.fetchHomeInfo();
 

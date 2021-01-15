@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, merge, Observable, Subject, interval } from 'rxjs';
 import { switchMap, takeUntil, tap, shareReplay } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 import { PokerService } from '../poker.service';
 import { NotificationService } from '../utils/notification.service';
 import { Card } from './card/card.component';
@@ -18,6 +19,8 @@ export type GameStatus = 'waiting' | 'started' | 'ended';
 })
 export class TableComponent implements OnInit, OnDestroy {
 
+
+    inProduction = environment.production;
 
     /***Comes from server*/
     tableName: string;
@@ -170,10 +173,20 @@ export class TableComponent implements OnInit, OnDestroy {
                 this._gameStatus$.next('ended');
             });
 
+        this.pokerService.tableClosed()
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe(() => {
+
+                const winner = this.players[0];
+                const message = `${ winner.name } won the game. GG WP`;
+                this.notification.showAction(message);
+                this.notification.addFeedMessage(message, MessageType.Won);
+            });
+
         this.pokerService.gameStatus()
             .pipe(takeUntil(this.unsubscribe$))
             .subscribe((status) => {
-                console.log(status);
+                console.log('Game Status: ' + status);
                 if (status == 'started' || status == 'ended') {
                     this._gameStatus$.next(status);
                 } else {
@@ -227,11 +240,11 @@ export class TableComponent implements OnInit, OnDestroy {
             )
             .subscribe(res => {
                 const player = this.getPlayerById(res.playerID);
-                const maxBet = this.maxBet > res.coins ? this.maxBet : res.coins;
+                const maxBet = this.maxBet > res.bet ? this.maxBet : res.bet;
                 this._maxBet$.next(maxBet);
 
-                this.notification.showAction(`${ player.name } bet ${ res.coins }`);
-                this.notification.addFeedMessage(`${ player.name } bet ${ res.coins }`, MessageType.Played);
+                this.notification.showAction(`${ player.name } bet ${ res.bet }`);
+                this.notification.addFeedMessage(`${ player.name } bet ${ res.bet }`, MessageType.Played);
             });
 
         this.pokerService.playerFolded()
@@ -265,11 +278,11 @@ export class TableComponent implements OnInit, OnDestroy {
                 if (disconnected) {
                     console.log('Player was disconnected. Try to reconnect!');
                     // reconnect if loading site directly
-                    this.pokerService.createOrJoinRoom(this.tableName);
                 } else if (!this.clientPlayerID) {
+                    console.log('Joined as spectator!');
                     // if a new user just joined the table without being at the home screen, join as spectator
-                    this.pokerService.createOrJoinRoom(this.tableName);
                 }
+                this.pokerService.createOrJoinRoom(this.tableName);
 
             }, error => {
                 console.log(error);

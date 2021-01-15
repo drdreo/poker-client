@@ -4,12 +4,14 @@
         Tables
         <div class="overview__rooms">
             <div *ngFor="let table of homeInfo.tables"
-                 class="overview__rooms__entry" [class.has-started]="table.started"
+                 class="overview__rooms__entry"
+                 [class.has-started]="table.started"
                  (click)="onTableClick(table.name)">
                 <span class="live" *ngIf="table.started"></span>  {{table.name}}
             </div>
         </div>
     </div>
+
     <h4>Definitely NOT Poker</h4>
 
     <form class="form" [formGroup]="loginForm" (ngSubmit)="joinTable()">
@@ -34,5 +36,6 @@
     </div>
 
 
+    <div *ngIf="connectionError$ | async">Something went wrong connecting to the server</div>
 </div>
 

@@ -65,15 +65,15 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
         switch (cmd) {
             case 'game_started':
                 this.sendTo(table, 'server:game:started');
-                this.sendPlayerUpdate(table, data.players);
                 break;
 
             case 'player_update':
-                this.sendPlayerUpdate(table, data.players);
+                this.sendPlayerUpdateToTable(table);
+                this.sendPlayerUpdateIndividually(table, data.players);
                 break;
 
             case 'player_bet':
-                this.sendTo(table, 'server:bet', { playerID: data.playerID, coins: data.coins });
+                this.sendTo(table, 'server:bet', { playerID: data.playerID, bet: data.bet });
                 break;
 
             case 'players_cards':
@@ -112,27 +112,37 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 this.sendTo(table, 'server:game:new_round', { round: data.round });
                 break;
 
+            case 'table_closed':
+                this.sendTo(table, 'server:table:closed');
+                break;
+
             default:
                 this.logger.warn(`Command[${ cmd }] was not handled!`);
                 break;
         }
     }
 
-    sendPlayerUpdate(table: string, players) {
-
+    sendPlayerUpdateIndividually(table: string, players) {
         // tell every player the cards specifically
         for (let player of players) {
+
+            const conn = this.connections.find(conn => conn.playerID === player.id);
+
             // only tell currently connected players the update
-            if (!player.disconnected) {
+            if (conn && !player.disconnected) {
                 const playersData = this.tableService.getTable(table).getPlayersPreview(); //TODO: for performance do not query each time
 
-                const conn = this.connections.find(conn => conn.playerID === player.id);
                 // find the player in the data again and reveal cards
                 playersData.find(p => p.id === player.id)['cards'] = remapCards(player.cards);
 
                 this.sendTo(conn.id, 'server:players_update', { players: playersData });
             }
         }
+    }
+
+    sendPlayerUpdateToTable(table: string) {
+        const playersData = this.tableService.getTable(table).getPlayersPreview();
+        this.sendTo(table, 'server:players_update', { players: playersData });
     }
 
     @SubscribeMessage('joinRoom')
