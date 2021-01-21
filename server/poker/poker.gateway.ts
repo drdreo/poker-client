@@ -86,7 +86,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 break;
 
             case 'player_bet':
-                this.sendTo(table, 'server:bet', { playerID: data.playerID, bet: data.bet });
+                this.sendTo(table, 'server:bet', { playerID: data.playerID, bet: data.bet, type: data.type });
                 break;
 
             case 'players_cards':
@@ -153,19 +153,18 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
     }
 
-    sendPlayerUpdateToSpectators(table: string, players: Player[]) {
-        const playersData = this.tableService.getTable(table).getPlayersPreview();
-
-        const room = this.server.sockets.adapter.rooms[table];
+    sendPlayerUpdateToSpectators(tableName: string, players: Player[]) {
+        const table = this.tableService.getTable(tableName);
+        const playersData = table.getPlayersPreview();
+        const room = this.server.sockets.adapter.rooms[tableName];
 
         for (let socketID in room.sockets) {
             const playerId = this.getConnectionById(socketID).playerID;
-            const isPlayer = players.some(player => player.id === playerId);
+            const isPlayer = table.isPlayer(playerId);
             if (!isPlayer) {
-                this.sendTo(table, 'server:players_update', { players: playersData });
+                this.sendTo(tableName, 'server:players_update', { players: playersData });
             }
         }
-
     }
 
 

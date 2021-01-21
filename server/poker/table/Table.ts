@@ -3,7 +3,7 @@ import { WsException } from '@nestjs/websockets';
 import * as PokerEvaluator from 'poker-evaluator';
 import { Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { Game, Round, RoundType } from '../Game';
+import { Game, Round, RoundType, BetType } from '../Game';
 import { Player, PlayerPreview } from '../Player';
 
 export enum GameStatus {
@@ -22,6 +22,7 @@ export interface TableCommand {
         dealerPlayerID?: string,
         pot?: number,
         bet?: number,
+        type?: BetType,
         board?: string[],
         round?: Round,
         winners?: Player[],
@@ -185,11 +186,11 @@ export class Table {
         });
     }
 
-    public sendPlayerBet(playerID: string, bet: number) {
+    public sendPlayerBet(playerID: string, bet: number, type: BetType) {
         this.commands$.next({
             cmd: 'player_bet',
             table: this.name,
-            data: { playerID, bet }
+            data: { playerID, bet, type }
         });
     }
 
@@ -292,8 +293,8 @@ export class Table {
         this.sendGameStarted();
 
         // auto bet small & big blind
-        this.bet(this.players[this.currentPlayer].id, this.smallBlind);
-        this.bet(this.players[this.currentPlayer].id, this.bigBlind);
+        this.bet(this.players[this.currentPlayer].id, this.smallBlind, BetType.SmallBlind);
+        this.bet(this.players[this.currentPlayer].id, this.bigBlind, BetType.BigBlind);
     }
 
     private dealCards() {
@@ -334,7 +335,7 @@ export class Table {
         }
     }
 
-    public bet(playerID: string, bet: number) {
+    public bet(playerID: string, bet: number, type: BetType = BetType.Bet) {
         const playerIndex = this.getPlayerIndexByID(playerID);
         if (playerIndex !== this.currentPlayer) {
             throw new WsException('Not your turn!');
@@ -346,9 +347,10 @@ export class Table {
 
         this.game.bet(playerIndex, bet);
 
-        this.nextPlayer();
+
+        this.sendPlayerBet(playerID, bet, type);
         this.sendPlayersUpdate();
-        this.sendPlayerBet(playerID, bet);
+        this.nextPlayer();
     }
 
     public fold(playerID: string) {
@@ -360,7 +362,7 @@ export class Table {
         const player = this.players[playerIndex];
         player.folded = true;
 
-        this.game.check(playerIndex); // mark the bet like checked
+        // this.game.check(playerIndex); // mark the bet like checked
 
         const next = this.progress();
         if (next) {

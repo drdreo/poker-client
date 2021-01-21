@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, merge, Observable, Subject, interval } from 'rxjs';
 import { switchMap, takeUntil, tap, shareReplay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { PokerService } from '../poker.service';
+import { PokerService, BetType } from '../poker.service';
 import { NotificationService } from '../utils/notification.service';
 import { Card } from './card/card.component';
 import { MessageType } from './feed/feed-message/feed-message.component';
@@ -240,8 +240,16 @@ export class TableComponent implements OnInit, OnDestroy {
                 const maxBet = this.maxBet > res.bet ? this.maxBet : res.bet;
                 this._maxBet$.next(maxBet);
 
-                this.notification.showAction(`${ player.name } bet ${ res.bet }`);
-                this.notification.addFeedMessage(`${ player.name } bet ${ res.bet }`, MessageType.Played);
+
+                if (res.type === BetType.Bet) {
+                    this.notification.showAction(`${ player.name } bet ${ res.bet }`);
+                    this.notification.addFeedMessage(`${ player.name } bet ${ res.bet }`, MessageType.Played);
+                } else if (res.type === BetType.SmallBlind) {
+                    this.notification.addFeedMessage(`${ player.name } is small blind with ${ res.bet }`, MessageType.Played);
+                } else if (res.type === BetType.BigBlind) {
+                    this.notification.addFeedMessage(`${ player.name } is big blind with ${ res.bet }`, MessageType.Played);
+                }
+
             });
 
         this.pokerService.playerFolded()

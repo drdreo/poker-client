@@ -23,6 +23,15 @@ interface PlayerFolded {
 interface PlayerBet {
     playerID: string;
     bet: number;
+    type: BetType
+}
+
+export enum BetType {
+    SmallBlind,
+    BigBlind,
+    Bet,
+    Raise,
+    ReRaise,
 }
 
 export interface PokerTable {

@@ -8,6 +8,8 @@ export enum RoundType {
 }
 
 export enum BetType {
+    SmallBlind,
+    BigBlind,
     Bet,
     Raise,
     ReRaise,
@@ -48,7 +50,7 @@ export class Game {
     getMaxBet(): number {
         return this.round.bets.reduce((p, c) => {
             return (p > c ? p : c);
-        });
+        },0);
     }
 
     hasSmallAndBigBlind(): boolean {
