@@ -128,10 +128,7 @@ export class TableComponent implements OnInit, OnDestroy {
 
         this.dealerPlayerID$ = this.pokerService.dealerUpdate()
                                    .pipe(shareReplay(1));
-        // this.currentPlayerID$.subscribe(playerID => {
-        //     console.log(playerID);
-        //     this.isCurrentPlayer = playerID === this.clientPlayerID;
-        // });
+
 
         merge(
             this.pokerService.playersUpdate(),
@@ -278,11 +275,12 @@ export class TableComponent implements OnInit, OnDestroy {
                 if (disconnected) {
                     console.log('Player was disconnected. Try to reconnect!');
                     // reconnect if loading site directly
+                    this.pokerService.createOrJoinRoom(this.tableName);
+
                 } else if (!this.clientPlayerID) {
                     console.log('Joined as spectator!');
                     // if a new user just joined the table without being at the home screen, join as spectator
                 }
-                this.pokerService.createOrJoinRoom(this.tableName);
 
             }, error => {
                 console.log(error);

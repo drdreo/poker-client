@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Observable, Subject, of, BehaviorSubject } from 'rxjs';
-import { takeUntil, catchError } from 'rxjs/operators';
+import { Observable, Subject, merge } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ErrorService } from '../error.service';
 import { HomeInfo, PokerService } from '../poker.service';
 
@@ -47,7 +47,7 @@ export class HomeComponent {
 
         this.connectionError$ = this.error.socketConnectionError$;
 
-        this.homeInfo$ = this.pokerService.fetchHomeInfo();
+        this.homeInfo$ = merge(this.pokerService.loadHomeInfo(), this.pokerService.homeInfo());
 
         this.pokerService.roomJoined()
             .pipe(takeUntil(this.unsubscribe$))

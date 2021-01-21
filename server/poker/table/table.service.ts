@@ -19,6 +19,10 @@ export class TableService {
      * HELPER METHODS
      **********************/
 
+    sendCommand(command: TableCommand | any){
+        this._tableCommands$.next(command);
+    }
+
     createTable(name: string): Table {
         this.logger.debug(`Table[${ name }] created!`);
         const table = new Table(10, 20, 2, 8, name);
@@ -57,6 +61,7 @@ export class TableService {
                     if (table.players.every(player => player.disconnected)) {
                         this.logger.debug(`Table[${ table.name }] removed!`);
                         this.tables = this.tables.filter(t => t.name !== table.name);
+                        this.sendCommand({cmd: "home_info"});
                     }
                 }, 2000);
                 return;

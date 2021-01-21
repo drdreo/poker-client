@@ -114,12 +114,16 @@ export class PokerService implements OnDestroy {
         this.unsubscribe$.complete();
     }
 
-    fetchHomeInfo(): Observable<HomeInfo> {
+    loadTable(tableName: string) {
+        return this.http.get<TableResponse>(POKER_API + '/table/' + tableName).toPromise();
+    }
+
+    loadHomeInfo() {
         return this.http.get<HomeInfo>(POKER_API + '/home');
     }
 
-    loadTable(tableName: string) {
-        return this.http.get<TableResponse>(POKER_API + '/table/' + tableName).toPromise();
+    homeInfo() {
+        return this.socket.fromEvent<HomeInfo>('server:home:info');
     }
 
     createOrJoinRoom(tableName: string, username?: string) {

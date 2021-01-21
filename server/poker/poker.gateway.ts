@@ -3,7 +3,8 @@ import {
     ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse
 } from '@nestjs/websockets';
 import { Client, Server, Socket } from 'socket.io';
-import { TableCommand, remapCards } from './table/Table';
+import { Player } from './Player';
+import { TableCommand, remapCards, GameStatus } from './table/Table';
 import { TableService } from './table/table.service';
 
 interface Connection {
@@ -29,6 +30,14 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.server.to(room).emit(event, data);
     }
 
+    private sendToAll(event, data?: any) {
+        this.server.emit(event, data);
+    }
+
+    private getConnectionById(socketId: string): Connection {
+        return this.connections.find(conn => conn.id === socketId);
+    }
+
     handleConnection(socket: Client) {
         this.logger.debug(`A new connection arrived!`);
 
@@ -40,7 +49,6 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         this.handlePlayerDisconnect(socket['playerID'], socket['table']);
     }
-
 
     private handlePlayerDisconnect(playerID: string, table: string) {
 
@@ -63,12 +71,17 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.dir(data);
 
         switch (cmd) {
+
+            case 'home_info':
+                this.sendHomeInfo();
+                break;
+
             case 'game_started':
                 this.sendTo(table, 'server:game:started');
                 break;
 
             case 'player_update':
-                this.sendPlayerUpdateToTable(table);
+                this.sendPlayerUpdateToSpectators(table, data.players);
                 this.sendPlayerUpdateIndividually(table, data.players);
                 break;
 
@@ -122,7 +135,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
     }
 
-    sendPlayerUpdateIndividually(table: string, players) {
+    sendPlayerUpdateIndividually(table: string, players: Player[]) {
         // tell every player the cards specifically
         for (let player of players) {
 
@@ -140,9 +153,27 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
     }
 
-    sendPlayerUpdateToTable(table: string) {
+    sendPlayerUpdateToSpectators(table: string, players: Player[]) {
         const playersData = this.tableService.getTable(table).getPlayersPreview();
-        this.sendTo(table, 'server:players_update', { players: playersData });
+
+        const room = this.server.sockets.adapter.rooms[table];
+
+        for (let socketID in room.sockets) {
+            const playerId = this.getConnectionById(socketID).playerID;
+            const isPlayer = players.some(player => player.id === playerId);
+            if (!isPlayer) {
+                this.sendTo(table, 'server:players_update', { players: playersData });
+            }
+        }
+
+    }
+
+
+    sendHomeInfo() {
+        this.sendToAll('server:home:info', {
+            tables: this.tableService.getAllTables(),
+            players: this.tableService.getPlayersCount()
+        });
     }
 
     @SubscribeMessage('joinRoom')
@@ -155,19 +186,23 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
             newPlayerID = playerID;
             this.tableService.playerReconnected(playerID);
 
-            // tell the player again all information: players, game status, board, pot
             const table = this.tableService.getTable(roomName);
-            table.sendCurrentPlayer();
-            table.sendGameBoardUpdate();
-            table.sendPotUpdate();
-
             const gameStatus = table.getGameStatus();
+            // tell the player again all information if game started: players, game status, board, pot
+            if (gameStatus === GameStatus.Started) {
+                table.sendCurrentPlayer();
+                table.sendGameBoardUpdate();
+                table.sendPotUpdate();
+            }
+
             this.sendTo(socket.id, 'server:game:status', gameStatus);
 
 
         } else if (playerName) {
             const response = this.tableService.createOrJoinTable(roomName, playerName);
             newPlayerID = response.playerID;
+
+            this.sendHomeInfo();
         } else {
             this.logger.debug(`Spectator joined!`);
         }
@@ -185,8 +220,8 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @SubscribeMessage('startGame')
     startGame(@ConnectedSocket() socket: Socket) {
         this.tableService.startGame(socket['table']);
+        this.sendHomeInfo();
     }
-
 
     @SubscribeMessage('player:leave')
     handleLeave(@ConnectedSocket() socket: Socket) {

@@ -6,6 +6,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { Game, Round, RoundType } from '../Game';
 import { Player, PlayerPreview } from '../Player';
 
+export enum GameStatus {
+    Waiting = 'waiting',
+    Started = 'started',
+    Ended = 'ended'
+}
+
 export interface TableCommand {
     cmd: string;
     table: string;
@@ -19,7 +25,7 @@ export interface TableCommand {
         board?: string[],
         round?: Round,
         winners?: Player[],
-        gameStatus?: string
+        gameStatus?: GameStatus
     };
 }
 
@@ -47,7 +53,6 @@ export class Table {
         public minPlayers: number,
         public maxPlayers: number,
         public name: string) {
-        Logger.debug(`Table[${ name }]created!`);
 
         //require at least two players to start a game.
         if (minPlayers < 2) {
@@ -75,11 +80,11 @@ export class Table {
         return this.players.some(player => player.id === playerID);
     }
 
-    public getGameStatus() {
+    public getGameStatus(): GameStatus {
         if (this.game) {
-            return this.game.ended ? 'ended' : 'started';
+            return this.game.ended ? GameStatus.Ended : GameStatus.Started;
         }
-        return 'waiting';
+        return GameStatus.Waiting;
     }
 
     public getPlayersPreview(showCards = false): PlayerPreview[] {
@@ -99,7 +104,6 @@ export class Table {
     }
 
     public addPlayer(playerName: string, chips: number): string {
-        //If there is no current game and we have enough players, start a new game.
         if (this.game) {
             throw new WsException('Game already started');
         }
