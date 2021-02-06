@@ -2,14 +2,12 @@ import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, merge, Observable, Subject, interval } from 'rxjs';
 import { switchMap, takeUntil, tap, shareReplay } from 'rxjs/operators';
+import { GameStatus, Card, BetType, PlayerOverview } from '../../../../shared/src';
 import { environment } from '../../environments/environment';
-import { PokerService, BetType } from '../poker.service';
+import { PokerService } from '../poker.service';
 import { NotificationService } from '../utils/notification.service';
-import { Card } from './card/card.component';
 import { MessageType } from './feed/feed-message/feed-message.component';
 import { Player } from './player/player.component';
-
-export type GameStatus = 'waiting' | 'started' | 'ended';
 
 @Component({
     selector: 'app-table',
@@ -48,7 +46,7 @@ export class TableComponent implements OnInit, OnDestroy {
     showOverlay: boolean = false;
     isCurrentPlayer: boolean = false; // if its the current clients turn
 
-    private _gameStatus$ = new BehaviorSubject<GameStatus>('waiting');
+    private _gameStatus$ = new BehaviorSubject<GameStatus>(GameStatus.Waiting);
     gameStatus$ = this._gameStatus$.asObservable();
 
     _betAmount$: BehaviorSubject<number> = new BehaviorSubject(0);
@@ -147,7 +145,7 @@ export class TableComponent implements OnInit, OnDestroy {
         this.board$ = this.pokerService.boardUpdated();
         this.pot$ = this.pokerService.potUpdate();
 
-        this.pokerService.playerleft()
+        this.pokerService.playerLeft()
             .pipe(takeUntil(this.unsubscribe$))
             .subscribe((res) => {
                 const player = this.getPlayerById(res.playerID);
@@ -156,18 +154,18 @@ export class TableComponent implements OnInit, OnDestroy {
 
         this.pokerService.roundUpdate()
             .pipe(takeUntil(this.unsubscribe$))
-            .subscribe((round) => {
+            .subscribe(() => {
                 this._maxBet$.next(0);
             });
 
         this.pokerService.gameStarted()
             .pipe(takeUntil(this.unsubscribe$))
-            .subscribe(() => this._gameStatus$.next('started'));
+            .subscribe(() => this._gameStatus$.next(GameStatus.Started));
 
         this.pokerService.gameEnded()
             .pipe(takeUntil(this.unsubscribe$))
             .subscribe(() => {
-                this._gameStatus$.next('ended');
+                this._gameStatus$.next(GameStatus.Ended);
             });
 
         this.pokerService.tableClosed()
@@ -187,7 +185,7 @@ export class TableComponent implements OnInit, OnDestroy {
                 if (status == 'started' || status == 'ended') {
                     this._gameStatus$.next(status);
                 } else {
-                    this._gameStatus$.next('waiting');
+                    this._gameStatus$.next(GameStatus.Waiting);
                 }
             });
 
@@ -237,8 +235,7 @@ export class TableComponent implements OnInit, OnDestroy {
             )
             .subscribe(res => {
                 const player = this.getPlayerById(res.playerID);
-                const maxBet = this.maxBet > res.bet ? this.maxBet : res.bet;
-                this._maxBet$.next(maxBet);
+                this._maxBet$.next(res.maxBet);
 
 
                 if (res.type === BetType.Bet) {

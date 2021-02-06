@@ -1,4 +1,4 @@
-import { RoundType } from '../Game';
+import { RoundType } from '../../../shared/src';
 import { TableMock } from './Table.mock';
 
 describe('Table', () => {
@@ -221,6 +221,25 @@ describe('Table', () => {
 
             expect(table.getRoundType()).toBe(RoundType.Flop);
         });
+
+        it('should add bets after raising your own blind', () => {
+            table.call(player3);
+            table.bet(player1, bigBlind * 3);
+
+            const maxBet = 70; // small blind + 3 * BB
+            expect(table.getGame().getMaxBet()).toBe(maxBet);
+        });
+
+        it('should have the correct amount in the pot after raise', () => {
+            table.call(player3);
+            table.bet(player1, bigBlind * 3);
+            table.call(player2);
+            table.call(player3);
+
+            const pot = 210; //10, 20, 20, 60, 50, 50
+            expect(table.getGame().pot).toBe(pot);
+        });
+
 
         describe('Round(Flop)', () => {
             beforeEach(() => {

@@ -1,24 +1,15 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { Card } from '../card/card.component';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { PlayerOverview } from '../../../../../shared/src';
 
-export interface Player {
-    id: string;
-    name: string;
-    chips: number;
-    bet?: number;
-    color: string;
-    cards?: Card[];
-    allIn: boolean;
-    folded: boolean;
-    disconnected: boolean;
-}
+export type Player = PlayerOverview;
 
 @Component({
     selector: 'app-player',
     templateUrl: './player.component.html',
-    styleUrls: ['./player.component.scss']
+    styleUrls: ['./player.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PlayerComponent implements OnChanges {
+export class PlayerComponent {
 
     @Input() player: Player;
     @Input() playing: boolean = false;
@@ -27,11 +18,4 @@ export class PlayerComponent implements OnChanges {
 
     constructor() { }
 
-    ngOnChanges(changes: SimpleChanges) {
-
-    }
-
-    getArray(number: number) {
-        return Array(number).fill(0).map((x, i) => i);
-    }
 }

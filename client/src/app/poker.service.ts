@@ -3,106 +3,12 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
 import { Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import {
+    PokerEvent, GameStatus, TableResponse, HomeInfo, ServerJoined, GameWinners, GamePotUpdate, PlayerLeft, GameDealerUpdate,
+    GameCurrentPlayer, GameBoardUpdate, PlayerCalled, PlayerChecked, PlayerFolded, GameRoundUpdate, PlayerBet, GamePlayersUpdate, Card,
+    PlayerEvent, PlayerOverview
+} from '../../../shared/src';
 import { environment } from '../environments/environment';
-import { Card } from './table/card/card.component';
-import { Player } from './table/player/player.component';
-import { GameStatus } from './table/table.component';
-
-interface PlayerChecked {
-    playerID: string;
-}
-
-interface PlayerCalled {
-    playerID: string;
-}
-
-interface PlayerFolded {
-    playerID: string;
-}
-
-interface PlayerBet {
-    playerID: string;
-    bet: number;
-    type: BetType
-}
-
-export enum BetType {
-    SmallBlind,
-    BigBlind,
-    Bet,
-    Raise,
-    ReRaise,
-}
-
-export interface PokerTable {
-    name: string;
-    started: boolean;
-}
-
-export interface HomeInfo {
-    tables: PokerTable[];
-    players: number;
-}
-
-export interface TableResponse {
-    name: string;
-    players: PlayerOverview[];
-}
-
-interface ServerJoined {
-    playerID: string;
-}
-
-interface PlayerLeft {
-    playerID: string;
-}
-
-interface GameWinners {
-    winners: Winner[];
-    pot: number;
-}
-
-interface PlayerOverview {
-    id: string;
-    name: string;
-    chips: number;
-    color: string;
-    cards?: Card[];
-    allIn: boolean;
-    folded: boolean;
-    disconnected: boolean;
-}
-
-interface Winner extends PlayerOverview {
-    hand?: {
-        handName: string;
-        handType: number;
-    }
-}
-
-interface GamePlayersUpdate {
-    players: PlayerOverview[];
-}
-
-interface GameCurrentPlayer {
-    currentPlayerID: string;
-}
-
-interface GameDealerUpdate {
-    dealerPlayerID: string;
-}
-
-interface GameBoardUpdate {
-    board: string[];
-}
-
-interface GamePotUpdate {
-    pot: number;
-}
-
-interface GameRoundUpdate {
-    round: any;
-}
 
 
 const POKER_API = environment.poker_api;
@@ -132,91 +38,85 @@ export class PokerService implements OnDestroy {
     }
 
     homeInfo() {
-        return this.socket.fromEvent<HomeInfo>('server:home:info');
+        return this.socket.fromEvent<HomeInfo>(PokerEvent.HomeInfo);
     }
 
     createOrJoinRoom(tableName: string, username?: string) {
-        this.socket.emit('joinRoom', { playerName: username, roomName: tableName, playerID: localStorage.getItem('playerID') });
+        this.socket.emit(PlayerEvent.JoinRoom, { playerName: username, roomName: tableName, playerID: localStorage.getItem('playerID') });
     }
 
-    roomJoined() {
-        return this.socket.fromEvent<ServerJoined>('server:joined');
+    roomJoined(): Observable<string> {
+        return this.socket.fromEvent<ServerJoined>(PokerEvent.Joined)
+                   .pipe(map(data => data.playerID));
     }
 
     startGame() {
-        this.socket.emit('startGame');
+        this.socket.emit(PlayerEvent.StartGame);
     }
 
-    gameStarted() {
-        return this.socket.fromEvent<undefined>('server:game:started');
+    gameStarted(): Observable<unknown> {
+        return this.socket.fromEvent(PokerEvent.GameStarted);
     }
 
-    gameEnded(): Observable<undefined> {
-        return this.socket.fromEvent<undefined>('server:game:ended');
+    gameEnded(): Observable<unknown> {
+        return this.socket.fromEvent(PokerEvent.GameEnded);
     }
 
     gameStatus(): Observable<GameStatus> {
-        return this.socket.fromEvent<GameStatus>('server:game:status');
+        return this.socket.fromEvent<GameStatus>(PokerEvent.GameStatus);
     }
 
     gameWinners(): Observable<GameWinners> {
-        return this.socket.fromEvent<GameWinners>('server:game:winners');
+        return this.socket.fromEvent<GameWinners>(PokerEvent.GameWinners);
     }
 
     leave() {
-        this.socket.emit('player:leave');
+        this.socket.emit(PlayerEvent.Leave);
     }
 
-    playerleft(): Observable<PlayerLeft> {
-        return this.socket.fromEvent<PlayerLeft>('server:player:left');
+    playerLeft(): Observable<PlayerLeft> {
+        return this.socket.fromEvent<PlayerLeft>(PokerEvent.PlayerLeft);
     }
 
-    playersUpdate(): Observable<Player[]> {
-        return this.socket.fromEvent<GamePlayersUpdate>('server:players_update')
+    playersUpdate(): Observable<PlayerOverview[]> {
+        return this.socket.fromEvent<GamePlayersUpdate>(PokerEvent.PlayersUpdate)
                    .pipe(map(data => data.players));
     }
 
     // basically like playersUpdate but includes everyones cards
-    playersCards(): Observable<Player[]> {
-        return this.socket.fromEvent<GamePlayersUpdate>('server:players_cards')
+    playersCards(): Observable<PlayerOverview[]> {
+        return this.socket.fromEvent<GamePlayersUpdate>(PokerEvent.PlayersCards)
                    .pipe(map(data => data.players));
     }
 
     currentPlayer(): Observable<string> {
-        return this.socket.fromEvent<GameCurrentPlayer>('server:game:current_player')
+        return this.socket.fromEvent<GameCurrentPlayer>(PokerEvent.CurrentPlayer)
                    .pipe(map(data => data.currentPlayerID));
     }
 
     dealerUpdate(): Observable<string> {
-        return this.socket.fromEvent<GameDealerUpdate>('server:game:dealer')
+        return this.socket.fromEvent<GameDealerUpdate>(PokerEvent.DealerUpdate)
                    .pipe(map(data => data.dealerPlayerID));
     }
 
     boardUpdated(): Observable<Card[]> {
-        return this.socket.fromEvent<GameBoardUpdate>('server:game:board_updated')
-                   .pipe(map(({ board }) => {
-                       return board.map(card => {
-                           const c = card.split('');
-                           // remap T to 10
-                           c[0] = c[0] === 'T' ? '10' : c[0];
-                           return { value: c[0], figure: c[1] };
-                       });
-                   }));
+        return this.socket.fromEvent<GameBoardUpdate>(PokerEvent.BoardUpdate)
+                   .pipe(map(data => data.board));
     }
 
     potUpdate(): Observable<number> {
-        return this.socket.fromEvent<GamePotUpdate>('server:pot_update')
+        return this.socket.fromEvent<GamePotUpdate>(PokerEvent.PotUpdate)
                    .pipe(map(data => data.pot));
     }
 
 
     roundUpdate(): Observable<any> {
-        return this.socket.fromEvent<GameRoundUpdate>('server:game:new_round')
+        return this.socket.fromEvent<GameRoundUpdate>(PokerEvent.NewRound)
                    .pipe(map(data => data.round));
     }
 
     tableClosed(): Observable<undefined> {
-        return this.socket.fromEvent<undefined>('server:table:closed');
+        return this.socket.fromEvent<undefined>(PokerEvent.TableClosed);
     }
 
     /********************
@@ -224,34 +124,34 @@ export class PokerService implements OnDestroy {
      ********************/
 
     check() {
-        this.socket.emit('player:check');
+        this.socket.emit(PlayerEvent.Check);
     }
 
     playerChecked() {
-        return this.socket.fromEvent<PlayerChecked>('server:checked');
+        return this.socket.fromEvent<PlayerChecked>(PokerEvent.PlayerChecked);
     }
 
     call() {
-        this.socket.emit('player:call');
+        this.socket.emit(PlayerEvent.Call);
     }
 
     playerCalled() {
-        return this.socket.fromEvent<PlayerCalled>('server:called');
+        return this.socket.fromEvent<PlayerCalled>(PokerEvent.PlayerCalled);
     }
 
     bet(amount: number) {
-        this.socket.emit('player:bet', amount);
+        this.socket.emit(PlayerEvent.Bet, amount);
     }
 
     playerBet() {
-        return this.socket.fromEvent<PlayerBet>('server:bet');
+        return this.socket.fromEvent<PlayerBet>(PokerEvent.PlayerBet);
     }
 
     fold() {
-        this.socket.emit('player:fold');
+        this.socket.emit(PlayerEvent.Fold);
     }
 
     playerFolded() {
-        return this.socket.fromEvent<PlayerFolded>('server:folded');
+        return this.socket.fromEvent<PlayerFolded>(PokerEvent.PlayerFolded);
     }
 }

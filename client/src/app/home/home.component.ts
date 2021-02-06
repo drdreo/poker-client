@@ -3,8 +3,9 @@ import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from
 import { Router } from '@angular/router';
 import { Observable, Subject, merge } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { HomeInfo } from '../../../../shared/src';
 import { ErrorService } from '../error.service';
-import { HomeInfo, PokerService } from '../poker.service';
+import { PokerService } from '../poker.service';
 
 @Component({
     selector: 'app-home',
@@ -51,7 +52,7 @@ export class HomeComponent {
 
         this.pokerService.roomJoined()
             .pipe(takeUntil(this.unsubscribe$))
-            .subscribe(({ playerID }) => {
+            .subscribe((playerID) => {
                 localStorage.setItem('playerID', playerID);
                 this.router.navigate(['/table', this.table.value]);
             });

@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 
-export interface Card {
+interface Card {
 	value: string;
 	figure: string;
 }

@@ -1,19 +1,6 @@
 import { Logger } from '@nestjs/common';
+import { RoundType } from '../../shared/src';
 
-export enum RoundType {
-    Deal,
-    Flop,
-    Turn,
-    River
-}
-
-export enum BetType {
-    SmallBlind,
-    BigBlind,
-    Bet,
-    Raise,
-    ReRaise,
-}
 
 export class Game {
     public pot: number = 0;
@@ -45,6 +32,10 @@ export class Game {
 
     getBet(playerIndex: number): number | undefined {
         return this.round.bets[playerIndex];
+    }
+
+    hasBet(playerIndex: number): boolean {
+        return !!this.round.bets[playerIndex];
     }
 
     getMaxBet(): number {

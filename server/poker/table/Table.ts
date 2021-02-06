@@ -3,14 +3,10 @@ import { WsException } from '@nestjs/websockets';
 import * as PokerEvaluator from 'poker-evaluator';
 import { Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { Game, Round, RoundType, BetType } from '../Game';
-import { Player, PlayerPreview } from '../Player';
+import { GameStatus, Card, BetType, RoundType, PlayerOverview, Winner } from '../../../shared/src';
+import { Game, Round } from '../Game';
+import { Player } from '../Player';
 
-export enum GameStatus {
-    Waiting = 'waiting',
-    Started = 'started',
-    Ended = 'ended'
-}
 
 export interface TableCommand {
     cmd: string;
@@ -22,10 +18,11 @@ export interface TableCommand {
         dealerPlayerID?: string,
         pot?: number,
         bet?: number,
+        maxBet?: number,
         type?: BetType,
-        board?: string[],
+        board?: Card[],
         round?: Round,
-        winners?: Player[],
+        winners?: Winner[],
         gameStatus?: GameStatus
     };
 }
@@ -88,7 +85,7 @@ export class Table {
         return GameStatus.Waiting;
     }
 
-    public getPlayersPreview(showCards = false): PlayerPreview[] {
+    public getPlayersPreview(showCards = false): PlayerOverview[] {
         return this.players.map(player => {
             return {
                 id: player.id,
@@ -100,7 +97,7 @@ export class Table {
                 folded: player.folded,
                 color: player.color,
                 disconnected: player.disconnected
-            };
+            } as PlayerOverview;
         });
     }
 
@@ -186,11 +183,11 @@ export class Table {
         });
     }
 
-    public sendPlayerBet(playerID: string, bet: number, type: BetType) {
+    public sendPlayerBet(playerID: string, bet: number, maxBet: number, type: BetType) {
         this.commands$.next({
             cmd: 'player_bet',
             table: this.name,
-            data: { playerID, bet, type }
+            data: { playerID, bet, type, maxBet}
         });
     }
 
@@ -206,7 +203,7 @@ export class Table {
         this.commands$.next({
             cmd: 'board_updated',
             table: this.name,
-            data: { board: this.game.board }
+            data: { board: remapCards(this.game.board) }
         });
     }
 
@@ -342,13 +339,17 @@ export class Table {
         }
 
         const player = this.players[playerIndex];
-        player.bet = bet;
         player.pay(bet);
 
-        this.game.bet(playerIndex, bet);
+        // if the player has already bet, add it to the current
+        const totalBet = player.bet ? player.bet + bet : bet;
+        player.bet = totalBet;
 
+        this.game.bet(playerIndex, totalBet);
 
-        this.sendPlayerBet(playerID, bet, type);
+        const maxBet = this.game.getMaxBet();
+
+        this.sendPlayerBet(playerID, bet, maxBet, type);
         this.sendPlayersUpdate();
         this.nextPlayer();
     }
@@ -361,8 +362,6 @@ export class Table {
 
         const player = this.players[playerIndex];
         player.folded = true;
-
-        // this.game.check(playerIndex); // mark the bet like checked
 
         const next = this.progress();
         if (next) {
@@ -566,7 +565,7 @@ function getNextIndex(currentIndex: number, array: any[]): number {
     return currentIndex === array.length - 1 ? 0 : currentIndex + 1;
 }
 
-function hideCards(cards) {
+function hideCards(cards: any[]): Card[] | undefined {
     if (!cards) {
         return undefined;
     }
@@ -576,7 +575,7 @@ function hideCards(cards) {
     });
 }
 
-export function remapCards(cards) {
+export function remapCards(cards: string[]): Card[] {
     return cards.map(card => {
         const c = card.split('');
         // remap T to 10

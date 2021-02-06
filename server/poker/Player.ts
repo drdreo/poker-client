@@ -1,9 +1,6 @@
 import { EvaluatedHand } from 'poker-evaluator/lib/types';
 import { WsException } from '@nestjs/websockets';
 
-
-export type PlayerPreview = Omit<Player, 'cards' | 'hand' | 'reset' | 'pay'>;
-
 export class Player {
     cards: string[] = [];
     hand: EvaluatedHand | null;
