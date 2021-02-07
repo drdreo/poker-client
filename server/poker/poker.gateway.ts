@@ -67,8 +67,8 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @SubscribeMessage(PlayerEvent.JoinRoom)
-    joinRoom(@ConnectedSocket() socket: Socket, @MessageBody() { playerID, roomName, playerName }): WsResponse<unknown> {
-        this.logger.debug(`Player[${ playerID }] joining!`);
+    joinRoom(@ConnectedSocket() socket: Socket, @MessageBody() { playerID, roomName, playerName }): WsResponse<ServerJoined> {
+        this.logger.debug(`Player[${ playerName }] joining!`);
 
         const sanitized_room = roomName.toLowerCase();
         socket.join(sanitized_room);
@@ -76,7 +76,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         // existing Player needs to reconnect
         if (playerID && this.tableService.playerExists(playerID)) {
-            this.logger.debug(`Player[${ playerID }] needs to reconnect!`);
+            this.logger.debug(`Player[${ playerName }] needs to reconnect!`);
             newPlayerID = playerID;
             this.tableService.playerReconnected(playerID);
 
@@ -107,8 +107,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 
         this.tableService.getTable(sanitized_room).sendPlayersUpdate();
-        const response: ServerJoined = { playerID: newPlayerID, table: sanitized_room };
-        return { event: PokerEvent.Joined, data: response };
+        return { event: PokerEvent.Joined, data: { playerID: newPlayerID, table: sanitized_room } };
     }
 
     @SubscribeMessage(PlayerEvent.StartGame)
