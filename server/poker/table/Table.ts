@@ -25,6 +25,7 @@ export class Table {
 
     commands$: Subject<TableCommand>;
 
+
     private logger;
     constructor(
         private CONFIG: TableConfig,
