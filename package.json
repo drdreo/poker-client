@@ -12,6 +12,7 @@
     "start": "cross-env NODE_ENV=dev nest start",
     "start:dev": "cross-env NODE_ENV=dev nest start --watch",
     "start:debug": "cross-env NODE_ENV=dev nest start --debug --watch",
+    "start:test": "cross-env NODE_ENV=test node dist/server/main",
     "start:prod": "cross-env NODE_ENV=prod node dist/server/main",
     "lint": "eslint \"{server,apps,libs,test}/**/*.ts\" --fix",
     "test": "cross-env NODE_ENV=test jest",
