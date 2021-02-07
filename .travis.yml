@@ -22,6 +22,7 @@ jobs:
       install: cd client && npm ci
       script: npm run test -- --watch=false --no-progress --browsers=ChromeHeadlessCI
     - script:
+      - cd ..
       - npm start &
       - cd client
       - npm run build:prod
