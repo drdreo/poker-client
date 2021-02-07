@@ -23,8 +23,9 @@ jobs:
     - script:  npm run e2e
       install: cd client && npm ci
       before_script:
-        - cd .. && npm start &
-        - cd client && npm start &
+        - npm start &
+        - cd ..
+        - npm start &
       name: E2E tests
     - script: npm run test
       name: Backend tests
