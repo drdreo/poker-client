@@ -1,16 +1,20 @@
-
 language: node_js
+
 node_js:
-  - "10"
+  - "lts/*"
 
 addons:
   chrome: stable
 
 cache:
+  # cache both npm modules and Cypress binary
   directories:
+    - ~/.npm
     - ./node_modules
     - ~/.cache
-
+  override:
+    - npm ci
+    - npm run cy:verify
 
 jobs:
   include:
@@ -20,10 +24,12 @@ jobs:
       name: Frontend Tests
       install: cd client && npm ci
       script: npm run test -- --watch=false --no-progress --browsers=ChromeHeadlessCI
-    - script:  npm run e2e
+    - script:
+      - npm run build:prod
+      - npm run cy:verify
+      - npm run ci:cy-run
       install: cd client && npm ci
       before_script:
-        - npm start &
         - cd ..
         - npm start &
       name: E2E tests
