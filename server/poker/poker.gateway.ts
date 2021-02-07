@@ -164,7 +164,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     private handleTableCommands({ cmd, data, table }: TableCommand) {
         this.logger.verbose(`Table[${ table }] - ${ cmd }:`);
-        console.dir(data);
+        this.logger.debug(data);
 
         switch (cmd) {
 
@@ -280,7 +280,6 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
     }
 
-
     sendHomeInfo() {
         const response: HomeInfo = {
             tables: this.tableService.getAllTables(),
@@ -288,5 +287,4 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
         };
         this.sendToAll(PokerEvent.HomeInfo, response);
     }
-
 }
