@@ -43,13 +43,16 @@ npm run build
 
 ## Test
 
+Inside root: 
 ```bash
 # unit tests
 npm run test
+```
 
+Inside client: 
+```bash
+# unit tests 
+npm run test
 # e2e tests
-npm run test:e2e
-
-# test coverage
-npm run test:cov
+npm run cypress
 ```
