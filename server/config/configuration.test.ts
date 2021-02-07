@@ -1,6 +1,7 @@
 import { Config } from './configuration';
 
 export const testConfig = () => ({
+    ENV: "test",
     PORT: parseInt(process.env.PORT, 10) || 3000,
     WHITELIST: ['http://localhost:4200'],
     TABLE: {

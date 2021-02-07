@@ -1,6 +1,7 @@
 import { Config } from './configuration';
 
 export const prodConfig = () => ({
+    ENV: "prod",
     PORT: parseInt(process.env.PORT, 10) || 3000,
     WHITELIST: ['https://pokern.netlify.app'],
     TABLE: {

@@ -3,8 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
-
-const logLevels: LogLevel[] = process.env.production ? ['error', 'warn'] : ['log', 'error', 'warn', 'debug', 'verbose'];
+const logLevels: LogLevel[] = process.env.NODE_ENV === 'prod' ? ['error', 'warn'] : ['log', 'error', 'warn', 'debug', 'verbose'];
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
@@ -13,6 +12,7 @@ async function bootstrap() {
     const configService = app.get(ConfigService);
     const logger = app.get(Logger);
     logger.setContext('main.ts');
+    logger.log(`Running app in {${ configService.get<string>('ENV') }} environment!`);
 
     const whitelist = configService.get('WHITELIST');
     logger.log(`Enabling CORS for ${ whitelist.join(' & ') }`);

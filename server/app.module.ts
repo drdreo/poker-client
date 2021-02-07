@@ -5,10 +5,6 @@ import { prodConfig } from './config/configuration.prod';
 import { testConfig } from './config/configuration.test';
 import { PokerModule } from './poker/poker.module';
 
-
-console.log('ENVIRONMENT: ' + process.env.NODE_ENV || 'dev');
-console.log('Production: ' + process.env.production);
-
 @Module({
     imports: [
         ConfigModule.forRoot({
