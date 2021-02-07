@@ -66,6 +66,98 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
     }
 
+    @SubscribeMessage(PlayerEvent.JoinRoom)
+    joinRoom(@ConnectedSocket() socket: Socket, @MessageBody() { playerID, roomName, playerName }): WsResponse<unknown> {
+        this.logger.debug(`Player[${ playerID }] joining!`);
+
+        const sanitized_room = roomName.toLowerCase();
+        socket.join(sanitized_room);
+        let newPlayerID;
+
+        // existing Player needs to reconnect
+        if (playerID && this.tableService.playerExists(playerID)) {
+            this.logger.debug(`Player[${ playerID }] needs to reconnect!`);
+            newPlayerID = playerID;
+            this.tableService.playerReconnected(playerID);
+
+            const table = this.tableService.getTable(sanitized_room);
+            const gameStatus = table.getGameStatus();
+            // tell the player again all information if game started: players, game status, board, pot
+            if (gameStatus === GameStatus.Started) {
+                table.sendCurrentPlayer();
+                table.sendGameBoardUpdate();
+                table.sendPotUpdate();
+            }
+
+            this.sendTo(socket.id, PokerEvent.GameStatus, gameStatus);
+
+        } else if (playerName) {   // new Player wants to create or join
+            const response = this.tableService.createOrJoinTable(sanitized_room, playerName);
+            newPlayerID = response.playerID;
+
+            this.sendHomeInfo();
+        } else { // Spectator joining
+            this.logger.debug(`Spectator joined!`);
+        }
+
+        // connect the socket with its playerID
+        socket['playerID'] = newPlayerID;
+        socket['table'] = sanitized_room;
+        this.connections.find(conn => conn.id === socket.id).playerID = newPlayerID;
+
+
+        this.tableService.getTable(sanitized_room).sendPlayersUpdate();
+        const response: ServerJoined = { playerID: newPlayerID, table: sanitized_room };
+        return { event: PokerEvent.Joined, data: response };
+    }
+
+    @SubscribeMessage(PlayerEvent.StartGame)
+    startGame(@ConnectedSocket() socket: Socket) {
+        this.tableService.startGame(socket['table']);
+        this.sendHomeInfo();
+    }
+
+    @SubscribeMessage(PlayerEvent.Leave)
+    handleLeave(@ConnectedSocket() socket: Socket) {
+        this.handlePlayerDisconnect(socket['playerID'], socket['table']);
+    }
+
+    /**
+     *
+     * Game Actions
+     */
+    @SubscribeMessage(PlayerEvent.Check)
+    handleCheck(@ConnectedSocket() socket: Socket) {
+        const playerID = socket['playerID'];
+        const table = socket['table'];
+        this.tableService.check(table, playerID);
+        this.sendTo(table, PokerEvent.PlayerChecked, { playerID } as PlayerChecked);
+    }
+
+    @SubscribeMessage(PlayerEvent.Call)
+    handleCall(@ConnectedSocket() socket: Socket) {
+        const playerID = socket['playerID'];
+        const table = socket['table'];
+        this.tableService.call(table, playerID);
+        this.sendTo(table, PokerEvent.PlayerCalled, { playerID } as PlayerCalled);
+    }
+
+    @SubscribeMessage(PlayerEvent.Bet)
+    handleBet(@ConnectedSocket() socket: Socket, @MessageBody() coins: number) {
+        const playerID = socket['playerID'];
+        const table = socket['table'];
+        this.tableService.bet(table, playerID, coins);
+    }
+
+    @SubscribeMessage(PlayerEvent.Fold)
+    handleFold(@ConnectedSocket() socket: Socket) {
+        const playerID = socket['playerID'];
+        const table = socket['table'];
+        this.tableService.fold(table, playerID);
+        this.sendTo(table, PokerEvent.PlayerFolded, { playerID } as PlayerFolded);
+    }
+
+
     /**
      *    Table Actions
      */
@@ -195,95 +287,6 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
             players: this.tableService.getPlayersCount()
         };
         this.sendToAll(PokerEvent.HomeInfo, response);
-    }
-
-    @SubscribeMessage(PlayerEvent.JoinRoom)
-    joinRoom(@ConnectedSocket() socket: Socket, @MessageBody() { playerID, roomName, playerName }): WsResponse<unknown> {
-        this.logger.debug(`Player[${ playerID }] joining!`);
-
-        socket.join(roomName);
-        let newPlayerID;
-
-        if (playerID && this.tableService.playerExists(playerID)) {
-            this.logger.debug(`Player[${ playerID }] needs to reconnect!`);
-            newPlayerID = playerID;
-            this.tableService.playerReconnected(playerID);
-
-            const table = this.tableService.getTable(roomName);
-            const gameStatus = table.getGameStatus();
-            // tell the player again all information if game started: players, game status, board, pot
-            if (gameStatus === GameStatus.Started) {
-                table.sendCurrentPlayer();
-                table.sendGameBoardUpdate();
-                table.sendPotUpdate();
-            }
-
-            this.sendTo(socket.id, PokerEvent.GameStatus, gameStatus);
-
-
-        } else if (playerName) {
-            const response = this.tableService.createOrJoinTable(roomName, playerName);
-            newPlayerID = response.playerID;
-
-            this.sendHomeInfo();
-        } else {
-            this.logger.debug(`Spectator joined!`);
-        }
-
-        // connect the socket with its playerID
-        socket['playerID'] = newPlayerID;
-        socket['table'] = roomName;
-        this.connections.find(conn => conn.id === socket.id).playerID = newPlayerID;
-
-
-        this.tableService.getTable(roomName).sendPlayersUpdate();
-        return { event: PokerEvent.Joined, data: { playerID: newPlayerID } as ServerJoined };
-    }
-
-    @SubscribeMessage(PlayerEvent.StartGame)
-    startGame(@ConnectedSocket() socket: Socket) {
-        this.tableService.startGame(socket['table']);
-        this.sendHomeInfo();
-    }
-
-    @SubscribeMessage(PlayerEvent.Leave)
-    handleLeave(@ConnectedSocket() socket: Socket) {
-        this.handlePlayerDisconnect(socket['playerID'], socket['table']);
-    }
-
-    /**
-     *
-     * Game Actions
-     */
-    @SubscribeMessage(PlayerEvent.Check)
-    handleCheck(@ConnectedSocket() socket: Socket) {
-        const playerID = socket['playerID'];
-        const table = socket['table'];
-        this.tableService.check(table, playerID);
-        this.sendTo(table, PokerEvent.PlayerChecked, { playerID } as PlayerChecked);
-    }
-
-    @SubscribeMessage(PlayerEvent.Call)
-    handleCall(@ConnectedSocket() socket: Socket) {
-        const playerID = socket['playerID'];
-        const table = socket['table'];
-        this.tableService.call(table, playerID);
-        this.sendTo(table, PokerEvent.PlayerCalled, { playerID } as PlayerCalled);
-    }
-
-    @SubscribeMessage(PlayerEvent.Bet)
-    handleBet(@ConnectedSocket() socket: Socket, @MessageBody() coins: number) {
-        const playerID = socket['playerID'];
-        const table = socket['table'];
-        this.tableService.bet(table, playerID, coins);
-    }
-
-    @SubscribeMessage(PlayerEvent.Fold)
-    handleFold(@ConnectedSocket() socket: Socket) {
-        const playerID = socket['playerID'];
-        const table = socket['table'];
-        this.tableService.fold(table, playerID);
-        this.sendTo(table, PokerEvent.PlayerFolded, { playerID } as PlayerFolded);
     }
 
 }

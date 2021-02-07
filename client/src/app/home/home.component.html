@@ -1,6 +1,6 @@
 <div class="page-container">
     <div class="overview" *ngIf="homeInfo$ | async as homeInfo">
-        <div class="overview__total-players">Online: <span>{{homeInfo.players}}</span></div>
+        <div class="overview__total-players" data-cy="overview_online">Online: <span>{{homeInfo.players}}</span></div>
         Tables
         <div class="overview__rooms">
             <div *ngFor="let table of homeInfo.tables"
@@ -15,9 +15,9 @@
     <h4>Definitely NOT Poker</h4>
 
     <form class="form" [formGroup]="loginForm" (ngSubmit)="joinTable()">
-        <input class="input username" placeholder="Username" formControlName="username" required/>
-        <input class="input room" placeholder="Table" formControlName="table" required/>
-        <button class="button join" type="submit" [disabled]="loginForm.invalid">Join</button>
+        <input class="input username" placeholder="Username" formControlName="username" required data-cy="username"/>
+        <input class="input room" placeholder="Table" formControlName="table" required data-cy="room"/>
+        <button class="button join" type="submit" [disabled]="loginForm.invalid" data-cy="join_button">Join</button>
     </form>
 
     <div class="form__error">

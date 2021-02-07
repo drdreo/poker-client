@@ -14,7 +14,6 @@ export class CardComponent implements Card, OnInit {
 
 	@Input() value: string;
 	@Input() figure: string;
-	@Input() type: string;
 
 	constructor() { }
 

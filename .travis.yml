@@ -1,0 +1,26 @@
+
+language: node_js
+node_js:
+  - "10"
+
+addons:
+  chrome: stable
+
+cache:
+  directories:
+    - ./node_modules
+    - ~/.cache
+
+
+jobs:
+  include:
+    - stage: Test
+      env:
+        - NODE_ENV=testing
+      name: Frontend Tests
+      install: cd client && npm ci
+      script: npm run test -- --watch=false --no-progress
+    - script: npm run e2e
+      name: E2E tests
+    - script: npm run test
+      name: Backend tests

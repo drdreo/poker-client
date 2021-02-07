@@ -52,9 +52,9 @@ export class HomeComponent {
 
         this.pokerService.roomJoined()
             .pipe(takeUntil(this.unsubscribe$))
-            .subscribe((playerID) => {
+            .subscribe(({ playerID, table } ) => {
                 localStorage.setItem('playerID', playerID);
-                this.router.navigate(['/table', this.table.value]);
+                this.router.navigate(['/table', table]);
             });
     }
 

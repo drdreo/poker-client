@@ -50,6 +50,7 @@ export interface TableResponse {
 
 export interface ServerJoined {
     playerID: string;
+    table: string;
 }
 
 export interface PlayerLeft {

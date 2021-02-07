@@ -29,15 +29,15 @@ export class PokerService implements OnDestroy {
         this.unsubscribe$.complete();
     }
 
-    loadTable(tableName: string) {
+    loadTable(tableName: string): Promise<TableResponse> {
         return this.http.get<TableResponse>(POKER_API + '/table/' + tableName).toPromise();
     }
 
-    loadHomeInfo() {
+    loadHomeInfo(): Observable<HomeInfo> {
         return this.http.get<HomeInfo>(POKER_API + '/home');
     }
 
-    homeInfo() {
+    homeInfo(): Observable<HomeInfo> {
         return this.socket.fromEvent<HomeInfo>(PokerEvent.HomeInfo);
     }
 
@@ -45,9 +45,8 @@ export class PokerService implements OnDestroy {
         this.socket.emit(PlayerEvent.JoinRoom, { playerName: username, roomName: tableName, playerID: localStorage.getItem('playerID') });
     }
 
-    roomJoined(): Observable<string> {
-        return this.socket.fromEvent<ServerJoined>(PokerEvent.Joined)
-                   .pipe(map(data => data.playerID));
+    roomJoined(): Observable<ServerJoined> {
+        return this.socket.fromEvent<ServerJoined>(PokerEvent.Joined);
     }
 
     startGame() {
