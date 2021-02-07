@@ -11,10 +11,10 @@ async function bootstrap() {
     logger.log(`Enabling CORS for ${whitelist.join(" & ")}`);
     app.enableCors({
         origin: function (origin, callback) {
-            if (whitelist.indexOf(origin) !== -1) {
+            if (whitelist.indexOf(origin) !== -1 || !origin) {
                 callback(null, true);
             } else {
-                callback(new Error('Not allowed by CORS'));
+                callback(new Error(`Origin[${origin}] Not allowed by CORS`));
             }
         },
         allowedHeaders: 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe',
