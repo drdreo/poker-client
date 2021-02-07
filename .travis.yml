@@ -12,9 +12,6 @@ cache:
     - ~/.npm
     - ./node_modules
     - ~/.cache
-  override:
-    - npm ci
-    - npm run cy:verify
 
 jobs:
   include:
@@ -31,7 +28,7 @@ jobs:
       install: cd client && npm ci
       before_script:
         - cd ..
-        - npm start &
+        - npm start & wait-on http://localhost:3000 &
       name: E2E tests
     - script: npm run test
       name: Backend tests
