@@ -22,14 +22,12 @@ jobs:
       install: cd client && npm ci
       script: npm run test -- --watch=false --no-progress --browsers=ChromeHeadlessCI
     - script:
+      - npm start &
       - cd client
       - npm run build:prod
       - npm run cy:verify
       - npm run ci:cy-run
       install: cd client && npm ci
-      before_script:
-        - cd ..
-        - npm start & wait-on http://localhost:3000 &
       name: E2E tests
     - script: npm run test
       name: Backend tests
