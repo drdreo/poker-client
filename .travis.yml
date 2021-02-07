@@ -25,7 +25,7 @@ jobs:
       - cd ..
       - npm ci
       - npm run build
-      - npm start:prod &
+      - npm run start:prod &
       - cd client
       - npm run cy:verify
       - npm run ci:cy-run
