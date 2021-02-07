@@ -4,12 +4,10 @@
 
 <a href="https://angular.io/" target="blank"><img src="https://angular.io/assets/images/logos/angular/angular.svg" alt="angular-logo" width="120px" height="120px"/></a>
  
- Tests: <img width="100" src="https://api.travis-ci.com/drdreo/poker.svg?branch=master" width="320" alt="Nest Logo" />
- 
- Deploy: [![Netlify Status](https://api.netlify.com/api/v1/badges/ba84f3f4-6438-4553-83e3-f9e8198dd9a1/deploy-status)](https://app.netlify.com/sites/pokern/deploys) 
+<img width="100" src="https://api.travis-ci.com/drdreo/poker.svg?branch=master" width="320" alt="CI Tests" />  [![Netlify Status](https://api.netlify.com/api/v1/badges/ba84f3f4-6438-4553-83e3-f9e8198dd9a1/deploy-status)](https://app.netlify.com/sites/pokern/deploys) 
 
 
-Server made with Nest.js
+Live app at netlify: https://pokern.netlify.app
 
 # Poker
 
@@ -45,13 +43,16 @@ npm run build
 
 ## Test
 
+Inside root: 
 ```bash
 # unit tests
 npm run test
+```
 
+Inside client: 
+```bash
+# unit tests 
+npm run test
 # e2e tests
-npm run test:e2e
-
-# test coverage
-npm run test:cov
+npm run cypress
 ```
