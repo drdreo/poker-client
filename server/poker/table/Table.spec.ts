@@ -1,5 +1,9 @@
 import { RoundType } from '../../../shared/src';
+import { testConfig } from '../../config/configuration.test';
 import { TableMock } from './Table.mock';
+import { TableCommandName } from './TableCommand';
+
+const CONFIG = testConfig();
 
 describe('Table', () => {
     let table: TableMock;
@@ -7,7 +11,7 @@ describe('Table', () => {
     let bigBlind = 20;
 
     beforeEach(() => {
-        table = new TableMock(smallBlind, bigBlind, 2, 5, 'TestTable');
+        table = new TableMock(CONFIG.TABLE, smallBlind, bigBlind, 2, 5, 'TestTable');
     });
 
     it('should have no Game', () => {
@@ -382,7 +386,7 @@ describe('Table', () => {
 
                     it('should have ended when everyone checks', done => {
                         table.commands$.subscribe((command) => {
-                            if (command.cmd === 'game_ended') {
+                            if (command.name === TableCommandName.GameEnded) {
                                 done();
                             }
                         });
@@ -394,7 +398,7 @@ describe('Table', () => {
 
                     it('should have added the pot to the winner after a delay', done => {
                         table.commands$.subscribe((command) => {
-                            if (command.cmd === 'game_winners') {
+                            if (command.name === TableCommandName.GameWinners) {
                                 const { winners } = command.data;
                                 expect(winners[0].chips).toEqual(1160);
                                 done();

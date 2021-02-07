@@ -1,4 +1,5 @@
 import { Logger, LogLevel } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
@@ -9,10 +10,11 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
         logger: logLevels
     });
+    const configService = app.get(ConfigService);
     const logger = app.get(Logger);
     logger.setContext('main.ts');
 
-    const whitelist = ['http://localhost:4200', 'https://pokern.netlify.app'];
+    const whitelist = configService.get('WHITELIST');
     logger.log(`Enabling CORS for ${ whitelist.join(' & ') }`);
     app.enableCors({
         origin: function (origin, callback) {
@@ -27,7 +29,7 @@ async function bootstrap() {
         credentials: true
     });
 
-    const port = process.env.PORT || 3000;
+    const port = configService.get('PORT');
     logger.log(`Listening to App on port ${ port }`);
     await app.listen(port);
 }

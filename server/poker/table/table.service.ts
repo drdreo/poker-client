@@ -1,7 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { WsException } from '@nestjs/websockets';
 import { Subject } from 'rxjs';
-import { Table, TableCommand } from './Table';
+import { TableConfig } from '../../config/table.config';
+import { Table } from './Table';
+import { TableCommand } from './TableCommand';
+
+const AUTO_DESTROY_TABLE_DELAY = 2000;
 
 @Injectable()
 export class TableService {
@@ -13,17 +18,20 @@ export class TableService {
 
     private logger = new Logger(TableService.name);
 
+    constructor(private configService: ConfigService) {
+
+    }
+
     /**********************
      * HELPER METHODS
      **********************/
 
-    sendCommand(command: TableCommand | any){
+    sendCommand(command: TableCommand | any) {
         this._tableCommands$.next(command);
     }
 
     createTable(name: string): Table {
-        this.logger.debug(`Table[${ name }] created!`);
-        const table = new Table(10, 20, 2, 8, name);
+        const table = new Table(this.configService.get<TableConfig>('table'), 10, 20, 2, 8, name);
         table.commands$ = this._tableCommands$;
         this.tables.push(table);
         return table;
@@ -59,9 +67,9 @@ export class TableService {
                     if (table.players.every(player => player.disconnected)) {
                         this.logger.debug(`Table[${ table.name }] removed!`);
                         this.tables = this.tables.filter(t => t.name !== table.name);
-                        this.sendCommand({cmd: "home_info"});
+                        this.sendCommand({ cmd: 'home_info' });
                     }
-                }, 2000);
+                }, AUTO_DESTROY_TABLE_DELAY);
                 return;
             }
         }

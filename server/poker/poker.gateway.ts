@@ -8,8 +8,9 @@ import {
     GamePlayersUpdate, PlayerBet, HomeInfo, PlayerEvent, ServerJoined, PlayerChecked, PlayerCalled, PlayerFolded
 } from '../../shared/src';
 import { Player } from './Player';
-import { TableCommand, remapCards } from './table/Table';
+import { remapCards } from './table/Table';
 import { TableService } from './table/table.service';
+import { TableCommand, TableCommandName } from './table/TableCommand';
 
 interface Connection {
     id: string;
@@ -173,88 +174,88 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
      *    Table Actions
      */
 
-    private handleTableCommands({ cmd, data, table }: TableCommand) {
-        this.logger.verbose(`Table[${ table }] - ${ cmd }:`);
+    private handleTableCommands({ name, data, table }: TableCommand) {
+        this.logger.verbose(`Table[${ table }] - ${ name }:`);
         this.logger.debug(data);
 
-        switch (cmd) {
+        switch (name) {
 
-            case 'home_info':
+            case TableCommandName.HomeInfo:
                 this.sendHomeInfo();
                 break;
 
-            case 'game_started':
+            case TableCommandName.GameStarted:
                 this.sendTo(table, PokerEvent.GameStarted);
                 break;
 
-            case 'player_update':
+            case TableCommandName.PlayerUpdate:
                 this.sendPlayerUpdateToSpectators(table);
                 this.sendPlayerUpdateIndividually(table, data.players);
                 break;
 
-            case 'player_bet': {
+            case TableCommandName.PlayerBet: {
                 let response: PlayerBet = { playerID: data.playerID, bet: data.bet, maxBet: data.maxBet, type: data.type };
                 this.sendTo(table, PokerEvent.PlayerBet, response);
             }
                 break;
 
 
-            case 'players_cards': {
+            case TableCommandName.PlayersCards: {
                 let response: GamePlayersUpdate = { players: data.players };
                 this.sendTo(table, PokerEvent.PlayersCards, response);
             }
                 break;
 
-            case 'pot_update': {
+            case TableCommandName.PotUpdate: {
                 let response: GamePotUpdate = { pot: data.pot };
                 this.sendTo(table, PokerEvent.PotUpdate, response);
             }
                 break;
 
-            case 'game_ended':
+            case TableCommandName.GameEnded:
                 this.sendTo(table, PokerEvent.GameEnded);
                 break;
 
-            case 'game_status':
+            case TableCommandName.GameStatus:
                 this.sendTo(table, PokerEvent.GameStatus, data.gameStatus as GameStatus);
                 break;
 
-            case 'game_winners': {
+            case TableCommandName.GameWinners: {
                 let response: GameWinners = { winners: data.winners, pot: data.pot };
                 this.sendTo(table, PokerEvent.GameWinners, response);
             }
                 break;
 
-            case 'current_player': {
+            case TableCommandName.CurrentPlayer: {
                 let response: GameCurrentPlayer = { currentPlayerID: data.currentPlayerID };
                 this.sendTo(table, PokerEvent.CurrentPlayer, response);
             }
                 break;
 
-            case 'dealer': {
+            case TableCommandName.Dealer: {
                 let response: GameDealerUpdate = { dealerPlayerID: data.dealerPlayerID };
                 this.sendTo(table, PokerEvent.DealerUpdate, response);
             }
                 break;
 
-            case 'board_updated': {
+            case TableCommandName.BoardUpdated: {
                 let response: GameBoardUpdate = { board: data.board };
                 this.sendTo(table, PokerEvent.BoardUpdate, response);
             }
                 break;
 
-            case 'new_round': {
+            case TableCommandName.NewRound: {
                 let response: GameRoundUpdate = { round: data.round };
                 this.sendTo(table, PokerEvent.NewRound, response);
             }
                 break;
 
-            case 'table_closed':
+            case TableCommandName.TableClosed :
                 this.sendTo(table, PokerEvent.TableClosed);
                 break;
 
             default:
-                this.logger.warn(`Command[${ cmd }] was not handled!`);
+                this.logger.warn(`Command[${ name }] was not handled!`);
                 break;
         }
     }

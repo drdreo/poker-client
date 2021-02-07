@@ -3,29 +3,12 @@ import { WsException } from '@nestjs/websockets';
 import * as PokerEvaluator from 'poker-evaluator';
 import { Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { GameStatus, Card, BetType, RoundType, PlayerOverview, Winner } from '../../../shared/src';
-import { Game, Round } from '../Game';
+import { GameStatus, Card, BetType, RoundType, PlayerOverview } from '../../../shared/src';
+import { TableConfig } from '../../config/table.config';
+import { Game } from '../Game';
 import { Player } from '../Player';
+import { TableCommand, TableCommandName } from './TableCommand';
 
-
-export interface TableCommand {
-    cmd: string;
-    table: string;
-    data?: {
-        players?,
-        playerID?: string,
-        currentPlayerID?: string,
-        dealerPlayerID?: string,
-        pot?: number,
-        bet?: number,
-        maxBet?: number,
-        type?: BetType,
-        board?: Card[],
-        round?: Round,
-        winners?: Winner[],
-        gameStatus?: GameStatus
-    };
-}
 
 export class Table {
     private playerColors = [
@@ -42,18 +25,20 @@ export class Table {
 
     commands$: Subject<TableCommand>;
 
-    protected endGameDelay = 1500;
-    protected nextGameDelay = 5000;
-
     private logger;
-
     constructor(
+        private CONFIG: TableConfig,
         public smallBlind: number,
         public bigBlind: number,
         public minPlayers: number,
         public maxPlayers: number,
         public name: string) {
         this.logger = new Logger(`Table[${ name }]`);
+        this.logger.debug(`Created!`);
+
+        if (this.CONFIG.NEXT_GAME_DELAY < this.CONFIG.END_GAME_DELAY) {
+            throw Error('Next game must not be triggered before the end game!');
+        }
 
         //require at least two players to start a game.
         if (minPlayers < 2) {
@@ -135,7 +120,7 @@ export class Table {
 
     private showPlayersCards() {
         this.commands$.next({
-            cmd: 'players_cards',
+            name: TableCommandName.PlayersCards,
             table: this.name,
             data: { players: this.getPlayersPreview(true) }
         });
@@ -180,7 +165,7 @@ export class Table {
 
     public sendPlayersUpdate() {
         this.commands$.next({
-            cmd: 'player_update',
+            name: TableCommandName.PlayerUpdate,
             table: this.name,
             data: { players: this.players }
         });
@@ -188,7 +173,7 @@ export class Table {
 
     public sendPlayerBet(playerID: string, bet: number, maxBet: number, type: BetType) {
         this.commands$.next({
-            cmd: 'player_bet',
+            name: TableCommandName.PlayerBet,
             table: this.name,
             data: { playerID, bet, type, maxBet }
         });
@@ -196,7 +181,7 @@ export class Table {
 
     public sendPotUpdate() {
         this.commands$.next({
-            cmd: 'pot_update',
+            name: TableCommandName.PotUpdate,
             table: this.name,
             data: { pot: this.game.pot }
         });
@@ -204,7 +189,7 @@ export class Table {
 
     public sendGameBoardUpdate() {
         this.commands$.next({
-            cmd: 'board_updated',
+            name: TableCommandName.BoardUpdated,
             table: this.name,
             data: { board: remapCards(this.game.board) }
         });
@@ -212,7 +197,7 @@ export class Table {
 
     public sendGameRoundUpdate() {
         this.commands$.next({
-            cmd: 'new_round',
+            name: TableCommandName.NewRound,
             table: this.name,
             data: { round: this.game.round }
         });
@@ -220,7 +205,7 @@ export class Table {
 
     public sendGameStarted() {
         this.commands$.next({
-            cmd: 'game_started',
+            name: TableCommandName.GameStarted,
             table: this.name,
             data: { players: this.players }
         });
@@ -228,22 +213,21 @@ export class Table {
 
     private sendGameEnded() {
         this.commands$.next({
-            cmd: 'game_ended',
+            name: TableCommandName.GameEnded,
             table: this.name
         });
     }
 
     public sendTableClosed() {
         this.commands$.next({
-            cmd: 'table_closed',
+            name: TableCommandName.TableClosed,
             table: this.name
         });
     }
 
-
     private sendGameStatusUpdate() {
         this.commands$.next({
-            cmd: 'game_status',
+            name: TableCommandName.GameStatus,
             table: this.name,
             data: { gameStatus: this.getGameStatus() }
         });
@@ -251,16 +235,15 @@ export class Table {
 
     public sendCurrentPlayer() {
         this.commands$.next({
-            cmd: 'current_player',
+            name: TableCommandName.CurrentPlayer,
             table: this.name,
             data: { currentPlayerID: this.players[this.currentPlayer].id }
         });
     }
 
-
     public sendDealerUpdate() {
         this.commands$.next({
-            cmd: 'dealer',
+            name: TableCommandName.Dealer,
             table: this.name,
             data: { dealerPlayerID: this.players[this.dealer].id }
         });
@@ -279,7 +262,6 @@ export class Table {
             this.sendTableClosed();
             return;
         }
-
 
         this.players.map(player => player.reset());
         this.setStartPlayer();
@@ -431,12 +413,12 @@ export class Table {
                 // wait for the winner announcement
                 setTimeout(() => {
                     this.processWinners(everyoneElseFolded);
-                }, this.endGameDelay);
+                }, this.CONFIG.END_GAME_DELAY);
 
                 // auto-create new game
                 setTimeout(() => {
                     this.newGame();
-                }, this.nextGameDelay);
+                }, this.CONFIG.NEXT_GAME_DELAY);
 
                 // stop the game progress since we are done
                 return false;
@@ -482,20 +464,12 @@ export class Table {
             }
         }
 
-
         // announce winner
         this.commands$.next({
-            cmd: 'game_winners',
+            name: TableCommandName.GameWinners,
             table: this.name,
             data: { pot, winners }
         });
-
-
-        // // reset player status
-        // this.players.map(player => player.reset());
-        // this.sendPlayersUpdate();
-        //
-
     }
 
     private getWinners(everyoneElseFolded: boolean): Player[] {
