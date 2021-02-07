@@ -20,8 +20,11 @@ jobs:
       name: Frontend Tests
       install: cd client && npm ci
       script: npm run test -- --watch=false --no-progress --browsers=ChromeHeadlessCI
-    - script: cd .. && npm start && wait-on http://localhost:3000 && cd client && npm start & wait-on http://localhost:4200 && npm run e2e
+    - script:  npm run e2e
       install: cd client && npm ci
+      before_script:
+        - cd .. && npm start &
+        - cd client && npm start &
       name: E2E tests
     - script: npm run test
       name: Backend tests
