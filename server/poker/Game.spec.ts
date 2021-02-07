@@ -6,7 +6,7 @@ describe('Game', () => {
     let bigBlind = 20;
 
     beforeEach(() => {
-        game = new Game(smallBlind, bigBlind);
+        game = new Game(smallBlind, bigBlind, 'TestGame');
     });
 
     it('should not have a board', () => {

@@ -45,12 +45,15 @@ export class Table {
     protected endGameDelay = 1500;
     protected nextGameDelay = 5000;
 
+    private logger;
+
     constructor(
         public smallBlind: number,
         public bigBlind: number,
         public minPlayers: number,
         public maxPlayers: number,
         public name: string) {
+        this.logger = new Logger(`Table[${ name }]`);
 
         //require at least two players to start a game.
         if (minPlayers < 2) {
@@ -187,7 +190,7 @@ export class Table {
         this.commands$.next({
             cmd: 'player_bet',
             table: this.name,
-            data: { playerID, bet, type, maxBet}
+            data: { playerID, bet, type, maxBet }
         });
     }
 
@@ -281,7 +284,7 @@ export class Table {
         this.players.map(player => player.reset());
         this.setStartPlayer();
 
-        this.game = new Game(this.smallBlind, this.bigBlind);
+        this.game = new Game(this.smallBlind, this.bigBlind, `Game[${ this.name }]`);
         this.dealCards();
 
         this.sendPotUpdate();
@@ -417,7 +420,7 @@ export class Table {
             // if we are in the last round and everyone has either called or folded
             if (round === RoundType.River || everyoneElseFolded) {
 
-                Logger.debug('Game ended!');
+                this.logger.debug('Game ended!');
                 this.sendGameEnded();
 
                 // only show cards if it was the last betting round
@@ -467,12 +470,12 @@ export class Table {
         let pot = this.game.pot;
 
         if (winners.length === 1) {
-            Logger.debug(`Player[${ winners[0].name }] has won the game and receives ${ pot }!`);
+            this.logger.debug(`Player[${ winners[0].name }] has won the game and receives ${ pot }!`);
             winners[0].chips += pot;
         } else {
             let winnerNames = winners.reduce((prev, cur) => prev + ', ' + cur.name, '');
             let earnings = Math.round(pot / winners.length);
-            Logger.debug(`Players[${ winnerNames }] have a tie and split the pot for ${ earnings } each!`);
+            this.logger.debug(`Players[${ winnerNames }] have a tie and split the pot for ${ earnings } each!`);
 
             for (const winner of winners) {
                 winner.chips += earnings;
@@ -550,7 +553,7 @@ export class Table {
             if (player.chips > this.bigBlind) {
                 return true;
             }
-            Logger.verbose(`Removing player[${ player.name }] from the table because chips[${ player.chips }] are not enough.`);
+            this.logger.verbose(`Removing player[${ player.name }] from the table because chips[${ player.chips }] are not enough.`);
             return false;
         });
 

@@ -9,14 +9,19 @@ export class Game {
     public board: string[] = [];
     public ended: boolean = false;
 
-    constructor(private smallBlind: number, private bigBlind: number) {
-        Logger.debug('Game started!');
+    private logger;
+
+    constructor(private smallBlind: number, private bigBlind: number, context?: string) {
+        this.logger = new Logger(context ? context : Game.name);
+        this.logger.debug('Started!');
         this.fillDeck();
 
         this.newRound(RoundType.Deal); //Start the first round
     }
 
     newRound(type: RoundType) {
+        this.logger.debug(`New Round[${ type }]`);
+
         this.round = new Round(type);
         if (type === RoundType.Flop) {
             this.deck.pop(); //Burn a card
@@ -41,12 +46,7 @@ export class Game {
     getMaxBet(): number {
         return this.round.bets.reduce((p, c) => {
             return (p > c ? p : c);
-        },0);
-    }
-
-    hasSmallAndBigBlind(): boolean {
-        // check if at least two blind bets exist
-        return this.round.bets.filter(bet => bet).length >= 2;
+        }, 0);
     }
 
     check(playerIndex: number) {
@@ -74,60 +74,8 @@ export class Game {
                 this.deck.push(v + fig);
             });
         });
-        // this.deck.push('AS');
-        // this.deck.push('KS');
-        // this.deck.push('QS');
-        // this.deck.push('JS');
-        // this.deck.push('TS');
-        // this.deck.push('9S');
-        // this.deck.push('8S');
-        // this.deck.push('7S');
-        // this.deck.push('6S');
-        // this.deck.push('5S');
-        // this.deck.push('4S');
-        // this.deck.push('3S');
-        // this.deck.push('2S');
-        // this.deck.push('AH');
-        // this.deck.push('KH');
-        // this.deck.push('QH');
-        // this.deck.push('JH');
-        // this.deck.push('TH');
-        // this.deck.push('9H');
-        // this.deck.push('8H');
-        // this.deck.push('7H');
-        // this.deck.push('6H');
-        // this.deck.push('5H');
-        // this.deck.push('4H');
-        // this.deck.push('3H');
-        // this.deck.push('2H');
-        // this.deck.push('AD');
-        // this.deck.push('KD');
-        // this.deck.push('QD');
-        // this.deck.push('JD');
-        // this.deck.push('TD');
-        // this.deck.push('9D');
-        // this.deck.push('8D');
-        // this.deck.push('7D');
-        // this.deck.push('6D');
-        // this.deck.push('5D');
-        // this.deck.push('4D');
-        // this.deck.push('3D');
-        // this.deck.push('2D');
-        // this.deck.push('AC');
-        // this.deck.push('KC');
-        // this.deck.push('QC');
-        // this.deck.push('JC');
-        // this.deck.push('TC');
-        // this.deck.push('9C');
-        // this.deck.push('8C');
-        // this.deck.push('7C');
-        // this.deck.push('6C');
-        // this.deck.push('5C');
-        // this.deck.push('4C');
-        // this.deck.push('3C');
-        // this.deck.push('2C');
 
-        //Shuffle the deck array with Fisher-Yates
+        // shuffle the deck array with Fisher-Yates
         for (let i = 0; i < this.deck.length; i++) {
             let j = Math.floor(Math.random() * (i + 1));
             let tmp = this.deck[i];
@@ -137,6 +85,8 @@ export class Game {
     }
 
     end() {
+        this.logger.debug(`Ended`);
+
         this.ended = true;
     }
 }
@@ -145,6 +95,7 @@ export class Game {
 // BetTypes: Bet,Raise,ReRaise, cap
 export class Round {
     bets: number[] = [];
+
     // betName: BetType = BetType.Bet;
 
     constructor(public type: RoundType) { }

@@ -1,20 +1,25 @@
-import { Logger } from '@nestjs/common';
+import { Logger, LogLevel } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
+
+const logLevels: LogLevel[] = process.env.production ? ['error', 'warn'] : ['log', 'error', 'warn', 'debug', 'verbose'];
+
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule, {
+        logger: logLevels
+    });
     const logger = app.get(Logger);
     logger.setContext('main.ts');
 
     const whitelist = ['http://localhost:4200', 'https://pokern.netlify.app'];
-    logger.log(`Enabling CORS for ${whitelist.join(" & ")}`);
+    logger.log(`Enabling CORS for ${ whitelist.join(' & ') }`);
     app.enableCors({
         origin: function (origin, callback) {
             if (whitelist.indexOf(origin) !== -1 || !origin) {
                 callback(null, true);
             } else {
-                callback(new Error(`Origin[${origin}] Not allowed by CORS`));
+                callback(new Error(`Origin[${ origin }] Not allowed by CORS`));
             }
         },
         allowedHeaders: 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe',

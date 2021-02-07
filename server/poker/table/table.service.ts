@@ -11,9 +11,7 @@ export class TableService {
     private _tableCommands$ = new Subject<TableCommand>();
     tableCommands$ = this._tableCommands$.asObservable();
 
-    constructor(private logger: Logger) {
-        this.logger.setContext('TableService');
-    }
+    private logger = new Logger(TableService.name);
 
     /**********************
      * HELPER METHODS

@@ -23,8 +23,10 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     connections: Connection[] = [];
 
-    constructor(private logger: Logger, private tableService: TableService) {
-        this.logger.setContext('PokerGateway');
+    private logger = new Logger(PokerGateway.name);
+
+
+    constructor(private tableService: TableService) {
 
         this.tableService.tableCommands$
             .subscribe((cmd: TableCommand) => this.handleTableCommands(cmd));
@@ -56,13 +58,23 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.handlePlayerDisconnect(socket['playerID'], socket['table']);
     }
 
-    private handlePlayerDisconnect(playerID: string, table: string) {
+
+    /**
+     * Called when a socket disconnects or a player opens the home page (to tell the server that a player navigated away from the table)
+     * @param playerID
+     * @param table
+     */
+    private handlePlayerDisconnect(playerID: string | undefined, table: string | undefined) {
 
         if (playerID && this.tableService.playerExists(playerID)) {
             this.tableService.playerLeft(playerID);
             this.logger.debug(`Player[${ playerID }] left!`);
 
-            this.sendTo(table, PokerEvent.PlayerLeft, { playerID });
+            if (table) {
+                this.sendTo(table, PokerEvent.PlayerLeft, { playerID });
+            } else {
+                this.logger.warn(`Player[${ playerID }] disconnected or left, but table was not found!`);
+            }
         }
     }
 

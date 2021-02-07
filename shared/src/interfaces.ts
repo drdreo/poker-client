@@ -19,10 +19,10 @@ export interface PlayerBet {
 
 
 export enum RoundType {
-    Deal,
-    Flop,
-    Turn,
-    River
+    Deal = 'Deal',
+    Flop = 'Flop',
+    Turn = 'Turn',
+    River = 'River'
 }
 
 export enum BetType {
