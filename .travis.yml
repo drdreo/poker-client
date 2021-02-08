@@ -25,8 +25,7 @@ jobs:
       - cd ..
       - npm ci
       - npm run build
-# use prod server for E2E testing
-      - npm run start:prod &
+      - npm run start:test &
       - cd client
       - npm run cy:verify
       - npm run ci:cy-run
