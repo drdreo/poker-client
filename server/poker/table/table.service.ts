@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WsException } from '@nestjs/websockets';
 import { Subject } from 'rxjs';
+import { Config } from '../../config/configuration';
 import { TableConfig } from '../../config/table.config';
 import { Table } from './Table';
 import { TableCommand } from './TableCommand';
@@ -18,8 +19,7 @@ export class TableService {
 
     private logger = new Logger(TableService.name);
 
-    constructor(private configService: ConfigService) {
-
+    constructor(private configService: ConfigService<Config>) {
     }
 
     /**********************
@@ -31,7 +31,7 @@ export class TableService {
     }
 
     createTable(name: string): Table {
-        const table = new Table(this.configService.get<TableConfig>('table'), 10, 20, 2, 8, name);
+        const table = new Table(this.configService.get<TableConfig>('TABLE'), 10, 20, 2, 8, name);
         table.commands$ = this._tableCommands$;
         this.tables.push(table);
         return table;

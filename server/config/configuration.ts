@@ -1,14 +1,20 @@
 import { TableConfig } from './table.config';
 
+export enum Environment {
+    DEV = 'dev',
+    TEST = 'test',
+    PROD = 'prod'
+}
+
 export interface Config {
-    ENV: 'prod' | 'test' | 'dev',
+    ENV: Environment,
     PORT: number,
     WHITELIST: string[],
     TABLE: TableConfig
 }
 
 export const devConfig = () => ({
-    ENV: 'dev',
+    ENV: Environment.DEV,
     PORT: 3000,
     WHITELIST: ['http://localhost:4200'],
     TABLE: {

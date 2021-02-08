@@ -2,6 +2,7 @@ import { Logger, LogLevel } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { Config, Environment } from './config/configuration';
 
 const logLevels: LogLevel[] = process.env.NODE_ENV === 'prod' ? ['error', 'warn'] : ['log', 'error', 'warn', 'debug', 'verbose'];
 
@@ -9,13 +10,14 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
         logger: logLevels
     });
-    const configService = app.get(ConfigService);
+    const configService: ConfigService<Config> = app.get(ConfigService);
     const logger = app.get(Logger);
     logger.setContext('main.ts');
-    logger.log(`Running app in {${ configService.get<string>('ENV') }} environment!`);
+    logger.log(`Running app in {${ configService.get<Environment>('ENV') }} environment!`);
 
-    const whitelist = configService.get('WHITELIST');
+    const whitelist = configService.get<string[]>('WHITELIST');
     logger.log(`Enabling CORS for ${ whitelist.join(' & ') }`);
+
     app.enableCors({
         origin: function (origin, callback) {
             if (whitelist.indexOf(origin) !== -1 || !origin) {
@@ -29,7 +31,7 @@ async function bootstrap() {
         credentials: true
     });
 
-    const port = configService.get('PORT');
+    const port = configService.get<number>('PORT');
     logger.log(`Listening to App on port ${ port }`);
     await app.listen(port);
 }
