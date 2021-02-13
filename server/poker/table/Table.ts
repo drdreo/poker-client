@@ -3,7 +3,7 @@ import { WsException } from '@nestjs/websockets';
 import * as PokerEvaluator from 'poker-evaluator';
 import { Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { GameStatus, Card, BetType, RoundType, PlayerOverview } from '../../../shared/src';
+import { GameStatus, Card, BetType, RoundType, PlayerOverview, SplitPot } from '../../../shared/src';
 import { TableConfig } from '../../config/table.config';
 import { Game } from '../Game';
 import { Player } from '../Player';
@@ -27,6 +27,7 @@ export class Table {
 
 
     private logger;
+
     constructor(
         private CONFIG: TableConfig,
         public smallBlind: number,
@@ -63,9 +64,14 @@ export class Table {
         return this.players.find(player => player.id === playerID);
     }
 
+    private getActivePlayers(): Player[] {
+        return this.players.filter(player => !player.folded);
+    }
+
     public isPlayer(playerID: string): boolean {
         return this.players.some(player => player.id === playerID);
     }
+
 
     public getGameStatus(): GameStatus {
         if (this.game) {
@@ -73,6 +79,19 @@ export class Table {
         }
         return GameStatus.Waiting;
     }
+
+    public getSplitPots(): SplitPot[]{
+        const pots: SplitPot[] = [];
+        for (let pot of this.game.splitPots) {
+            const playerIDs = pot.players.reduce((prev, cur) => {
+                prev.push(cur.id);
+                return prev;
+            }, [] as string[]);
+            pots.push({ amount: pot.amount, playerIDs});
+        }
+        return pots;
+    }
+
 
     public getPlayersPreview(showCards = false): PlayerOverview[] {
         return this.players.map(player => {
@@ -155,7 +174,7 @@ export class Table {
 
             // if last player, continue with first
             this.currentPlayer = this.currentPlayer === this.players.length - 1 ? 0 : this.currentPlayer + 1;
-        } while (this.players[this.currentPlayer].folded);
+        } while (this.players[this.currentPlayer].folded || this.players[this.currentPlayer].allIn);
 
         this.sendCurrentPlayer();
     }
@@ -172,11 +191,11 @@ export class Table {
         });
     }
 
-    public sendPlayerBet(playerID: string, bet: number, maxBet: number, type: BetType) {
+    public sendPlayerBet(playerID: string, bet: number, type: BetType) {
         this.commands$.next({
             name: TableCommandName.PlayerBet,
             table: this.name,
-            data: { playerID, bet, type, maxBet }
+            data: { playerID, bet, type, maxBet: this.game.getMaxBet() }
         });
     }
 
@@ -184,7 +203,7 @@ export class Table {
         this.commands$.next({
             name: TableCommandName.PotUpdate,
             table: this.name,
-            data: { pot: this.game.pot }
+            data: { pot: this.game.pot, splitPots: this.getSplitPots() }
         });
     }
 
@@ -306,8 +325,8 @@ export class Table {
         let betToPay = existingBet ? maxBet - existingBet : maxBet;
 
         const player = this.players[playerIndex];
-        player.bet += betToPay;
         player.pay(betToPay);
+        player.bet += betToPay;
 
         this.game.call(playerIndex);
 
@@ -326,18 +345,24 @@ export class Table {
 
         const player = this.players[playerIndex];
         player.pay(bet);
+        // check if all-in
+        if (player.chips <= 0) {
+            player.allIn = true;
+        }
 
         // if the player has already bet, add it to the current
-        const totalBet = player.bet ? player.bet + bet : bet;
-        player.bet = totalBet;
+        player.bet += bet;
 
-        this.game.bet(playerIndex, totalBet);
+        this.game.bet(playerIndex, player.bet);
 
-        const maxBet = this.game.getMaxBet();
-
-        this.sendPlayerBet(playerID, bet, maxBet, type);
+        this.sendPlayerBet(playerID, bet, type);
         this.sendPlayersUpdate();
-        this.nextPlayer();
+
+        const next = this.progress();
+        if (next) {
+            this.nextPlayer();
+        }
+
     }
 
     public fold(playerID: string) {
@@ -374,9 +399,9 @@ export class Table {
     private isEndOfRound(): boolean {
         let endOfRound = true;
         const maxBet = this.game.getMaxBet();
-        // check if each player has folded or everyone has called
+        // check if each player has folded, called or is all-in
         for (let i = 0; i < this.players.length; i++) {
-            if (this.players[i].folded === false) {
+            if (this.players[i].folded === false && !this.players[i].allIn) {
                 if (this.game.getBet(i) !== maxBet) {
                     endOfRound = false;
                     break;
@@ -386,23 +411,45 @@ export class Table {
         return endOfRound;
     }
 
+    // Either all players have folded, met the biggest bet, or raised / gone all-in.
+    // private hasEveryoneActed(): boolean {
+    //     let everyoneActed = true;
+    //     const maxBet = this.game.getMaxBet();
+    //     for (let i = 0; i < this.players.length; i++) {
+    //         if (this.players[i].folded === false || !this.players[i].allIn) {
+    //             if (this.game.getBet(i) <=  maxBet) {
+    //                 everyoneActed = false;
+    //                 break;
+    //             }
+    //         }
+    //     }
+    //     return everyoneActed;
+    // }
+
     private hasEveryoneElseFolded(): boolean {
         return this.players.filter(player => !player.folded).length === 1;
     }
 
     private progress(): boolean {
         const everyoneElseFolded = this.hasEveryoneElseFolded();
+
         if (this.isEndOfRound() || everyoneElseFolded) {
 
-            this.game.moveBetsToPot();
-            this.resetPlayerBets();
-            this.sendPotUpdate();
+            this.processBets();
+
+            // all players all in or all except one is all in
+            const allInPlayers = this.players.filter(player => player.allIn);
+            if (allInPlayers.length > this.getActivePlayers().length - 1) {
+                // TODO: auto play, no more betting rounds, deal all cards
+
+                this.logger.debug('All in situation, auto-play game');
+                return false;
+            }
 
             const round = this.game.round.type;
 
             // if we are in the last round and everyone has either called or folded
             if (round === RoundType.River || everyoneElseFolded) {
-
                 this.logger.debug('Game ended!');
                 this.sendGameEnded();
 
@@ -447,9 +494,45 @@ export class Table {
     }
 
 
+    private processBets() {
+
+        let activePlayers;
+        do {
+            const lowestBet = this.game.getLowestBet();
+            let pot = 0;
+            for (let i = 0; i < this.players.length; i++) {
+                const player = this.players[i];
+
+                if (player.bet > 0) {
+                    pot += lowestBet;
+                    player.bet -= lowestBet;
+                    this.game.bet(i, player.bet);
+                }
+            }
+
+            this.game.pot += pot;
+
+            activePlayers = this.players.filter(player => player.bet > 0);
+            if (activePlayers.length > 1) {
+                this.game.splitPot(activePlayers);
+            }
+        } while (activePlayers.length > 1);
+
+        // if there is money left, give it back and unmark
+        const leftOvers = this.game.getLastBet();
+        if (leftOvers) {
+            this.players[leftOvers.index].chips += leftOvers.bet;
+        }
+
+        this.resetPlayerBets();
+        this.game.round.bets = [];
+        this.sendPotUpdate();
+    }
+
     private processWinners(everyoneElseFolded: boolean) {
 
-        const winners = this.getWinners(everyoneElseFolded);
+        const availablePlayers = this.players.filter(player => !player.folded);
+        const winners = this.getWinners(availablePlayers, everyoneElseFolded);
         let pot = this.game.pot;
 
         if (winners.length === 1) {
@@ -473,10 +556,7 @@ export class Table {
         });
     }
 
-    private getWinners(everyoneElseFolded: boolean): Player[] {
-
-        // find the highest hand from not folded players
-        const availablePlayers = this.players.filter(player => !player.folded);
+    private getWinners(availablePlayers: Player[], everyoneElseFolded: boolean): Player[] {
 
         // if everyone folded, no need to rank hands
         if (everyoneElseFolded) {
@@ -490,7 +570,7 @@ export class Table {
         });
 
         // then return all players with that hand
-        return this.players.filter(player => player.hand?.value === winner.hand.value);
+        return availablePlayers.filter(player => player.hand?.value === winner.hand.value);
     }
 
     private rankHand(player: Player) {

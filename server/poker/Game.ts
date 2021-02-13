@@ -1,9 +1,11 @@
 import { Logger } from '@nestjs/common';
 import { RoundType } from '../../shared/src';
+import { Player } from './Player';
 
 
 export class Game {
     public pot: number = 0;
+    public splitPots: SplitPot[] = [];
     public round: Round;
     public deck: string[] = [];
     public board: string[] = [];
@@ -43,6 +45,30 @@ export class Game {
         return !!this.round.bets[playerIndex];
     }
 
+    // Returns the index of the player with the last bet or undefined
+    getLastBet(): { index: number, bet: number } | null {
+
+        for (let index = 0; index < this.round.bets.length; index++){
+            let bet = this.round.bets[index];
+            if (bet > 0) {
+                return { index, bet };
+            }
+        }
+
+        return null;
+    }
+
+    getLowestBet(): number {
+        let lowest = Number.POSITIVE_INFINITY;
+        for (let bet of this.round.bets) {
+            if (bet > 0) {
+                lowest = Math.min(lowest, bet);
+            }
+        }
+
+        return lowest;
+    }
+
     getMaxBet(): number {
         return this.round.bets.reduce((p, c) => {
             return (p > c ? p : c);
@@ -61,8 +87,17 @@ export class Game {
         this.round.bets[playerIndex] = bet;
     }
 
-    moveBetsToPot() {
-        this.pot += this.round.bets.reduce((prev, cur) => prev + cur, 0);
+    moveBetsToPot(split: boolean = false) {
+        const bets = this.round.bets.reduce((prev, cur) => prev + cur, 0);
+        if (bets === 0) {
+            this.logger.warn('Moved 0 bets to pot');
+        }
+        this.pot += bets;
+    }
+
+    splitPot(potPlayers: Player[]) {
+        this.splitPots.push(new SplitPot(this.pot, potPlayers));
+        this.pot = 0;
     }
 
     fillDeck() {
@@ -100,3 +135,9 @@ export class Round {
 
     constructor(public type: RoundType) { }
 }
+
+
+export class SplitPot {
+    constructor(public amount: number, public players: Player[]) { }
+}
+

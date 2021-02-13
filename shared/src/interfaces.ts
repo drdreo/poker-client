@@ -74,6 +74,10 @@ export interface PlayerOverview {
     disconnected: boolean;
 }
 
+export interface SplitPot {
+    amount: number;
+    playerIDs: string[];
+}
 
 export interface Winner extends Pick<PlayerOverview, 'name' | 'chips'> {
     hand?: {
@@ -100,6 +104,7 @@ export interface GameBoardUpdate {
 
 export interface GamePotUpdate {
     pot: number;
+    splitPots: SplitPot[];
 }
 
 export interface GameRoundUpdate {
