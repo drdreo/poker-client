@@ -3,7 +3,7 @@ import { WsException } from '@nestjs/websockets';
 import * as PokerEvaluator from 'poker-evaluator';
 import { Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { GameStatus, Card, BetType, RoundType, PlayerOverview, SplitPot } from '../../../shared/src';
+import { GameStatus, Card, BetType, RoundType, PlayerOverview, SplitPot, Winner } from '../../../shared/src';
 import { TableConfig } from '../../config/table.config';
 import { Game } from '../Game';
 import { Player } from '../Player';
@@ -64,6 +64,10 @@ export class Table {
         return this.players.find(player => player.id === playerID);
     }
 
+    private hasEveryoneElseFolded(): boolean {
+        return this.getActivePlayers().length === 1;
+    }
+
     private getActivePlayers(): Player[] {
         return this.players.filter(player => !player.folded);
     }
@@ -80,14 +84,14 @@ export class Table {
         return GameStatus.Waiting;
     }
 
-    public getSplitPots(): SplitPot[]{
+    public getSplitPots(): SplitPot[] {
         const pots: SplitPot[] = [];
         for (let pot of this.game.splitPots) {
             const playerIDs = pot.players.reduce((prev, cur) => {
                 prev.push(cur.id);
                 return prev;
             }, [] as string[]);
-            pots.push({ amount: pot.amount, playerIDs});
+            pots.push({ amount: pot.amount, playerIDs });
         }
         return pots;
     }
@@ -426,27 +430,44 @@ export class Table {
     //     return everyoneActed;
     // }
 
-    private hasEveryoneElseFolded(): boolean {
-        return this.players.filter(player => !player.folded).length === 1;
+    private nextRound(round: RoundType): RoundType {
+        switch (round) {
+            case RoundType.Deal:
+                this.game.newRound(RoundType.Flop);
+                break;
+            case RoundType.Flop:
+                this.game.newRound(RoundType.Turn);
+                break;
+            case RoundType.Turn:
+                this.game.newRound(RoundType.River);
+                break;
+            default:
+                break;
+        }
+        this.sendGameBoardUpdate();
+        return this.game.round.type;
     }
 
     private progress(): boolean {
         const everyoneElseFolded = this.hasEveryoneElseFolded();
 
         if (this.isEndOfRound() || everyoneElseFolded) {
+            let round = this.game.round.type;
 
-            this.processBets();
+            this.processBetsNew(everyoneElseFolded);
 
             // all players all in or all except one is all in
             const allInPlayers = this.players.filter(player => player.allIn);
-            if (allInPlayers.length > this.getActivePlayers().length - 1) {
-                // TODO: auto play, no more betting rounds, deal all cards
-
+            if (allInPlayers.length >= this.getActivePlayers().length - 1) {
                 this.logger.debug('All in situation, auto-play game');
-                return false;
-            }
+                this.showPlayersCards();
 
-            const round = this.game.round.type;
+                // play until RoundType.River
+                do {
+                    round = this.nextRound(round);
+                    this.sendGameBoardUpdate();
+                } while (round !== RoundType.River);
+            }
 
             // if we are in the last round and everyone has either called or folded
             if (round === RoundType.River || everyoneElseFolded) {
@@ -472,31 +493,92 @@ export class Table {
                 return false;
             }
 
-            switch (round) {
-                case RoundType.Deal:
-                    this.game.newRound(RoundType.Flop);
-                    break;
-                case RoundType.Flop:
-                    this.game.newRound(RoundType.Turn);
-                    break;
-                case RoundType.Turn:
-                    this.game.newRound(RoundType.River);
-                    break;
-                default:
-                    break;
-            }
+            this.nextRound(round);
             this.sendGameRoundUpdate();
-            this.sendGameBoardUpdate();
             // let player after dealer start, so set it to the dealer
             this.currentPlayer = this.dealer;
         }
         return true;
     }
 
+    private processBetsNew(everyoneElseFolded: boolean = false) {
+        let activePlayers = this.players.filter(player => player.bet > 0);
+        const allInPlayers = activePlayers.filter(player => player.allIn);
+
+        // handle split pots if someone went all-in, and a player raised
+        const allinBets = allInPlayers.reduce((bets, player) => {
+            const idx = this.getPlayerIndexByID(player.id);
+            const bet = this.game.getBet(idx);
+            bets.push(bet);
+            return bets;
+        }, [] as number[]);
+
+        const maxBet = this.game.getMaxBet();
+        const raised = allinBets.some(bet => bet < maxBet);
+        // if the all-in bet is maxBet
+
+        if (allInPlayers.length > 0 && raised) {
+            this.logger.warn('Creating new split pot cause someone went all in!');
+
+            do {
+                const lowestBet = this.game.getLowestBet();
+                let pot = 0;
+                for (let i = 0; i < this.players.length; i++) {
+                    const player = this.players[i];
+
+                    if (player.bet > 0) {
+                        pot += lowestBet;
+                        player.bet -= lowestBet;
+                        this.game.bet(i, player.bet);
+                    }
+                }
+
+                this.game.pot += pot;
+
+                activePlayers = this.players.filter(player => player.bet > 0);
+                if (activePlayers.length > 1) {
+                    this.game.splitPot(activePlayers);
+                }
+            } while (activePlayers.length > 1);
+
+            // if there is money left, give it back
+            const leftOvers = this.game.getLastBet();
+            if (leftOvers) {
+                this.players[leftOvers.index].chips += leftOvers.bet;
+            }
+
+        } else {
+            // if everyone else folded, repay the last bet
+            if (everyoneElseFolded) {
+                const lastPlayer = this.getActivePlayers()[0];
+                const lastPlayerIndex = this.getPlayerIndexByID(lastPlayer.id);
+                const lastPlayersBet = this.game.getBet(lastPlayerIndex);
+                lastPlayer.chips += lastPlayersBet;
+                this.game.bet(lastPlayerIndex, 0);
+            }
+            this.game.moveBetsToPot();
+        }
+
+        this.resetPlayerBets();
+        this.game.round.bets = [];
+        this.sendPotUpdate();
+    }
 
     private processBets() {
 
-        let activePlayers;
+        let activePlayers = this.players.filter(player => player.bet > 0);
+
+        // determine if we need a new split pot when all-in was called
+        const allInPlayers = activePlayers.filter(player => player.allIn);
+        const hasSplitPot = this.game.splitPots.some(pot => pot.players.some(player => {
+            return allInPlayers.some(p => p.id === player.id);
+        }));
+
+        if (allInPlayers.length > 0 && !hasSplitPot && this.game.pot > 0) {
+            this.logger.warn('Creating new split pot cause last round was called!');
+            this.game.splitPot(activePlayers);
+        }
+
         do {
             const lowestBet = this.game.getLowestBet();
             let pot = 0;
@@ -518,11 +600,22 @@ export class Table {
             }
         } while (activePlayers.length > 1);
 
-        // if there is money left, give it back and unmark
+        // if there is money left, give it back
         const leftOvers = this.game.getLastBet();
         if (leftOvers) {
             this.players[leftOvers.index].chips += leftOvers.bet;
         }
+
+        // merge the split pots back, if it was not all in
+        // this.game.splitPots.forEach((splitPot, index) => {
+        //         const noAllIn = splitPot.players.every(player => !player.allIn);
+        //         if (noAllIn) {
+        //             this.game.pot += splitPot.amount;
+        //             this.game.splitPots.splice(index, 1);
+        //         }
+        //     }
+        // );
+
 
         this.resetPlayerBets();
         this.game.round.bets = [];
@@ -531,28 +624,48 @@ export class Table {
 
     private processWinners(everyoneElseFolded: boolean) {
 
+        // TODO: A all in player is included in the availablePLayers and might win the pot
         const availablePlayers = this.players.filter(player => !player.folded);
-        const winners = this.getWinners(availablePlayers, everyoneElseFolded);
-        let pot = this.game.pot;
+
+        let mainPot = this.game.pot;
+        const winners: Winner[] = [];
+        winners.push(...this.mapWinners(availablePlayers, everyoneElseFolded, mainPot, 'main'));
+
+        // TODO: add money adding method. Depending on winners amount and pot amount, return the earnings
+        // todo: refactor the pot data to use winners earnings on client
+
+        // if there were side pots, process the winners of each
+        for (let splitPot of this.game.splitPots) {
+            winners.push(...this.mapWinners(splitPot.players, everyoneElseFolded, splitPot.amount, 'side'));
+        }
 
         if (winners.length === 1) {
-            this.logger.debug(`Player[${ winners[0].name }] has won the game and receives ${ pot }!`);
-            winners[0].chips += pot;
+            this.logger.debug(`Player[${ winners[0].name }] has won the game and receives ${ winners[0].amount }!`);
+            this.getPlayer(winners[0].id).chips += mainPot;
         } else {
             let winnerNames = winners.reduce((prev, cur) => prev + ', ' + cur.name, '');
-            let earnings = Math.round(pot / winners.length);
+            let earnings = Math.round(mainPot / winners.length);
             this.logger.debug(`Players[${ winnerNames }] have a tie and split the pot for ${ earnings } each!`);
 
             for (const winner of winners) {
-                winner.chips += earnings;
+                this.getPlayer(winner.id).chips += winner.amount;
             }
         }
+
 
         // announce winner
         this.commands$.next({
             name: TableCommandName.GameWinners,
             table: this.name,
-            data: { pot, winners }
+            data: { winners, pot: mainPot }
+        });
+    }
+
+    private mapWinners(availablePlayers: Player[], everyoneElseFolded: boolean, pot: number, potType: string): Winner[] {
+        const potWinners = [...this.getWinners(availablePlayers, everyoneElseFolded)];
+        const potEarning = pot / potWinners.length;
+        return potWinners.map((player) => {
+            return { ...player, potType, amount: potEarning };
         });
     }
 

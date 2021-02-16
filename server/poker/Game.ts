@@ -26,7 +26,7 @@ export class Game {
 
         this.round = new Round(type);
         if (type === RoundType.Flop) {
-            this.deck.pop(); //Burn a card
+            this.deck.pop(); // Burn a card
             // play 3 flop cards
             for (let i = 0; i < 3; i++) {
                 this.board.push(this.deck.pop());
@@ -87,11 +87,8 @@ export class Game {
         this.round.bets[playerIndex] = bet;
     }
 
-    moveBetsToPot(split: boolean = false) {
+    moveBetsToPot() {
         const bets = this.round.bets.reduce((prev, cur) => prev + cur, 0);
-        if (bets === 0) {
-            this.logger.warn('Moved 0 bets to pot');
-        }
         this.pot += bets;
     }
 
