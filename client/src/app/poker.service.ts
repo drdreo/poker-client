@@ -98,6 +98,7 @@ export class PokerService implements OnDestroy {
                    .pipe(map(data => data.dealerPlayerID));
     }
 
+    // TODO: Delay each received event 1s, for the auto-play feature if everyone is all-in
     boardUpdated(): Observable<Card[]> {
         return this.socket.fromEvent<GameBoardUpdate>(PokerEvent.BoardUpdate)
                    .pipe(map(data => data.board));

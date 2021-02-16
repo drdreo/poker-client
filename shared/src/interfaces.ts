@@ -79,7 +79,9 @@ export interface SplitPot {
     playerIDs: string[];
 }
 
-export interface Winner extends Pick<PlayerOverview, 'name' | 'chips'> {
+export interface Winner extends Pick<PlayerOverview, 'id'| 'name' | 'chips'> {
+    potType: string,
+    amount: number,
     hand?: {
         handName: string;
         handType: number;
