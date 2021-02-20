@@ -1,6 +1,7 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 export enum MessageType {
+    Info,
     Played,
     Won,
     Joined,

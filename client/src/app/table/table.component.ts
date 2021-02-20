@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, merge, Observable, Subject, interval } from 'rxjs';
 import { switchMap, takeUntil, tap, shareReplay } from 'rxjs/operators';
-import { GameStatus, Card, BetType, PlayerOverview } from '../../../../shared/src';
+import { GameStatus, Card, BetType } from '../../../../shared/src';
 import { environment } from '../../environments/environment';
 import { PokerService } from '../poker.service';
 import { NotificationService } from '../utils/notification.service';
@@ -28,7 +28,7 @@ export class TableComponent implements OnInit, OnDestroy {
     pot$: Observable<number>;
     /***/
 
-    _players$: BehaviorSubject<Player[]> = new BehaviorSubject<Player[]>([]);
+    private _players$: BehaviorSubject<Player[]> = new BehaviorSubject<Player[]>([]);
     players$: Observable<Player[]> = this._players$.asObservable();
 
     get players(): Player[] {
@@ -36,7 +36,7 @@ export class TableComponent implements OnInit, OnDestroy {
     }
 
     // set if the current client is a player of the table
-    _player$ = new BehaviorSubject<Player>(null);
+    private _player$ = new BehaviorSubject<Player>(null);
     player$ = this._player$.asObservable();
 
     get player(): Player | null {
@@ -173,9 +173,10 @@ export class TableComponent implements OnInit, OnDestroy {
             .subscribe(() => {
 
                 const winner = this.players[0];
-                const message = `${ winner.name } won the game. GG WP`;
-                this.notification.showAction(message);
+                const message = `${ winner.name } won the game.`;
+                this.notification.showAction(message + ' GG WP!');
                 this.notification.addFeedMessage(message, MessageType.Won);
+                this.notification.addFeedMessage('Table will be closed now. Reopen a new one!', MessageType.Info);
             });
 
         this.pokerService.gameStatus()
@@ -191,15 +192,23 @@ export class TableComponent implements OnInit, OnDestroy {
 
         this.pokerService.gameWinners()
             .pipe(takeUntil(this.unsubscribe$))
-            .subscribe((res) => {
-                console.log(res);
-                const { winners, pot } = res;
+            .subscribe(({ winners }) => {
+                console.log(winners);
 
-                const winnerNames = winners.reduce((prev, cur) => prev + ' ' + cur.name, '');
+                if (winners.length === 0) {
+                    console.error('Server sent us no winners at all!');
+                }
 
-                let message = `${ winnerNames } won the pot of ${ pot }`;
-                if (winners[0].hand) {
-                    message += ` with ${ winners[0].hand.handName }`;
+                let message = '';
+                if (winners.length === 1) {
+                    message = `${ winners[0].name } won the pot of ${ winners[0].amount }`;
+                    if (winners[0].hand) {
+                        message += ` with ${ winners[0].hand.handName }`;
+                    }
+                } else {
+                    const winnerNames = winners.reduce((prev, cur) => prev + ' ' + cur.name, '');
+                    const winnerPots = winners.reduce((prev, cur) => prev + ',' + cur.amount, '');
+                    message = `${ winnerNames } won the pots of ${ winnerPots }`;
                 }
 
                 this.notification.showAction(message);

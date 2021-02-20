@@ -1,5 +1,6 @@
 import { EvaluatedHand } from 'poker-evaluator/lib/types';
 import { WsException } from '@nestjs/websockets';
+import { Winner } from '../../shared/src';
 
 export class Player {
     cards: string[] = [];
@@ -7,6 +8,7 @@ export class Player {
     bet: number | null = 0;
     folded = false;
     allIn = false;
+    hasSidePot = false;
     disconnected: boolean = false;
 
     constructor(public id: string, public name: string, public color: string, public chips: number) {
@@ -15,6 +17,7 @@ export class Player {
     reset() {
         this.folded = false;
         this.allIn = false;
+        this.hasSidePot = false;
         this.hand = null;
         this.cards = [];
         this.bet = null;
@@ -25,5 +28,14 @@ export class Player {
             throw new WsException(`Not sufficient funds to bet[${ bet }]!`);
         }
         this.chips -= bet;
+    }
+
+    formatWinner() {
+        return {
+            id: this.id,
+            name: this.name,
+            allIn: this.allIn,
+            hand: this.hand,
+        }
     }
 }

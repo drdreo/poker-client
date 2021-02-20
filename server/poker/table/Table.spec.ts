@@ -5,13 +5,21 @@ import { TableCommandName } from './TableCommand';
 
 const CONFIG = testConfig();
 
+let counter = 1;
+
 describe('Table', () => {
     let table: TableMock;
     let smallBlind = 10;
     let bigBlind = 20;
 
     beforeEach(() => {
-        table = new TableMock({ ...CONFIG.TABLE }, smallBlind, bigBlind, 2, 5, 'TestTable');
+        table = new TableMock({ ...CONFIG.TABLE }, smallBlind, bigBlind, 2, 5, 'TestTable' + counter++);
+    });
+
+    afterEach(async () => {
+        if (table) {
+           table.destroy();
+        }
     });
 
     it('should have no Game', () => {
@@ -82,6 +90,16 @@ describe('Table', () => {
             expect(everyoneHasCards).toBe(true);
         });
     });
+
+    function rigCardsForThirdPlayer(player1, player2, player3) {
+        table.getPlayer(player1).cards = ['3D', '7C'];
+        table.getPlayer(player2).cards = ['2D', '6C'];
+        table.getPlayer(player3).cards = ['JD', 'TD'];
+    }
+
+    function rigBoardForRoyalFlush() {
+        table.getGame().board = ['AD', 'KD', 'QD', '2S', '2C'];
+    }
 
     describe('Game Mechanics', () => {
 
@@ -275,17 +293,18 @@ describe('Table', () => {
             table.fold(player2);
         });
 
-        it('should return bet if everyone folds', (done) => {
+        it('should return bet if everyone folds', done => {
+            table.commands$.subscribe((command) => {
+                if (command.name === TableCommandName.GameWinners) {
+                    expect(table.getPlayer(player3).chips).toBe(1000 + smallBlind + bigBlind);
+                    done();
+                }
+            });
+
             table.bet(player3, 200);
             table.fold(player1);
             table.fold(player2);
-
-            setTimeout(() => {
-                expect(table.getPlayer(player3).chips).toBe(1000 + smallBlind + bigBlind);
-                done();
-            }, 100);
-
-        }, 1000);
+        });
 
         describe('Round(Flop)', () => {
             beforeEach(() => {
@@ -438,16 +457,24 @@ describe('Table', () => {
                         table.call(player3);
                     }, 1000);
 
-                    it('should have added the pot to the winner ', done => {
+                    it('should have the correct pot and added it to the winner', done => {
                         table.commands$.subscribe((command) => {
                             if (command.name === TableCommandName.GameWinners) {
                                 const { winners } = command.data;
                                 expect(table.getPlayer(winners[0].id).chips).toBe(1160);
+                                expect(winners[0].amount).toBe(240);
                                 done();
                             }
                         });
 
 
+                        // rig the player cards to prevent a side pot
+                        table.getPlayer(player1).cards = ['JD', 'TD'];
+                        table.getPlayer(player2).cards = ['3D', '4S'];
+                        table.getPlayer(player3).cards = ['2D', '9C'];
+                        table.getGame().board = ['AD', 'KD', 'QD', '2S', '2C'];
+
+                        // coins: 920, pot: 240 => 1160
                         table.bet(player1, bigBlind);
                         table.call(player2);
                         table.call(player3);
@@ -456,7 +483,7 @@ describe('Table', () => {
             });
         });
 
-        describe('Split pots ', () => {
+        describe('Side pots ', () => {
 
             beforeEach(() => {
                 // set player cash
@@ -465,7 +492,7 @@ describe('Table', () => {
                 table.getPlayer(player3).chips = 100;
             });
 
-            it('should have no split pot if one folds', () => {
+            it('should have no side pot if one folds', () => {
                 table.bet(player3, 50);
                 table.fold(player1);
                 table.call(player2);
@@ -473,7 +500,7 @@ describe('Table', () => {
                 expect(table.getGame().pot).toBe(110);
             });
 
-            it('should have no split pot if one folds after betting', done => {
+            it('should have no side pot if one folds after betting', done => {
                 table.commands$.subscribe((command) => {
                     if (command.name === TableCommandName.GameWinners) {
                         expect(table.getPlayer(player3).chips).toBe(100 + smallBlind + 50);
@@ -493,16 +520,16 @@ describe('Table', () => {
 
             });
 
-            it('should NOT create a split pot when player 3 is all-in and others call', () => {
+            it('should NOT create a side pot when player 3 is all-in and others call', () => {
                 table.bet(player3, table.getPlayer(player3).chips); // all in
                 table.call(player1);
                 table.call(player2);
                 expect(table.getPlayer(player3).allIn).toBeTruthy();
-                expect(table.getGame().splitPots[0]).toBeUndefined();
+                expect(table.getGame().sidePots[0]).toBeUndefined();
                 expect(table.getGame().pot).toBe(300);
             });
 
-            it('should create a split pot when player 3 is all-in , player 1 calls and player 2 raises all-in and player 1 has to all-in ', () => {
+            it('should create a side pot when player 3 is all-in , player 1 calls and player 2 raises all-in and player 1 has to all-in ', () => {
                 // P3 is all-in with 100 --> 1st Side pot with 100 (300 total)
                 // P2 is all-in with 250 --> 2nd Side pot with other 100
                 // P1 is all-in with 200 --> adds to 2nd Side pot (main pot) with other 100 (200 total)
@@ -518,7 +545,7 @@ describe('Table', () => {
                 expect(table.getPlayer(player2).allIn).toBeTruthy();
                 expect(table.getPlayer(player3).allIn).toBeTruthy();
 
-                expect(table.getGame().splitPots[0]).toBeDefined();
+                expect(table.getGame().sidePots[0]).toBeDefined();
                 expect(table.getGame().pot).toBe(200);
 
                 expect(table.getPlayer(player1).chips).toBe(0);
@@ -550,32 +577,64 @@ describe('Table', () => {
                 expect(table.getPlayer(player3).allIn).toBeTruthy();
 
                 expect(table.getGame().pot).toBe(100);
-                expect(table.getGame().splitPots[0]).toBeDefined();
-                expect(table.getGame().splitPots[0].amount).toBe(300);
+                expect(table.getGame().sidePots[0]).toBeDefined();
+                expect(table.getGame().sidePots[0].amount).toBe(300);
 
                 expect(table.getRoundType()).toBe(RoundType.Flop);
             });
 
-            it('should create only one split pot when player 3 is all-in and the others continue', () => {
+            it('should create only one side pot when player 3 is all-in and the others continue', () => {
                 table.bet(player3, table.getPlayer(player3).chips); // all in
                 table.call(player1);
                 table.call(player2);
 
+                expect(table.getRoundType()).toBe(RoundType.Flop);
+
                 table.bet(player1, 20);
                 table.call(player2);
 
-                expect(table.getGame().splitPots[0]).toBeDefined();
-                expect(table.getGame().splitPots[0]?.amount).toBe(300);
+                expect(table.getRoundType()).toBe(RoundType.Turn);
+
+
+                expect(table.getGame().sidePots[0]).toBeDefined();
+                expect(table.getGame().sidePots[0]?.amount).toBe(300);
                 expect(table.getGame().pot).toBe(40);
 
                 table.bet(player1, 20);
                 table.bet(player2, 30);
                 table.call(player1);
 
+                expect(table.getRoundType()).toBe(RoundType.River);
+                expect(table.getGame().pot).toBe(100);
+                expect(table.getGame().sidePots[0].amount).toBe(300);
+                expect(table.getGame().sidePots[1]).toBeUndefined();
+            });
+
+            it('should not create a second sidepot when player 2 is all-in in the last round', () => {
+                table.bet(player3, table.getPlayer(player3).chips); // all in
+                table.call(player1);
+                table.call(player2);
+
+                expect(table.getRoundType()).toBe(RoundType.Flop);
+
+                table.bet(player1, 20);
+                table.call(player2);
+
+                // should trigger auto play
                 expect(table.getRoundType()).toBe(RoundType.Turn);
-                expect(table.getGame().pot).toBe(120);
-                expect(table.getGame().splitPots[0]?.amount).toBe(300);
-                expect(table.getGame().splitPots[1]).toBeUndefined();
+
+
+                expect(table.getGame().sidePots[0]).toBeDefined();
+                expect(table.getGame().sidePots[0]?.amount).toBe(300);
+                expect(table.getGame().pot).toBe(40);
+
+                table.bet(player1, table.getPlayer(player1).chips); // all in
+                table.call(player2);
+
+                expect(table.getRoundType()).toBe(RoundType.River);
+                expect(table.getGame().pot).toBe(200);
+                expect(table.getGame().sidePots[0].amount).toBe(300);
+                expect(table.getGame().sidePots[1]).toBeUndefined();
             });
 
             it('should process winners if player 2 folds after player 3 is all-in', done => {
@@ -583,14 +642,16 @@ describe('Table', () => {
                     if (command.name === TableCommandName.GameWinners) {
                         const { winners } = command.data;
                         expect(winners[0].amount).toBe(220);
-                        expect(table.getPlayer(winners[0].id).chips).toBe(320);
+
+                        expect(table.getPlayer(winners[0].id).chips).toBe(320 / winners.length);
                         done();
                     }
                 });
 
                 // rig the test player cards
-                table.getPlayer(player1).cards = ["AD", "AS"];
-                table.getPlayer(player3).cards = ["2D", "9C"];
+                table.getPlayer(player1).cards = ['AD', 'AS'];
+                table.getPlayer(player3).cards = ['2D', '9C'];
+
 
                 table.bet(player3, table.getPlayer(player3).chips); // all in
                 table.call(player1); // 10 + 90
@@ -608,15 +669,139 @@ describe('Table', () => {
                 table.call(player2);
                 table.fold(player3);
 
-                expect(table.getGame().splitPots[0]).toBeUndefined();
+                expect(table.getGame().sidePots[0]).toBeUndefined();
                 expect(table.getGame().pot).toBe(450);
             });
 
         });
 
-        test.todo('should pay out split-pot to all-in player if won');
-        test.todo('should pay out each split-pot to each winner');
-        test.todo('should pay out all split-pots to winner if every pot was won');
+
+        describe('Process Winners', () => {
+
+            beforeEach(() => {
+                // set player cash
+                table.getPlayer(player1).chips = 200 - smallBlind;
+                table.getPlayer(player2).chips = 250 - bigBlind;
+                table.getPlayer(player3).chips = 100;
+            });
+
+            it('should pay out main pot to all-in player if won', done => {
+                table.commands$.subscribe((command) => {
+                    if (command.name === TableCommandName.GameWinners) {
+                        const { winners } = command.data;
+                        expect(winners[0].amount).toBe(300);
+                        expect(table.getPlayer(winners[0].id).chips).toBe(300);
+                        done();
+                    }
+                });
+
+                // rig the test player cards
+                rigCardsForThirdPlayer(player1, player2, player3);
+
+                table.bet(player3, table.getPlayer(player3).chips); // all in
+                table.call(player1);
+                table.call(player2);
+
+                // check until the end
+                table.check(player1);
+                table.check(player2);
+
+                table.check(player1);
+                table.check(player2);
+
+                table.check(player1);
+
+                expect(table.getGame().sidePots[0]).toBeUndefined();
+                expect(table.getGame().pot).toBe(300);
+
+                rigBoardForRoyalFlush();
+
+                table.check(player2);
+            });
+
+            it('should pay out the side pot to all-in player and main pot to other', done => {
+                table.commands$.subscribe((command) => {
+                    if (command.name === TableCommandName.GameWinners) {
+                        const { winners } = command.data;
+
+                        const mainPotWinners = winners.filter(winner => winner.potType === 'main');
+                        const sidePotWinners = winners.filter(winner => winner.potType.includes('sidepot'));
+                        expect(mainPotWinners[0].amount).toBe(40 / mainPotWinners.length);
+                        expect(mainPotWinners.every(player => player.id !== table.getPlayer(player3).id)).toBeTruthy();
+
+                        expect(sidePotWinners.some(player => player.id === table.getPlayer(player3).id)).toBeTruthy();
+                        expect(table.getPlayer(player3).chips).toBe(300);
+                        done();
+                    }
+                });
+
+                // rig the test player cards
+                rigCardsForThirdPlayer(player1, player2, player3);
+
+                table.bet(player3, table.getPlayer(player3).chips); // all in
+                table.call(player1);
+                table.call(player2);
+
+
+                table.bet(player1, 20);
+                table.call(player2);
+
+
+                table.check(player1);
+                table.check(player2);
+
+
+                table.check(player1);
+
+                expect(table.getGame().sidePots[0]).toBeDefined();
+                expect(table.getGame().pot).toBe(40);
+
+                rigBoardForRoyalFlush();
+
+                table.check(player2);
+            });
+
+            it('should pay out each pot to player 1', done => {
+                table.commands$.subscribe((command) => {
+                    if (command.name === TableCommandName.GameWinners) {
+                        const { winners } = command.data;
+
+                        expect(winners.every(player => player.id === player1)).toBeTruthy();
+                        expect(winners.reduce((sum, player) => sum + player.amount, 0)).toBe(340);
+                        expect(table.getPlayer(player1).chips).toBe(420); // 80 + 340
+
+                        done();
+                    }
+                });
+
+                // rig the test player cards
+                rigCardsForThirdPlayer(player3, player2, player1);
+
+                table.bet(player3, table.getPlayer(player3).chips); // all in
+                table.call(player1);
+                table.call(player2);
+
+                expect(table.getGame().pot).toBe(300);
+
+                table.bet(player1, 20);
+                table.call(player2);
+
+
+                table.check(player1);
+                table.check(player2);
+
+
+                table.check(player1);
+
+                expect(table.getGame().sidePots[0]).toBeDefined();
+                expect(table.getGame().pot).toBe(40);
+
+                rigBoardForRoyalFlush();
+
+                table.check(player2);
+            });
+        });
+
 
         test.todo('should kick player from table if no chips left');
         test.todo('should kick all-in player after lose');

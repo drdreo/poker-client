@@ -5,9 +5,7 @@ import { Subject } from 'rxjs';
 import { Config } from '../../config/configuration';
 import { TableConfig } from '../../config/table.config';
 import { Table } from './Table';
-import { TableCommand } from './TableCommand';
-
-const AUTO_DESTROY_TABLE_DELAY = 2000;
+import { TableCommand, TableCommandName } from './TableCommand';
 
 @Injectable()
 export class TableService {
@@ -18,20 +16,23 @@ export class TableService {
     tableCommands$ = this._tableCommands$.asObservable();
 
     private logger = new Logger(TableService.name);
+    private readonly CONFIG: TableConfig;
+    private destroyTimeout: NodeJS.Timeout;
 
     constructor(private configService: ConfigService<Config>) {
+        this.CONFIG = this.configService.get<TableConfig>('TABLE');
     }
 
     /**********************
      * HELPER METHODS
      **********************/
 
-    sendCommand(command: TableCommand | any) {
+    sendCommand(command: TableCommand) {
         this._tableCommands$.next(command);
     }
 
     createTable(name: string): Table {
-        const table = new Table(this.configService.get<TableConfig>('TABLE'), 10, 20, 2, 8, name);
+        const table = new Table(this.CONFIG, 10, 20, 2, 8, name);
         table.commands$ = this._tableCommands$;
         this.tables.push(table);
         return table;
@@ -59,17 +60,21 @@ export class TableService {
 
     playerLeft(playerID: string) {
         for (let table of this.tables) {
-            const player = table.players.find(player => player.id === playerID);
+            const player = table.getPlayer(playerID);
             if (player) {
                 player.disconnected = true;
-                // if every player disconnected, remove the table after 2s
-                setTimeout(() => {
+                // if every player disconnected, remove the table after some time
+                if (this.destroyTimeout) {
+                    clearTimeout(this.destroyTimeout);
+                }
+
+                this.destroyTimeout = setTimeout(() => {
                     if (table.players.every(player => player.disconnected)) {
                         this.logger.debug(`Table[${ table.name }] removed!`);
                         this.tables = this.tables.filter(t => t.name !== table.name);
-                        this.sendCommand({ cmd: 'home_info' });
+                        this.sendCommand({ name: TableCommandName.HomeInfo, table: table.name });
                     }
-                }, AUTO_DESTROY_TABLE_DELAY);
+                }, this.CONFIG.AUTO_DESTROY_DELAY);
                 return;
             }
         }
