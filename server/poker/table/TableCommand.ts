@@ -1,4 +1,4 @@
-import { BetType, Card, Winner, GameStatus, SplitPot } from '../../../shared/src';
+import { BetType, Card, Winner, GameStatus, SidePot } from '../../../shared/src';
 import { Round } from '../Game';
 
 export enum TableCommandName{
@@ -27,7 +27,7 @@ export interface TableCommand {
         currentPlayerID?: string,
         dealerPlayerID?: string,
         pot?: number,
-        splitPots?: SplitPot[],
+        sidePots?: SidePot[],
         bet?: number,
         maxBet?: number,
         type?: BetType,

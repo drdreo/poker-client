@@ -73,7 +73,7 @@ export interface PlayerOverview {
     disconnected: boolean;
 }
 
-export interface SplitPot {
+export interface SidePot {
     amount: number;
     playerIDs: string[];
 }
@@ -107,7 +107,7 @@ export interface GameBoardUpdate {
 
 export interface GamePotUpdate {
     pot: number;
-    splitPots: SplitPot[];
+    sidePots: SidePot[];
 }
 
 export interface GameRoundUpdate {

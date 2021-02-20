@@ -207,7 +207,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 break;
 
             case TableCommandName.PotUpdate: {
-                let response: GamePotUpdate = { pot: data.pot, splitPots: data.splitPots };
+                let response: GamePotUpdate = { pot: data.pot, sidePots: data.sidePots };
                 this.sendTo(table, PokerEvent.PotUpdate, response);
             }
                 break;

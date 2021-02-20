@@ -3,7 +3,7 @@ import { WsException } from '@nestjs/websockets';
 import * as PokerEvaluator from 'poker-evaluator';
 import { Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { GameStatus, Card, BetType, RoundType, PlayerOverview, SplitPot, Winner } from '../../../shared/src';
+import { GameStatus, Card, BetType, RoundType, PlayerOverview, SidePot, Winner } from '../../../shared/src';
 import { TableConfig } from '../../config/table.config';
 import { Game } from '../Game';
 import { Player } from '../Player';
@@ -92,8 +92,8 @@ export class Table {
         return GameStatus.Waiting;
     }
 
-    public getSplitPots(): SplitPot[] {
-        const pots: SplitPot[] = [];
+    public getSplitPots(): SidePot[] {
+        const pots: SidePot[] = [];
         for (let pot of this.game.sidePots) {
             const playerIDs = pot.players.reduce((prev, cur) => {
                 prev.push(cur.id);
@@ -215,7 +215,7 @@ export class Table {
         this.commands$.next({
             name: TableCommandName.PotUpdate,
             table: this.name,
-            data: { pot: this.game.pot, splitPots: this.getSplitPots() }
+            data: { pot: this.game.pot, sidePots: this.getSplitPots() }
         });
     }
 

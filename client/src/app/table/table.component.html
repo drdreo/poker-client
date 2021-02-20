@@ -11,6 +11,7 @@
         <!--        </ul>-->
 
         <div class="table__time">Play time: {{playDuration$ | async }}s</div>
+        SidePots: {{ sidePots$ | async | json }}
     </div>
 
     <h3 class="table__action" *ngIf="notification.action$ | async as currentAction">{{currentAction}}</h3>
@@ -67,6 +68,9 @@
         <div class="pot" *ngIf="pot$ | async as pot">
             <div class="pot__value">
                 {{pot}}€
+            </div>
+            <div class="jetons">
+                <app-coins [amount]="pot" [type]="100"></app-coins>
             </div>
             <div class="jetons">
                 <app-coins [amount]="pot" [type]="50"></app-coins>

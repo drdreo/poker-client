@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, merge, Observable, Subject, interval } from 'rxjs';
 import { switchMap, takeUntil, tap, shareReplay } from 'rxjs/operators';
-import { GameStatus, Card, BetType } from '../../../../shared/src';
+import { GameStatus, Card, BetType, SidePot } from '../../../../shared/src';
 import { environment } from '../../environments/environment';
 import { PokerService } from '../poker.service';
 import { NotificationService } from '../utils/notification.service';
@@ -26,6 +26,7 @@ export class TableComponent implements OnInit, OnDestroy {
     dealerPlayerID$: Observable<string>; // ID of the dealer
     board$: Observable<Card[]>;
     pot$: Observable<number>;
+    sidePots$: Observable<SidePot[]>;
     /***/
 
     private _players$: BehaviorSubject<Player[]> = new BehaviorSubject<Player[]>([]);
@@ -70,52 +71,9 @@ export class TableComponent implements OnInit, OnDestroy {
         return localStorage.getItem('playerID');
     }
 
-    playerColors = [
-        '#444444', '#3498db', '#9b59b6',
-        '#e67e22', '#3ae374', '#16a085',
-        'crimson', '#227093', '#d1ccc0',
-        '#34495e', '#673ab7', '#cf6a87'
-    ];
-
-    figures = ['S', 'H', 'C', 'D'];
-    values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-
-    get cards(): Card[] {
-        let all = [];
-        for (let figure of this.figures) {
-            for (let value of this.values) {
-                all.push({
-                    figure,
-                    value
-                });
-            }
-        }
-        return all;
-    }
-
-    get two_cards() {
-        let cards = [];
-        for (let i = 0; i < 2; i++) {
-            let rand_id = Math.floor(Math.random() * this.cards.length);
-            cards.push(this.cards[rand_id]);
-        }
-        return cards;
-    }
-
-    test_cards(amount: number) {
-        let fives = [];
-        for (let i = 0; i < amount; i++) {
-            let rand_id = Math.floor(Math.random() * this.cards.length);
-            fives.push(this.cards[rand_id]);
-        }
-        return fives;
-    }
-
     unsubscribe$ = new Subject();
 
     constructor(private route: ActivatedRoute, public notification: NotificationService, public pokerService: PokerService) {
-
-        this.loadDevPlayers();
 
         this.currentPlayerID$ = this.pokerService.currentPlayer()
                                     .pipe(
@@ -135,15 +93,18 @@ export class TableComponent implements OnInit, OnDestroy {
             this._players$.next(players);
         });
 
-        this.players$.subscribe(players => {
-            // look for the current player instance if is one
-            if (this.clientPlayerID) {
-                this._player$.next(players.find(player => player.id === this.clientPlayerID) || null);
-            }
-        });
+        this.players$
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe(players => {
+                // look for the current player instance if is one
+                if (this.clientPlayerID) {
+                    this._player$.next(players.find(player => player.id === this.clientPlayerID) || null);
+                }
+            });
 
         this.board$ = this.pokerService.boardUpdated();
-        this.pot$ = this.pokerService.potUpdate();
+        this.pot$ = this.pokerService.mainPotUpdate();
+        this.sidePots$ = this.pokerService.sidePotUpdate();
 
         this.pokerService.playerLeft()
             .pipe(takeUntil(this.unsubscribe$))
@@ -269,6 +230,7 @@ export class TableComponent implements OnInit, OnDestroy {
                 this.notification.showAction(`${ player.name } folded`);
                 this.notification.addFeedMessage(`${ player.name } folded`, MessageType.Played);
             });
+
     }
 
     ngOnInit() {
@@ -300,6 +262,11 @@ export class TableComponent implements OnInit, OnDestroy {
                 console.log(error);
                 this.showOverlay = true;
             });
+
+
+        if (!environment.production) {
+            // this.loadDevThings();
+        }
 
     }
 
@@ -336,9 +303,6 @@ export class TableComponent implements OnInit, OnDestroy {
         return this.players.find(player => player.id === playerID);
     }
 
-    private getColor() {
-        return this.playerColors.pop();
-    }
 
     getArray(number: number) {
         return Array(number).fill(0).map((x, i) => i);
@@ -349,40 +313,98 @@ export class TableComponent implements OnInit, OnDestroy {
         this._betAmount$.next(amount);
     }
 
+    private loadDevThings() {
+        console.log('Loading dev data!');
+        this.loadDevPlayers();
+
+        const devPotSubject = new BehaviorSubject<number>(666);
+        const devsidePotsSubject = new BehaviorSubject<SidePot[]>([{ amount: 60, playerIDs: ['tester1', 'tester2'] }, {
+            amount: 100,
+            playerIDs: ['tester3', 'tester4', 'dealer']
+        }]);
+        this.pot$ = devPotSubject.asObservable();
+        this.sidePots$ = devsidePotsSubject.asObservable();
+        // devPotSubject.next(666);
+        // devsidePotsSubject.next([{ amount: 60, playerIDs: ['tester1', 'tester2'] }, {
+        //     amount: 100,
+        //     playerIDs: ['tester3', 'tester4', 'dealer']
+        // }]);
+    }
+
     private loadDevPlayers() {
+
+
+        const playerColors = [
+            '#444444', '#3498db', '#9b59b6',
+            '#e67e22', '#3ae374', '#16a085',
+            'crimson', '#227093', '#d1ccc0',
+            '#34495e', '#673ab7', '#cf6a87'
+        ];
+
+        const figures = ['S', 'H', 'C', 'D'];
+        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+
+        function generateCards(): Card[] {
+            let all = [];
+            for (let figure of figures) {
+                for (let value of values) {
+                    all.push({
+                        figure,
+                        value
+                    });
+                }
+            }
+            return all;
+        }
+
+        const cards = generateCards();
+
+        function test_cards(amount: number) {
+            let fives = [];
+            for (let i = 0; i < amount; i++) {
+                let rand_id = Math.floor(Math.random() * cards.length);
+                fives.push(cards[rand_id]);
+            }
+            return fives;
+        }
+
+        function getColor() {
+            return playerColors.pop();
+        }
+
         // init players
         let players = [];
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: []
+            id: 'tester1', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: []
         });
         players.push({
-            allIn: false, disconnected: true, folded: false, id: '', name: 'DCer',
-            color: this.getColor(), chips: 667, bet: 579, cards: this.two_cards
-        });
-        players.push({
-            allIn: false, disconnected: false, folded: false,
-            id: '', name: 'DrDreo', color: this.getColor(), chips: 667, bet: 579, cards: []
+            allIn: false, disconnected: true, folded: false, id: 'tester2', name: 'DCer',
+            color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
         });
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: '', name: 'Hackl', color: this.getColor(), chips: 667, bet: 579, cards: []
+            id: 'tester3', name: 'DrDreo', color: getColor(), chips: 667, bet: 579, cards: []
         });
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: []
+            id: 'tester4', name: 'Hackl', color: getColor(), chips: 667, bet: 579, cards: []
         });
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: []
+            id: 'tester5', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: []
         });
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: '', name: 'rivy331', color: this.getColor(), chips: 667, bet: 579, cards: []
+            id: 'tester6', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: []
         });
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: 'dealer', name: 'Dealer', color: this.getColor(), chips: 667, bet: 579, cards: []
+            id: 'tester7', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: []
+        });
+        players.push({
+            allIn: false, disconnected: false, folded: false,
+            id: 'dealer', name: 'Dealer', color: getColor(), chips: 667, bet: 579, cards: []
         });
 
         this._players$.next(players);
