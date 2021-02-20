@@ -1,5 +1,6 @@
 import { of, Observable } from 'rxjs';
-import { HomeInfo, TableResponse } from '../../../shared/src';
+import { map } from 'rxjs/operators';
+import { HomeInfo, TableResponse, SidePot } from '../../../shared/src';
 
 export class PokerServiceMock {
 
@@ -76,10 +77,13 @@ export class PokerServiceMock {
         return of();
     }
 
-    potUpdate() {
-        return of();
+    mainPotUpdate(): Observable<number> {
+        return of(666);
     }
 
+    sidePotUpdate(): Observable<SidePot[]> {
+        return of();
+    }
 
     roundUpdate() {
         return of();
