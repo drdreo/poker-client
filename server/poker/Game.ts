@@ -5,7 +5,7 @@ import { Player } from './Player';
 
 export class Game {
     public pot: number = 0;
-    public splitPots: SplitPot[] = [];
+    public sidePots: SidePot[] = [];
     public round: Round;
     public deck: string[] = [];
     public board: string[] = [];
@@ -93,8 +93,9 @@ export class Game {
     }
 
     splitPot(potPlayers: Player[]) {
-        this.splitPots.push(new SplitPot(this.pot, potPlayers));
+        this.sidePots.push(new SidePot(this.pot, potPlayers));
         this.pot = 0;
+        potPlayers.filter(player => player.allIn).forEach(player => player.hasSidePot = true);
     }
 
     fillDeck() {
@@ -134,7 +135,7 @@ export class Round {
 }
 
 
-export class SplitPot {
+export class SidePot {
     constructor(public amount: number, public players: Player[]) { }
 }
 

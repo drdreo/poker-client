@@ -6,6 +6,7 @@ export const testConfig = () => ({
     WHITELIST: ['http://localhost:4200'],
     TABLE: {
         END_GAME_DELAY: 0,
-        NEXT_GAME_DELAY: 10000 // should just prevent next game from being triggered
+        NEXT_GAME_DELAY: 10000, // should just prevent next game from being triggered
+        AUTO_DESTROY_DELAY: 5000
     }
 } as Config);

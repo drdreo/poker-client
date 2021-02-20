@@ -59,7 +59,6 @@ export interface PlayerLeft {
 
 export interface GameWinners {
     winners: Winner[];
-    pot: number;
 }
 
 export interface PlayerOverview {
@@ -79,8 +78,10 @@ export interface SplitPot {
     playerIDs: string[];
 }
 
-export interface Winner extends Pick<PlayerOverview, 'id'| 'name' | 'chips'> {
-    potType: string,
+export type PotType = "main" | "sidepot" | string;
+
+export interface Winner extends Pick<PlayerOverview, 'id'| 'name' | 'allIn'> {
+    potType: PotType,
     amount: number,
     hand?: {
         handName: string;

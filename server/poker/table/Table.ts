@@ -8,6 +8,7 @@ import { TableConfig } from '../../config/table.config';
 import { Game } from '../Game';
 import { Player } from '../Player';
 import { TableCommand, TableCommandName } from './TableCommand';
+import Timeout = NodeJS.Timeout;
 
 
 export class Table {
@@ -27,6 +28,7 @@ export class Table {
 
 
     private logger;
+    private timeouts: Timeout[] = [];
 
     constructor(
         private CONFIG: TableConfig,
@@ -50,6 +52,12 @@ export class Table {
         if (minPlayers > maxPlayers) {
             throw new Error('Parameter [minPlayers] must be less than or equal to [maxPlayers].');
         }
+    }
+
+    public destroy(): void {
+        this.timeouts.forEach(timeout =>{
+            clearTimeout(timeout);
+        });
     }
 
     public hasGame(): boolean {
@@ -86,7 +94,7 @@ export class Table {
 
     public getSplitPots(): SplitPot[] {
         const pots: SplitPot[] = [];
-        for (let pot of this.game.splitPots) {
+        for (let pot of this.game.sidePots) {
             const playerIDs = pot.players.reduce((prev, cur) => {
                 prev.push(cur.id);
                 return prev;
@@ -480,14 +488,14 @@ export class Table {
                 }
 
                 // wait for the winner announcement
-                setTimeout(() => {
+                this.timeouts.push(setTimeout(() => {
                     this.processWinners(everyoneElseFolded);
-                }, this.CONFIG.END_GAME_DELAY);
+                }, this.CONFIG.END_GAME_DELAY));
 
                 // auto-create new game
-                setTimeout(() => {
+                this.timeouts.push(setTimeout(() => {
                     this.newGame();
-                }, this.CONFIG.NEXT_GAME_DELAY);
+                }, this.CONFIG.NEXT_GAME_DELAY));
 
                 // stop the game progress since we are done
                 return false;
@@ -502,10 +510,11 @@ export class Table {
     }
 
     private processBetsNew(everyoneElseFolded: boolean = false) {
-        let activePlayers = this.players.filter(player => player.bet > 0);
+        // let activePlayers = this.players.filter(player => player.bet > 0);
+        let activePlayers = this.players.filter(player => player.bet > 0 || !player.folded && player.allIn && !player.hasSidePot);
         const allInPlayers = activePlayers.filter(player => player.allIn);
 
-        // handle split pots if someone went all-in, and a player raised
+        // handle split pots if someone went all-in, and a player raised or bet
         const allinBets = allInPlayers.reduce((bets, player) => {
             const idx = this.getPlayerIndexByID(player.id);
             const bet = this.game.getBet(idx);
@@ -515,7 +524,11 @@ export class Table {
 
         const maxBet = this.game.getMaxBet();
         const raised = allinBets.some(bet => bet < maxBet);
+        const allInButNoBet = allinBets.some(bet => !bet);
         // if the all-in bet is maxBet
+        if (maxBet && allInButNoBet) {
+            this.game.splitPot(activePlayers);
+        }
 
         if (allInPlayers.length > 0 && raised) {
             this.logger.warn('Creating new split pot cause someone went all in!');
@@ -570,7 +583,7 @@ export class Table {
 
         // determine if we need a new split pot when all-in was called
         const allInPlayers = activePlayers.filter(player => player.allIn);
-        const hasSplitPot = this.game.splitPots.some(pot => pot.players.some(player => {
+        const hasSplitPot = this.game.sidePots.some(pot => pot.players.some(player => {
             return allInPlayers.some(p => p.id === player.id);
         }));
 
@@ -624,8 +637,7 @@ export class Table {
 
     private processWinners(everyoneElseFolded: boolean) {
 
-        // TODO: A all in player is included in the availablePLayers and might win the pot
-        const availablePlayers = this.players.filter(player => !player.folded);
+        const availablePlayers = this.players.filter(player => !player.folded && !player.hasSidePot);
 
         let mainPot = this.game.pot;
         const winners: Winner[] = [];
@@ -635,29 +647,27 @@ export class Table {
         // todo: refactor the pot data to use winners earnings on client
 
         // if there were side pots, process the winners of each
-        for (let splitPot of this.game.splitPots) {
-            winners.push(...this.mapWinners(splitPot.players, everyoneElseFolded, splitPot.amount, 'side'));
+        for (let i = 0; i < this.game.sidePots.length; i++){
+            let splitPot = this.game.sidePots[i];
+            winners.push(...this.mapWinners(splitPot.players, everyoneElseFolded, splitPot.amount, 'sidepot' + i));
         }
 
         if (winners.length === 1) {
             this.logger.debug(`Player[${ winners[0].name }] has won the game and receives ${ winners[0].amount }!`);
-            this.getPlayer(winners[0].id).chips += mainPot;
         } else {
             let winnerNames = winners.reduce((prev, cur) => prev + ', ' + cur.name, '');
-            let earnings = Math.round(mainPot / winners.length);
-            this.logger.debug(`Players[${ winnerNames }] have a tie and split the pot for ${ earnings } each!`);
-
-            for (const winner of winners) {
-                this.getPlayer(winner.id).chips += winner.amount;
-            }
+            this.logger.debug(`Players[${ winnerNames }] won!`);
         }
 
+        for (const winner of winners) {
+            this.getPlayer(winner.id).chips += winner.amount;
+        }
 
         // announce winner
         this.commands$.next({
             name: TableCommandName.GameWinners,
             table: this.name,
-            data: { winners, pot: mainPot }
+            data: { winners }
         });
     }
 
@@ -665,7 +675,7 @@ export class Table {
         const potWinners = [...this.getWinners(availablePlayers, everyoneElseFolded)];
         const potEarning = pot / potWinners.length;
         return potWinners.map((player) => {
-            return { ...player, potType, amount: potEarning };
+            return { ...player.formatWinner(), potType, amount: potEarning };
         });
     }
 

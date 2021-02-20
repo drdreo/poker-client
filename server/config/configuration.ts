@@ -19,6 +19,7 @@ export const devConfig = () => ({
     WHITELIST: ['http://localhost:4200'],
     TABLE: {
         END_GAME_DELAY: 1500,
-        NEXT_GAME_DELAY: 5000
+        NEXT_GAME_DELAY: 5000,
+        AUTO_DESTROY_DELAY: 5000
     }
 } as Config);
