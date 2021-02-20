@@ -92,7 +92,7 @@ export class Table {
         return GameStatus.Waiting;
     }
 
-    public getSplitPots(): SidePot[] {
+    public getSidePots(): SidePot[] {
         const pots: SidePot[] = [];
         for (let pot of this.game.sidePots) {
             const playerIDs = pot.players.reduce((prev, cur) => {
@@ -215,7 +215,7 @@ export class Table {
         this.commands$.next({
             name: TableCommandName.PotUpdate,
             table: this.name,
-            data: { pot: this.game.pot, sidePots: this.getSplitPots() }
+            data: { pot: this.game.pot, sidePots: this.getSidePots() }
         });
     }
 
@@ -462,7 +462,7 @@ export class Table {
         if (this.isEndOfRound() || everyoneElseFolded) {
             let round = this.game.round.type;
 
-            this.processBetsNew(everyoneElseFolded);
+            this.processBets(everyoneElseFolded);
 
             // all players all in or all except one is all in
             const allInPlayers = this.players.filter(player => player.allIn);
@@ -509,7 +509,7 @@ export class Table {
         return true;
     }
 
-    private processBetsNew(everyoneElseFolded: boolean = false) {
+    private processBets(everyoneElseFolded: boolean = false) {
         // let activePlayers = this.players.filter(player => player.bet > 0);
         let activePlayers = this.players.filter(player => player.bet > 0 || !player.folded && player.allIn && !player.hasSidePot);
         const allInPlayers = activePlayers.filter(player => player.allIn);
@@ -527,11 +527,11 @@ export class Table {
         const allInButNoBet = allinBets.some(bet => !bet);
         // if the all-in bet is maxBet
         if (maxBet && allInButNoBet) {
-            this.game.splitPot(activePlayers);
+            this.game.createSidePot(activePlayers);
         }
 
         if (allInPlayers.length > 0 && raised) {
-            this.logger.warn('Creating new split pot cause someone went all in!');
+            this.logger.warn('Creating new side pot cause someone went all in!');
 
             do {
                 const lowestBet = this.game.getLowestBet();
@@ -550,7 +550,7 @@ export class Table {
 
                 activePlayers = this.players.filter(player => player.bet > 0);
                 if (activePlayers.length > 1) {
-                    this.game.splitPot(activePlayers);
+                    this.game.createSidePot(activePlayers);
                 }
             } while (activePlayers.length > 1);
 
@@ -577,64 +577,6 @@ export class Table {
         this.sendPotUpdate();
     }
 
-    private processBets() {
-
-        let activePlayers = this.players.filter(player => player.bet > 0);
-
-        // determine if we need a new split pot when all-in was called
-        const allInPlayers = activePlayers.filter(player => player.allIn);
-        const hasSplitPot = this.game.sidePots.some(pot => pot.players.some(player => {
-            return allInPlayers.some(p => p.id === player.id);
-        }));
-
-        if (allInPlayers.length > 0 && !hasSplitPot && this.game.pot > 0) {
-            this.logger.warn('Creating new split pot cause last round was called!');
-            this.game.splitPot(activePlayers);
-        }
-
-        do {
-            const lowestBet = this.game.getLowestBet();
-            let pot = 0;
-            for (let i = 0; i < this.players.length; i++) {
-                const player = this.players[i];
-
-                if (player.bet > 0) {
-                    pot += lowestBet;
-                    player.bet -= lowestBet;
-                    this.game.bet(i, player.bet);
-                }
-            }
-
-            this.game.pot += pot;
-
-            activePlayers = this.players.filter(player => player.bet > 0);
-            if (activePlayers.length > 1) {
-                this.game.splitPot(activePlayers);
-            }
-        } while (activePlayers.length > 1);
-
-        // if there is money left, give it back
-        const leftOvers = this.game.getLastBet();
-        if (leftOvers) {
-            this.players[leftOvers.index].chips += leftOvers.bet;
-        }
-
-        // merge the split pots back, if it was not all in
-        // this.game.splitPots.forEach((splitPot, index) => {
-        //         const noAllIn = splitPot.players.every(player => !player.allIn);
-        //         if (noAllIn) {
-        //             this.game.pot += splitPot.amount;
-        //             this.game.splitPots.splice(index, 1);
-        //         }
-        //     }
-        // );
-
-
-        this.resetPlayerBets();
-        this.game.round.bets = [];
-        this.sendPotUpdate();
-    }
-
     private processWinners(everyoneElseFolded: boolean) {
 
         const availablePlayers = this.players.filter(player => !player.folded && !player.hasSidePot);
@@ -648,8 +590,8 @@ export class Table {
 
         // if there were side pots, process the winners of each
         for (let i = 0; i < this.game.sidePots.length; i++){
-            let splitPot = this.game.sidePots[i];
-            winners.push(...this.mapWinners(splitPot.players, everyoneElseFolded, splitPot.amount, 'sidepot' + i));
+            let sidePot = this.game.sidePots[i];
+            winners.push(...this.mapWinners(sidePot.players, everyoneElseFolded, sidePot.amount, 'sidepot' + i));
         }
 
         if (winners.length === 1) {

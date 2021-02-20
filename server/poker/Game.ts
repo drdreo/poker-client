@@ -92,7 +92,7 @@ export class Game {
         this.pot += bets;
     }
 
-    splitPot(potPlayers: Player[]) {
+    createSidePot(potPlayers: Player[]) {
         this.sidePots.push(new SidePot(this.pot, potPlayers));
         this.pot = 0;
         potPlayers.filter(player => player.allIn).forEach(player => player.hasSidePot = true);
