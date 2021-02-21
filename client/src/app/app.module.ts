@@ -1,11 +1,13 @@
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { NgModule } from '@angular/core';
+import { NgModule, ErrorHandler, APP_INITIALIZER } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { Router } from '@angular/router';
+import * as Sentry from '@sentry/angular';
 import { SocketIoConfig, SocketIoModule } from 'ngx-socket-io';
-import { environment } from '../environments/environment';
 
+import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ErrorService } from './error.service';
@@ -32,7 +34,23 @@ const config: SocketIoConfig = { url: environment.socket_url, options: {} };
         TableModule
     ],
     providers: [
-        { provide: HTTP_INTERCEPTORS, useClass: ErrorService, multi: true  }
+        { provide: HTTP_INTERCEPTORS, useClass: ErrorService, multi: true },
+        {
+            provide: ErrorHandler,
+            useValue: Sentry.createErrorHandler({
+                showDialog: false
+            })
+        },
+        {
+            provide: Sentry.TraceService,
+            deps: [Router]
+        },
+        {
+            provide: APP_INITIALIZER,
+            useFactory: () => () => {},
+            deps: [Sentry.TraceService],
+            multi: true
+        }
     ],
     bootstrap: [AppComponent]
 })

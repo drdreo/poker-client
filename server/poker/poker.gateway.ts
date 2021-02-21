@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, UseInterceptors } from '@nestjs/common';
 import {
     ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse
 } from '@nestjs/websockets';
@@ -7,6 +7,7 @@ import {
     PokerEvent, GameStatus, GameRoundUpdate, GameBoardUpdate, GameDealerUpdate, GameCurrentPlayer, GameWinners, GamePotUpdate,
     GamePlayersUpdate, PlayerBet, HomeInfo, PlayerEvent, ServerJoined, PlayerChecked, PlayerCalled, PlayerFolded
 } from '../../shared/src';
+import { SentryInterceptor } from '../sentry.interceptor';
 import { Player } from './Player';
 import { remapCards } from './table/Table';
 import { TableService } from './table/table.service';
@@ -17,6 +18,7 @@ interface Connection {
     playerID: string | null;
 }
 
+@UseInterceptors(SentryInterceptor)
 @WebSocketGateway()
 export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
