@@ -4,6 +4,7 @@ import { BehaviorSubject, merge, Observable, Subject, interval } from 'rxjs';
 import { switchMap, takeUntil, tap, shareReplay } from 'rxjs/operators';
 import { GameStatus, Card, BetType, SidePot } from '../../../../shared/src';
 import { environment } from '../../environments/environment';
+import { AudioService, Sounds } from '../audio.service';
 import { PokerService } from '../poker.service';
 import { NotificationService } from '../utils/notification.service';
 import { MessageType } from './feed/feed-message/feed-message.component';
@@ -19,6 +20,13 @@ export class TableComponent implements OnInit, OnDestroy {
 
 
     inProduction = environment.production;
+    showOverlay: boolean = false;
+    isCurrentPlayer: boolean = false; // if its the current clients turn
+    playDuration$ = interval(1000);
+
+    get clientPlayerID(): string {
+        return localStorage.getItem('playerID');
+    }
 
     /***Comes from server*/
     tableName: string;
@@ -44,8 +52,6 @@ export class TableComponent implements OnInit, OnDestroy {
         return this._player$.getValue();
     }
 
-    showOverlay: boolean = false;
-    isCurrentPlayer: boolean = false; // if its the current clients turn
 
     private _gameStatus$ = new BehaviorSubject<GameStatus>(GameStatus.Waiting);
     gameStatus$ = this._gameStatus$.asObservable();
@@ -57,8 +63,6 @@ export class TableComponent implements OnInit, OnDestroy {
         return this._betAmount$.getValue();
     }
 
-    playDuration$ = interval(1000);
-
     // maybe refactor to better data structure if more come up
     private _maxBet$ = new BehaviorSubject<number>(0);
     maxBet$ = this._maxBet$.asObservable();
@@ -67,13 +71,9 @@ export class TableComponent implements OnInit, OnDestroy {
         return this._maxBet$.getValue();
     }
 
-    get clientPlayerID(): string {
-        return localStorage.getItem('playerID');
-    }
-
     unsubscribe$ = new Subject();
 
-    constructor(private route: ActivatedRoute, public notification: NotificationService, public pokerService: PokerService) {
+    constructor(private route: ActivatedRoute, public notification: NotificationService, public pokerService: PokerService, private audio: AudioService) {
 
         this.currentPlayerID$ = this.pokerService.currentPlayer()
                                     .pipe(
@@ -102,8 +102,8 @@ export class TableComponent implements OnInit, OnDestroy {
                 }
             });
 
-        this.board$ = this.pokerService.boardUpdated();
-        this.pot$ = this.pokerService.mainPotUpdate();
+        this.board$ = this.pokerService.boardUpdated().pipe(tap(() => this.audio.play(Sounds.CardDealt)));
+        this.pot$ = this.pokerService.mainPotUpdate().pipe(tap(() => this.audio.play(Sounds.ChipsBet)));
         this.sidePots$ = this.pokerService.sidePotUpdate();
 
         this.pokerService.playerLeft()
@@ -315,6 +315,9 @@ export class TableComponent implements OnInit, OnDestroy {
 
     private loadDevThings() {
         console.log('Loading dev data!');
+        setTimeout(() => {
+            this.audio.play(Sounds.Leave);
+        }, 2000);
         this.loadDevPlayers();
 
         const devPotSubject = new BehaviorSubject<number>(666);
@@ -327,7 +330,6 @@ export class TableComponent implements OnInit, OnDestroy {
     }
 
     private loadDevPlayers() {
-
 
         const playerColors = [
             '#444444', '#3498db', '#9b59b6',

@@ -132,6 +132,11 @@ $name-font-family: 'Balsamiq Sans', cursive;
     .name {
       transform: rotatez(0deg);
     }
+
+    .bank-value, .mise-value {
+      transform: rotatez(270deg);
+    }
+
   }
 
   &.player-4 {
@@ -159,7 +164,7 @@ $name-font-family: 'Balsamiq Sans', cursive;
     left: 25%;
     transform: translatex(-50%) translatey(50%) rotatez(180deg);
 
-    .name, .cards, .bank-value, .mise-value, .dealer-btn  {
+    .name, .cards, .bank-value, .mise-value, .dealer-btn {
       transform: rotatez(180deg);
     }
   }
@@ -172,6 +177,11 @@ $name-font-family: 'Balsamiq Sans', cursive;
     .name {
       transform: rotatez(0deg);
     }
+
+    .bank-value, .mise-value {
+      transform: rotatez(90deg);
+    }
+
   }
 
   &.player-8 {

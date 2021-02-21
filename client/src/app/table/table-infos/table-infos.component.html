@@ -6,7 +6,7 @@
 <ng-container *ngIf="(sidePotsWithPlayers$ | async) as sidePots">
     <span class="side-pots">SidePots</span>
     <div class="side-pot" *ngFor="let pot of sidePots">
-        <div class="side-pot__amount">{{pot.amount}}</div>
+        <div class="side-pot__amount">{{pot.amount}}€</div>
         <ul>
             <li *ngFor="let player of pot.players" [style.color]="player.color">{{player.name}}</li>
         </ul>

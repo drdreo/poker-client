@@ -13,8 +13,9 @@ const routes: Routes = [
     { path: '**', component: ErrorComponent }
 ];
 
+// relativeLinkResolution: 'legacy',
 @NgModule({
-    imports: [RouterModule.forRoot(routes, { relativeLinkResolution: 'legacy', preloadingStrategy: PreloadAllModules })],
+    imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })],
     exports: [RouterModule]
 })
 export class AppRoutingModule {
