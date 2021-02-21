@@ -2,17 +2,11 @@
 
     <app-feed></app-feed>
 
-    <div class="table-infos">
-        <h1 class="table__name">Table <span class="is-primary">{{tableName}}</span></h1>
-        <!--        <ul>-->
-        <!--            <li class="table__player" *ngFor="let player of (players$ | async)"> {{player.name}}-->
-        <!--                <ng-container *ngIf="(currentPlayerID$ | async) === player.id">- {{player.id}}</ng-container>-->
-        <!--            </li>-->
-        <!--        </ul>-->
 
-        <div class="table__time">Play time: {{playDuration$ | async }}s</div>
-        SidePots: {{ sidePots$ | async | json }}
-    </div>
+    <table-infos class="table-infos" [tableName]="tableName" [players$]="players$" [sidePots$]="sidePots$"
+                 [time$]="playDuration$"
+
+    ></table-infos>
 
     <h3 class="table__action" *ngIf="notification.action$ | async as currentAction">{{currentAction}}</h3>
 
@@ -39,7 +33,12 @@
 
         </ng-container>
         <div *ngIf="player.chips > 0" class="game_controls__bet-amount">
-            <input (input)="onBetChange($event)" [value]="player.chips / 2" type="range" step="10" min="10" [max]="player.chips"/>
+            <input (input)="onBetChange($event)"
+                   [value]="player.chips / 2"
+                   type="range"
+                   step="10"
+                   min="10"
+                   [max]="player.chips"/>
             {{betAmount$ | async}}
             <button class="button" (click)="bet();">Bet</button>
         </div>
@@ -53,9 +52,7 @@
                       [ngStyle]="{'top.px': -0.5*i +5 }"></app-card>
         </div>
         <div class="board card-place">
-            <app-card *ngFor="let card of (board$ | async)"
-                      [figure]="card.figure"
-                      [value]="card.value"></app-card>
+            <app-card *ngFor="let card of (board$ | async)" [figure]="card.figure" [value]="card.value"></app-card>
         </div>
         <div class="players">
             <app-player *ngFor="let player of (players$ | async); let i = index;"
@@ -88,7 +85,7 @@
     </div>
 
     <div class="overlay" [class.visible]="showOverlay && inProduction">
-        <h2>Sorry, but the table <span class="is-primary">{{tableName}}</span> does not exist</h2>
+        <h2>Sorry, but the table <span class="is-primary-text">{{tableName}}</span> does not exist</h2>
         <a routerLink="/" class="link">Back to home?</a>
     </div>
 </div>

@@ -26,6 +26,7 @@ export class Table {
 
     commands$: Subject<TableCommand>;
 
+    startTime = new Date();
 
     private logger;
     private timeouts: Timeout[] = [];
@@ -55,7 +56,7 @@ export class Table {
     }
 
     public destroy(): void {
-        this.timeouts.forEach(timeout =>{
+        this.timeouts.forEach(timeout => {
             clearTimeout(timeout);
         });
     }
@@ -589,7 +590,7 @@ export class Table {
         // todo: refactor the pot data to use winners earnings on client
 
         // if there were side pots, process the winners of each
-        for (let i = 0; i < this.game.sidePots.length; i++){
+        for (let i = 0; i < this.game.sidePots.length; i++) {
             let sidePot = this.game.sidePots[i];
             winners.push(...this.mapWinners(sidePot.players, everyoneElseFolded, sidePot.amount, 'sidepot' + i));
         }

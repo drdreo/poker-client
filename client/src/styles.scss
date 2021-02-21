@@ -3,6 +3,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Balsamiq+Sans&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
 
 body {
   margin: 0;
@@ -16,6 +17,14 @@ body {
   color: white;
 }
 
+h1,h2,h3,h4,h5,h6 {
+  font-size:100%;
+  font-weight:normal;
+}
+
+ul{
+  margin: 0;
+}
 
 .page-container {
   display: flex;
@@ -29,10 +38,6 @@ body {
   color: white;
 }
 
-.is-primary {
-  color: $primary-color;
-}
-
 .button {
   padding: .5rem .75rem;
   box-sizing: border-box;
@@ -43,7 +48,7 @@ body {
   cursor: pointer;
 
   font-size: 1rem;
-  color: white;
+  color: $button-color;
   background-color: $button-background-color;
   transition: background-color .17s ease, color .17s ease;
 
@@ -93,19 +98,11 @@ body {
 .link {
   text-decoration: underline;
   cursor: pointer;
-  color: $primary-color;
+  color: $link-color;
   background-color: transparent;
   border: none;
 
   &:hover {
-    color: darken($primary-color, 10);
+    color: darken($link-color, 10);;
   }
-}
-
-.is-hidden {
-  display: none;
-}
-
-.is-invisible {
-  visibility: hidden;
 }

@@ -324,11 +324,6 @@ export class TableComponent implements OnInit, OnDestroy {
         }]);
         this.pot$ = devPotSubject.asObservable();
         this.sidePots$ = devsidePotsSubject.asObservable();
-        // devPotSubject.next(666);
-        // devsidePotsSubject.next([{ amount: 60, playerIDs: ['tester1', 'tester2'] }, {
-        //     amount: 100,
-        //     playerIDs: ['tester3', 'tester4', 'dealer']
-        // }]);
     }
 
     private loadDevPlayers() {

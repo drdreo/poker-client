@@ -3,12 +3,9 @@
 
 .table-infos {
   position: absolute;
-  top: 0;
+  top: 12px;
   left: 5%;
-
-  .table_name {
-
-  }
+  min-width: 150px;
 }
 
 .table__action {

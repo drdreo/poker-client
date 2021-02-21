@@ -7,6 +7,7 @@ import { PlayerComponent } from './player/player.component';
 import { CoinsComponent } from './coins/coins.component';
 import { FeedComponent } from './feed/feed.component';
 import { FeedMessageComponent } from './feed/feed-message/feed-message.component';
+import { TableInfosComponent } from './table-infos/table-infos.component';
 
 
 @NgModule({
@@ -17,6 +18,7 @@ import { FeedMessageComponent } from './feed/feed-message/feed-message.component
 		CoinsComponent,
 		FeedComponent,
 		FeedMessageComponent,
+		TableInfosComponent,
 	],
 	imports: [
 		CommonModule,
