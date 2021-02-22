@@ -33,9 +33,12 @@ jobs:
       name: E2E tests
     - script: npm run test
       name: Backend tests
+      
+    - stage: deploy
+      if: branch = master
+      deploy:
+        provider: netlify
+        site: https://pokern.netlify.app
+        edge: true # opt in to dpl v2
+        dir: "client/dist/"
 
-deploy:
-  provider: netlify
-  site: https://pokern.netlify.app
-  edge: true # opt in to dpl v2
-  dir: "client/dist/"
