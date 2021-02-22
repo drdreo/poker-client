@@ -37,7 +37,6 @@ jobs:
     - stage: Deploy
       if: branch = master
       deploy:
-        name: Netlify deploy
         provider: netlify
         site: https://pokern.netlify.app
         edge: true # opt in to dpl v2
