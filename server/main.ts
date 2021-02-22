@@ -29,7 +29,7 @@ async function bootstrap() {
                 callback(new Error(`Origin[${ origin }] Not allowed by CORS`));
             }
         },
-        allowedHeaders: 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe',
+        allowedHeaders: 'X-Requested-With,X-HTTP-Method-Override,Content-Type,OPTIONS,Accept,Observe,sentry-trace',
         methods: 'GET,PUT,POST,DELETE,UPDATE,OPTIONS',
         credentials: true
     });

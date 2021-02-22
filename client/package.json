@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "start:hmr": "ng serve --hmr",
+    "start:test": "ng serve --configuration=test",
     "build": "ng build",
     "build:prod": "ng build --prod",
     "test": "ng test",
@@ -14,7 +15,8 @@
     "cy": "cypress open",
     "cy:run": "cypress run",
     "cy:verify": "cypress verify",
-    "ci:cy-run": "concurrently \"npm run start\" \"wait-on http-get://localhost:4200 && npm run e2e\" --kill-others --success first"
+    "ci:cy-run": "concurrently \"npm run start:test\" \"wait-on http-get://localhost:4200 && npm run e2e\" --kill-others --success first",
+    "test-server": "http-server ./dist -p 4200"
   },
   "dependencies": {
     "@angular/animations": "~11.0.5",
@@ -43,6 +45,7 @@
     "codelyzer": "^6.0.0",
     "concurrently": "^5.3.0",
     "cypress": "^6.4.0",
+    "http-server": "^0.12.3",
     "jasmine-core": "~3.6.0",
     "jasmine-spec-reporter": "~5.0.0",
     "karma": "~5.1.1",

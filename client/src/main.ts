@@ -6,18 +6,22 @@ import { Integrations } from '@sentry/tracing';
 import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 
-Sentry.init({
-    dsn: 'https://8f134bc88a744cc28130a298f6bdae88@o528779.ingest.sentry.io/5646355',
-    integrations: [
-        new Integrations.BrowserTracing({
-            tracingOrigins: ['localhost', 'https://pokern.herokuapp.com/api'],
-            routingInstrumentation: Sentry.routingInstrumentation
-        })
-    ],
-    release: "pokern@0.0.0",
-    environment: environment.production ? 'production' : 'dev',
-    tracesSampleRate: environment.production ? 0.2 : 1.0
-});
+setTimeout(() => {
+    console.log('Initiating Sentry...');
+
+    Sentry.init({
+        dsn: environment.sentry.dsn,
+        integrations: [
+            new Integrations.BrowserTracing({
+                tracingOrigins: environment.sentry.tracingOrigins,
+                routingInstrumentation: Sentry.routingInstrumentation
+            })
+        ],
+        release: 'pokern@0.0.0',
+        environment: environment.production ? 'production' : 'dev',
+        tracesSampleRate: environment.production ? 0.2 : 1.0
+    });
+}, 2000);
 
 if (environment.production) {
     enableProdMode();
