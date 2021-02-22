@@ -36,6 +36,7 @@ jobs:
 
     - stage: Deploy
       if: branch = master
+      script: skip     # usually you do not want to rerun any tests
       deploy:
         provider: netlify
         site: https://pokern.netlify.app
