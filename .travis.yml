@@ -33,10 +33,11 @@ jobs:
       name: E2E tests
     - script: npm run test
       name: Backend tests
-      
-    - stage: deploy
+
+    - stage: Deploy
       if: branch = master
       deploy:
+        name: Netlify deploy
         provider: netlify
         site: https://pokern.netlify.app
         edge: true # opt in to dpl v2

@@ -5,6 +5,7 @@ export const environment = {
 	poker_api: 'http://localhost:3000/api/poker',
 	socket_url: 'ws://localhost:3000',
 	sentry: {
-		dsn: ''
+		dsn: '',
+		tracingOrigins: ''
 	}
 };
