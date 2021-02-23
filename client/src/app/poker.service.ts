@@ -99,14 +99,12 @@ export class PokerService implements OnDestroy {
     }
 
     boardUpdated(): Observable<Card[]> {
-        return zip(
-            this.socket.fromEvent<GameBoardUpdate>(PokerEvent.BoardUpdate),
-            interval(1000)
-        ).pipe(
-            map(([s, d]) => s),
-            map(data => data.board),
-            tap(console.log)
-        );
+        return this.socket.fromEvent<GameBoardUpdate>(PokerEvent.BoardUpdate)
+                   .pipe(
+                        map(data => of(data.board).pipe(delay(1000))),
+                        concatAll()
+                        tap(console.log)
+                    );
     }
 
     private potUpdate(): Observable<GamePotUpdate> {
