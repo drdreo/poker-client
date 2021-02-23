@@ -102,7 +102,7 @@ export class PokerService implements OnDestroy {
         return this.socket.fromEvent<GameBoardUpdate>(PokerEvent.BoardUpdate)
                    .pipe(
                         map(data => of(data.board).pipe(delay(1000))),
-                        concatAll()
+                        concatAll(),
                         tap(console.log)
                     );
     }
