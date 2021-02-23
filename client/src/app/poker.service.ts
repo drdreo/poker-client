@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
-import { Observable, Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, Subject, zip, interval } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import {
     PokerEvent, GameStatus, TableResponse, HomeInfo, ServerJoined, GameWinners, GamePotUpdate, PlayerLeft, GameDealerUpdate,
     GameCurrentPlayer, GameBoardUpdate, PlayerCalled, PlayerChecked, PlayerFolded, GameRoundUpdate, PlayerBet, GamePlayersUpdate, Card,
@@ -98,10 +98,15 @@ export class PokerService implements OnDestroy {
                    .pipe(map(data => data.dealerPlayerID));
     }
 
-    // TODO: Delay each received event 1s, for the auto-play feature if everyone is all-in
     boardUpdated(): Observable<Card[]> {
-        return this.socket.fromEvent<GameBoardUpdate>(PokerEvent.BoardUpdate)
-                   .pipe(map(data => data.board));
+        return zip(
+            this.socket.fromEvent<GameBoardUpdate>(PokerEvent.BoardUpdate),
+            interval(1000)
+        ).pipe(
+            map(([s, d]) => s),
+            map(data => data.board),
+            tap(console.log)
+        );
     }
 
     private potUpdate(): Observable<GamePotUpdate> {

@@ -2,11 +2,11 @@
 
     <app-feed></app-feed>
 
-
-    <table-infos class="table-infos" [tableName]="tableName" [players$]="players$" [sidePots$]="sidePots$"
-                 [time$]="playDuration$"
-
-    ></table-infos>
+    <table-infos class="table-infos"
+                 [tableName]="tableName"
+                 [players$]="players$"
+                 [sidePots$]="sidePots$"
+                 [time$]="playDuration$"></table-infos>
 
     <h3 class="table__action" *ngIf="notification.action$ | async as currentAction">{{currentAction}}</h3>
 

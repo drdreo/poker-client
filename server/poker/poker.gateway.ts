@@ -76,7 +76,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
             if (table) {
                 this.sendTo(table, PokerEvent.PlayerLeft, { playerID });
             } else {
-                this.logger.error(`Player[${ playerID }] disconnected or left, but table[${table}] no longer exists!`);
+                this.logger.error(`Player[${ playerID }] disconnected or left, but table[${ table }] no longer exists!`);
             }
         }
     }
@@ -93,13 +93,16 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (playerID && this.tableService.playerExists(playerID)) {
             this.logger.debug(`Player[${ playerName }] needs to reconnect!`);
             newPlayerID = playerID;
-            this.tableService.playerReconnected(playerID);
+            const table = this.tableService.playerReconnected(playerID);
+            this.logger.debug(`Players last table[${table.name}] found!`);
 
-            const table = this.tableService.getTable(sanitized_room);
             const gameStatus = table.getGameStatus();
             // tell the player again all information if game started: players, game status, board, pot
             if (gameStatus === GameStatus.Started) {
-                table.sendCurrentPlayer();
+                if(table.players.length && table.currentPlayer){
+                    table.sendCurrentPlayer();
+                }
+
                 table.sendGameBoardUpdate();
                 table.sendPotUpdate();
             }

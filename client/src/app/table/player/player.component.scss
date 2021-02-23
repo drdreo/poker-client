@@ -133,10 +133,9 @@ $name-font-family: 'Balsamiq Sans', cursive;
       transform: rotatez(0deg);
     }
 
-    .bank-value, .mise-value {
+    .cards, .bank-value, .mise-value {
       transform: rotatez(270deg);
     }
-
   }
 
   &.player-4 {
@@ -176,6 +175,10 @@ $name-font-family: 'Balsamiq Sans', cursive;
 
     .name {
       transform: rotatez(0deg);
+    }
+
+    .cards {
+      transform: rotatez(90deg);
     }
 
     .bank-value, .mise-value {

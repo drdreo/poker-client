@@ -80,11 +80,12 @@ export class TableService {
         }
     }
 
-    playerReconnected(playerID: string) {
+    playerReconnected(playerID: string): Table {
         for (let table of this.tables) {
             const player = table.players.find(player => player.id === playerID);
             if (player) {
                 player.disconnected = false;
+                return table;
             }
         }
     }

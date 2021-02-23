@@ -9,7 +9,8 @@ export const environment = {
 	socket_url: 'ws://localhost:3000',
 	sentry: {
 		dsn: 'https://8f134bc88a744cc28130a298f6bdae88@o528779.ingest.sentry.io/5646355',
-		tracingOrigins: ['localhost']
+		tracingOrigins: ['localhost:4200'],
+		tracesSampleRate: 1.0
 	}
 };
 

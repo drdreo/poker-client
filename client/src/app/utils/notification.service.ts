@@ -29,6 +29,10 @@ export class NotificationService {
         this._action$.next(message);
     }
 
+    clearAction(){
+        this._action$.next('');
+    }
+
     addFeedMessage(content: string, type?: MessageType) {
         this._newFeedMessage$.next({ content, type });
     }

@@ -29,6 +29,7 @@
     "@nestjs/platform-express": "^7.6.11",
     "@nestjs/platform-socket.io": "^7.6.11",
     "@nestjs/websockets": "^7.6.11",
+    "@ntegral/nestjs-sentry": "^2.0.5",
     "@sentry/node": "^6.2.0",
     "@sentry/tracing": "^6.2.0",
     "@types/poker-evaluator": "^0.3.3",

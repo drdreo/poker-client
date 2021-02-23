@@ -138,6 +138,7 @@ export class Table {
     }
 
     private setStartPlayer() {
+        // TODO: Headsup check
         // just hardcoded dealer is always last and small blind is first, maybe do better
         // check if dealer was set already, so move it further instead
         if (this.dealer) {
@@ -356,6 +357,8 @@ export class Table {
             throw new WsException('Not your turn!');
         }
 
+        // TODO: Check if bet was at least max bet.
+
         const player = this.players[playerIndex];
         player.pay(bet);
         // check if all-in
@@ -466,15 +469,16 @@ export class Table {
             this.processBets(everyoneElseFolded);
 
             // all players all in or all except one is all in
+            let autoPlaying = false;
             const allInPlayers = this.players.filter(player => player.allIn);
-            if (allInPlayers.length >= this.getActivePlayers().length - 1) {
+            if (allInPlayers.length != 0 && allInPlayers.length >= this.getActivePlayers().length - 1) { // TODO: HEADS UP is des voisch wenn wer folded
                 this.logger.debug('All in situation, auto-play game');
+                autoPlaying = true;
                 this.showPlayersCards();
 
                 // play until RoundType.River
                 do {
                     round = this.nextRound(round);
-                    this.sendGameBoardUpdate();
                 } while (round !== RoundType.River);
             }
 
@@ -488,15 +492,18 @@ export class Table {
                     this.showPlayersCards();
                 }
 
-                // wait for the winner announcement
+                // wait for the winner announcement. Maximum of 5s card display delay
                 this.timeouts.push(setTimeout(() => {
                     this.processWinners(everyoneElseFolded);
-                }, this.CONFIG.END_GAME_DELAY));
+                    // hide pot after giving it to the winner
+                    this.game.pot = 0;
+                    this.sendPotUpdate();
 
-                // auto-create new game
-                this.timeouts.push(setTimeout(() => {
-                    this.newGame();
-                }, this.CONFIG.NEXT_GAME_DELAY));
+                    // auto-create new game
+                    this.timeouts.push(setTimeout(() => {
+                        this.newGame();
+                    }, this.CONFIG.NEXT_GAME_DELAY));
+                }, this.CONFIG.END_GAME_DELAY));
 
                 // stop the game progress since we are done
                 return false;
@@ -562,13 +569,15 @@ export class Table {
             }
 
         } else {
-            // if everyone else folded, repay the last bet
+            // if everyone else folded, repay the last bet if it existed
             if (everyoneElseFolded) {
                 const lastPlayer = this.getActivePlayers()[0];
                 const lastPlayerIndex = this.getPlayerIndexByID(lastPlayer.id);
                 const lastPlayersBet = this.game.getBet(lastPlayerIndex);
-                lastPlayer.chips += lastPlayersBet;
-                this.game.bet(lastPlayerIndex, 0);
+                if (lastPlayersBet) {
+                    lastPlayer.chips += lastPlayersBet;
+                    this.game.bet(lastPlayerIndex, 0);
+                }
             }
             this.game.moveBetsToPot();
         }
@@ -602,6 +611,7 @@ export class Table {
             this.logger.debug(`Players[${ winnerNames }] won!`);
         }
 
+        // pay the winners
         for (const winner of winners) {
             this.getPlayer(winner.id).chips += winner.amount;
         }

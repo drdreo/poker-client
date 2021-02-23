@@ -74,6 +74,7 @@ export class TableComponent implements OnInit, OnDestroy {
     unsubscribe$ = new Subject();
 
     constructor(private route: ActivatedRoute, public notification: NotificationService, public pokerService: PokerService, private audio: AudioService) {
+        this.notification.clearAction();
 
         this.currentPlayerID$ = this.pokerService.currentPlayer()
                                     .pipe(
@@ -102,7 +103,7 @@ export class TableComponent implements OnInit, OnDestroy {
                 }
             });
 
-        this.board$ = this.pokerService.boardUpdated().pipe(tap(() => this.audio.play(Sounds.CardDealt)));
+        this.board$ = this.pokerService.boardUpdated();
         this.pot$ = this.pokerService.mainPotUpdate().pipe(tap(() => this.audio.play(Sounds.ChipsBet)));
         this.sidePots$ = this.pokerService.sidePotUpdate();
 
@@ -121,7 +122,10 @@ export class TableComponent implements OnInit, OnDestroy {
 
         this.pokerService.gameStarted()
             .pipe(takeUntil(this.unsubscribe$))
-            .subscribe(() => this._gameStatus$.next(GameStatus.Started));
+            .subscribe(() => {
+                this._gameStatus$.next(GameStatus.Started);
+                this.notification.clearAction();
+            });
 
         this.pokerService.gameEnded()
             .pipe(takeUntil(this.unsubscribe$))
@@ -260,13 +264,12 @@ export class TableComponent implements OnInit, OnDestroy {
 
             }, error => {
                 console.log(error);
+                if (!environment.production) {
+                    this.loadDevThings();
+                }
                 this.showOverlay = true;
             });
 
-
-        if (!environment.production) {
-            // this.loadDevThings();
-        }
 
     }
 
@@ -373,7 +376,7 @@ export class TableComponent implements OnInit, OnDestroy {
         let players = [];
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: 'tester1', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: []
+            id: 'tester1', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
         });
         players.push({
             allIn: false, disconnected: true, folded: false, id: 'tester2', name: 'DCer',
@@ -381,27 +384,27 @@ export class TableComponent implements OnInit, OnDestroy {
         });
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: 'tester3', name: 'DrDreo', color: getColor(), chips: 667, bet: 579, cards: []
+            id: 'tester3', name: 'DrDreo', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
         });
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: 'tester4', name: 'Hackl', color: getColor(), chips: 667, bet: 579, cards: []
+            id: 'tester4', name: 'Hackl', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
         });
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: 'tester5', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: []
+            id: 'tester5', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
         });
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: 'tester6', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: []
+            id: 'tester6', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
         });
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: 'tester7', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: []
+            id: 'tester7', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
         });
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: 'dealer', name: 'Dealer', color: getColor(), chips: 667, bet: 579, cards: []
+            id: 'dealer', name: 'Dealer', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
         });
 
         this._players$.next(players);
