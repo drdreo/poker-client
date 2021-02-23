@@ -39,7 +39,7 @@ jobs:
       script: skip     # usually you do not want to rerun any tests
       deploy:
         provider: netlify
-        site: pokern
+        site: ba84f3f4-6438-4553-83e3-f9e8198dd9a1
         edge: true # opt in to dpl v2
         dir: "client/dist/"
 
