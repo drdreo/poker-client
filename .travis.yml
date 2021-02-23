@@ -36,10 +36,10 @@ jobs:
 
     - stage: Deploy
       if: branch = master
+      script: skip     # usually you do not want to rerun any tests
       deploy:
-        name: Netlify deploy
         provider: netlify
-        site: https://pokern.netlify.app
+        site: pokern
         edge: true # opt in to dpl v2
         dir: "client/dist/"
 
