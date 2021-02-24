@@ -4,10 +4,6 @@ import { map, tap } from 'rxjs/operators';
 import { SidePot } from '../../../../../shared/src';
 import { Player } from '../player/player.component';
 
-interface SidePotWithPlayers extends SidePot {
-    players: Player[];
-}
-
 @Component({
     selector: 'table-infos',
     templateUrl: './table-infos.component.html',
@@ -20,28 +16,26 @@ export class TableInfosComponent implements OnInit {
     @Input() time$: Observable<number>;
     @Input() sidePots$: Observable<SidePot[]>;
 
-    sidePotsWithPlayers$: Observable<SidePotWithPlayers[]>;
-
     constructor() {
 
 
     }
 
     ngOnInit(): void {
-        this.sidePotsWithPlayers$ = combineLatest([this.players$, this.sidePots$])
-            .pipe(
-                tap(console.log),
-                map(([players, sidePots]) => {
-                    const newSidePots: SidePotWithPlayers[] = [];
-                    sidePots.forEach(pot => {
-                        const potPlayers = [];
-                        pot.playerIDs.forEach(id => {
-                            potPlayers.push(players.find(player => player.id === id));
-                        });
-                        newSidePots.push({ ...pot, players: potPlayers });
-                    });
-                    return newSidePots;
-                }));
+        // this.sidePotsWithPlayers$ = combineLatest([this.players$, this.sidePots$])
+        //     .pipe(
+        //         tap(console.log),
+        //         map(([players, sidePots]) => {
+        //             const newSidePots: SidePotWithPlayers[] = [];
+        //             sidePots.forEach(pot => {
+        //                 const potPlayers = [];
+        //                 pot.playerIDs.forEach(id => {
+        //                     potPlayers.push(players.find(player => player.id === id));
+        //                 });
+        //                 newSidePots.push({ ...pot, players: potPlayers });
+        //             });
+        //             return newSidePots;
+        //         }));
     }
 
 }

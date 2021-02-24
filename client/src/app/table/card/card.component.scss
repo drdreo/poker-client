@@ -16,7 +16,7 @@
 
 
   &--back {
-    background-image: url("https://upload.wikimedia.org/wikipedia/commons/4/43/Card_back_02.svg");
+    background-image: url('/assets/cards/back_02.svg');
     background-size: contain;
     border: 2px solid white;
   }
@@ -60,7 +60,7 @@
 .figures {
   width: 20px;
   height: 20px;
-  background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/441095/clovers.svg');
+  background-image: url('/assets/cards/clovers.svg');
   background-size: 40px;
 
   &.S {

@@ -73,9 +73,16 @@ export interface PlayerOverview {
     disconnected: boolean;
 }
 
+export interface SidePotPlayer{
+    id: string;
+    name: string;
+    color: string;
+    allIn: boolean;
+}
+
 export interface SidePot {
     amount: number;
-    playerIDs: string[];
+    players: SidePotPlayer[];
 }
 
 export type PotType = "main" | "sidepot" | string;

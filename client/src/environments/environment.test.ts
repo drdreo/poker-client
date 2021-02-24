@@ -7,6 +7,7 @@ export const environment = {
 	sentry: {
 		dsn: '',
 		tracingOrigins: '',
-		tracesSampleRate : 0
+		tracesSampleRate : 0,
+		enabled: false
 	}
 };

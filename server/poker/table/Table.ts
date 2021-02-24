@@ -3,7 +3,7 @@ import { WsException } from '@nestjs/websockets';
 import * as PokerEvaluator from 'poker-evaluator';
 import { Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { GameStatus, Card, BetType, RoundType, PlayerOverview, SidePot, Winner } from '../../../shared/src';
+import { GameStatus, Card, BetType, RoundType, PlayerOverview, SidePot, Winner, SidePotPlayer } from '../../../shared/src';
 import { TableConfig } from '../../config/table.config';
 import { Game } from '../Game';
 import { Player } from '../Player';
@@ -96,29 +96,18 @@ export class Table {
     public getSidePots(): SidePot[] {
         const pots: SidePot[] = [];
         for (let pot of this.game.sidePots) {
-            const playerIDs = pot.players.reduce((prev, cur) => {
-                prev.push(cur.id);
+            const potPlayers = pot.players.reduce((prev, cur) => {
+                prev.push(Player.getSidePotPlayer(cur));
                 return prev;
-            }, [] as string[]);
-            pots.push({ amount: pot.amount, playerIDs });
+            }, [] as SidePotPlayer[]);
+            pots.push({ amount: pot.amount, players: potPlayers });
         }
         return pots;
     }
 
-
     public getPlayersPreview(showCards = false): PlayerOverview[] {
         return this.players.map(player => {
-            return {
-                id: player.id,
-                name: player.name,
-                chips: player.chips,
-                bet: player.bet,
-                cards: showCards && !player.folded ? remapCards(player.cards) : hideCards(player.cards),
-                allIn: player.allIn,
-                folded: player.folded,
-                color: player.color,
-                disconnected: player.disconnected
-            } as PlayerOverview;
+            return Player.getPlayerOverview(player, showCards);
         });
     }
 
@@ -699,7 +688,7 @@ function getNextIndex(currentIndex: number, array: any[]): number {
     return currentIndex === array.length - 1 ? 0 : currentIndex + 1;
 }
 
-function hideCards(cards: any[]): Card[] | undefined {
+export function hideCards(cards: any[]): Card[] | undefined {
     if (!cards) {
         return undefined;
     }

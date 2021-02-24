@@ -27,7 +27,8 @@
             "tsConfig": "tsconfig.app.json",
             "aot": true,
             "assets": [
-              "src/favicon.ico",
+              "src/manifest.json",
+              "src/browserconfig.xml",
               "src/assets",
               "src/_redirects"
             ],
@@ -103,7 +104,8 @@
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
             "assets": [
-              "src/favicon.ico",
+              "src/manifest.json",
+              "src/browserconfig.xml",
               "src/assets"
             ],
             "styles": [

@@ -17,7 +17,8 @@ Sentry.init({
         })
     ],
     release: 'pokern@0.0.0',
-    environment: environment.production ? 'production' : 'dev',
+    environment: environment.name,
+    enabled: environment.sentry.enabled,
     tracesSampleRate: environment.sentry.tracesSampleRate,
 });
 

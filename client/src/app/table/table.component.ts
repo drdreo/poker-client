@@ -324,9 +324,9 @@ export class TableComponent implements OnInit, OnDestroy {
         this.loadDevPlayers();
 
         const devPotSubject = new BehaviorSubject<number>(666);
-        const devsidePotsSubject = new BehaviorSubject<SidePot[]>([{ amount: 60, playerIDs: ['tester1', 'tester2'] }, {
+        const devsidePotsSubject = new BehaviorSubject<SidePot[]>([{ amount: 60, players:  [this.players[0], this.players[1]] }, {
             amount: 100,
-            playerIDs: ['tester3', 'tester4', 'dealer']
+            players: [this.players[1], this.players[2]]
         }]);
         this.pot$ = devPotSubject.asObservable();
         this.sidePots$ = devsidePotsSubject.asObservable();

@@ -1,6 +1,7 @@
-import { EvaluatedHand } from 'poker-evaluator/lib/types';
 import { WsException } from '@nestjs/websockets';
-import { Winner } from '../../shared/src';
+import { EvaluatedHand } from 'poker-evaluator/lib/types';
+import { SidePotPlayer, PlayerOverview } from '../../shared/src';
+import { remapCards, hideCards } from './table/Table';
 
 export class Player {
     cards: string[] = [];
@@ -12,6 +13,29 @@ export class Player {
     disconnected: boolean = false;
 
     constructor(public id: string, public name: string, public color: string, public chips: number) {
+    }
+
+    static getPlayerOverview(player: Player, showCards: boolean): PlayerOverview {
+        return {
+            id: player.id,
+            name: player.name,
+            chips: player.chips,
+            bet: player.bet,
+            cards: showCards && !player.folded ? remapCards(player.cards) : hideCards(player.cards),
+            allIn: player.allIn,
+            folded: player.folded,
+            color: player.color,
+            disconnected: player.disconnected
+        };
+    }
+
+    static getSidePotPlayer(player: Player): SidePotPlayer {
+        return {
+            allIn: player.allIn,
+            color: player.color,
+            id: player.id,
+            name: player.name
+        };
     }
 
     reset() {
@@ -35,7 +59,8 @@ export class Player {
             id: this.id,
             name: this.name,
             allIn: this.allIn,
-            hand: this.hand,
-        }
+            hand: this.hand
+        };
     }
+
 }

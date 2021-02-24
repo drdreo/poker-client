@@ -87,6 +87,9 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         const sanitized_room = roomName.toLowerCase();
         socket.join(sanitized_room);
+        socket['table'] = sanitized_room;
+        socket['playerID'] = playerID; // either overwrite existing one, reset it if its undefined
+
         let newPlayerID;
 
         // existing Player needs to reconnect
@@ -99,10 +102,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
             const gameStatus = table.getGameStatus();
             // tell the player again all information if game started: players, game status, board, pot
             if (gameStatus === GameStatus.Started) {
-                if(table.players.length && table.currentPlayer){
-                    table.sendCurrentPlayer();
-                }
-
+                table.sendCurrentPlayer();
                 table.sendGameBoardUpdate();
                 table.sendPotUpdate();
             }
