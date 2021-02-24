@@ -21,6 +21,21 @@ $name-font-family: 'Balsamiq Sans', cursive;
   position: absolute;
   font-family: $player-font-family;
 
+  &.allin{
+    .bank-value{
+      color: $yellow;
+    }
+  }
+  &.folded {
+    .avatar {
+      filter: grayscale(1);
+    }
+
+    .cards {
+      display: none;
+    }
+  }
+
   .avatar {
     width: 120px;
     height: 120px;
@@ -69,10 +84,6 @@ $name-font-family: 'Balsamiq Sans', cursive;
 
     app-card:first-child {
       margin-right: 20px;
-    }
-
-    &.folded {
-      display: none;
     }
   }
 
@@ -233,10 +244,6 @@ $name-font-family: 'Balsamiq Sans', cursive;
     font-weight: bold;
     font-size: 12px;
     color: #96e296;
-
-    &:after {
-      content: $currency-symbol;
-    }
   }
 
   app-coins {

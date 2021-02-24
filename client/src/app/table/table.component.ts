@@ -391,7 +391,7 @@ export class TableComponent implements OnInit, OnDestroy {
             id: 'tester4', name: 'Hackl', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
         });
         players.push({
-            allIn: false, disconnected: false, folded: false,
+            allIn: false, disconnected: false, folded: true,
             id: 'tester5', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
         });
         players.push({
@@ -399,8 +399,8 @@ export class TableComponent implements OnInit, OnDestroy {
             id: 'tester6', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
         });
         players.push({
-            allIn: false, disconnected: false, folded: false,
-            id: 'tester7', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
+            allIn: true, disconnected: false, folded: false,
+            id: 'tester7', name: 'rivy331', color: getColor(), chips: 0, bet: 579, cards: test_cards(2)
         });
         players.push({
             allIn: false, disconnected: false, folded: false,

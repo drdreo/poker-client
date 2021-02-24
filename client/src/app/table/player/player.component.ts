@@ -18,4 +18,7 @@ export class PlayerComponent {
 
     constructor() { }
 
+    bankValue(chips: number, allIn: boolean): string {
+        return allIn ? 'All In' : chips + '€';
+    }
 }

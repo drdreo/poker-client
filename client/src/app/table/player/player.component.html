@@ -1,6 +1,11 @@
-<div class="player" [ngClass]="'player-'+ (seat)" [class.playing]="playing" [class.dealer]="dealer">
+<div class="player"
+     [ngClass]="'player-'+ (seat)"
+     [class.playing]="playing"
+     [class.dealer]="dealer"
+     [class.folded]="player.folded"
+     [class.allin]="player.allIn">
     <div class="bank">
-        <div class="bank-value">{{ player.chips }}</div>
+        <div class="bank-value">{{bankValue(player.chips, player.allIn)}}</div>
         <app-coins class="jetons-100" [amount]="player.chips" [type]="100"></app-coins>
         <app-coins class="jetons-50" [amount]="player.chips" [type]="50"></app-coins>
         <app-coins class="jetons-10" [amount]="player.chips" [type]="10"></app-coins>
