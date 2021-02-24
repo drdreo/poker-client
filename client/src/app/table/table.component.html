@@ -10,7 +10,7 @@
 
     <h3 class="table__action" *ngIf="notification.action$ | async as currentAction">{{currentAction}}</h3>
 
-    <div class="ready-container" *ngIf="(gameStatus$ | async) == 'waiting' && player$ | async">
+    <div class="ready-container" *ngIf="(gameStatus$ | async) == 'waiting' && (player$ | async).id === (players$ | async)[0].id">
         <div class="ready-container__message">Everyone's ready?</div>
         <button class="button" (click)="startGame()">Start</button>
     </div>
