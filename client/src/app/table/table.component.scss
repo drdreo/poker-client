@@ -28,30 +28,7 @@
 
 .game_controls {
   position: absolute;
-  bottom: 5%;
-  display: flex;
-  align-items: center;
-
-  &__bet-amount {
-    margin-left: 1rem;
-    display: flex;
-    align-items: center;
-  }
-
-  .button {
-    padding: 1rem 1.5rem;
-
-    margin-left: 1rem;
-
-    &.check {
-      color: white;
-      background-color: lighten($primary-background-color, 5%);
-
-      &:hover {
-        background-color: lighten($primary-background-color, 2%);
-      }
-    }
-  }
+  bottom: 3%;
 }
 
 .table {

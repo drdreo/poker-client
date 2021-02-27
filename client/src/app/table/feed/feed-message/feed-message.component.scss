@@ -2,6 +2,14 @@
 
 .message {
 
+  &__info {
+    color: $gray;
+  }
+
+  &__error {
+    color: $danger-color;
+  }
+
   &__played {
     color: $primary-color;
   }

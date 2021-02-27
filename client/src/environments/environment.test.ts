@@ -6,7 +6,7 @@ export const environment = {
 	socket_url: 'ws://localhost:3000',
 	sentry: {
 		dsn: '',
-		tracingOrigins: '',
+		tracingOrigins: undefined,
 		tracesSampleRate : 0,
 		enabled: false
 	}

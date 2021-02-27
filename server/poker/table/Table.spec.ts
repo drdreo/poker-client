@@ -18,7 +18,7 @@ describe('Table', () => {
 
     afterEach(async () => {
         if (table) {
-           table.destroy();
+            table.destroy();
         }
     });
 
@@ -134,14 +134,14 @@ describe('Table', () => {
             let currentPlayer = table.getPlayerIndexByID(player2);
             expect(table.currentPlayer).toBe(currentPlayer);
 
+            table.check(player2); // BB check
+
+            currentPlayer = table.getPlayerIndexByID(player2);
+            expect(table.currentPlayer).toBe(currentPlayer);
+
             table.check(player2);
 
             currentPlayer = table.getPlayerIndexByID(player3);
-            expect(table.currentPlayer).toBe(currentPlayer);
-
-            table.check(player3);
-
-            currentPlayer = table.getPlayerIndexByID(player2);
             expect(table.currentPlayer).toBe(currentPlayer);
         });
 
@@ -157,16 +157,43 @@ describe('Table', () => {
             expect(table.currentPlayer).toBe(currentPlayer);
 
             table.call(player2);
+            // next round
             currentPlayer = table.getPlayerIndexByID(player1);
+            expect(table.currentPlayer).toBe(currentPlayer);
+        });
+
+
+        it('should give the big blind an option if it was called', () => {
+            table.call(player3);
+            table.call(player1);
+
+            expect(table.getRoundType()).toBe(RoundType.Deal);
+            let currentPlayer = table.getPlayerIndexByID(player2);
+            expect(table.currentPlayer).toBe(currentPlayer);
+            table.check(player2);
+
+            expect(table.getRoundType()).toBe(RoundType.Flop);
+        });
+
+        it('should give the big blind an option, if it raises, should not progress', () => {
+            table.call(player3);
+            table.call(player1);
+
+            expect(table.getRoundType()).toBe(RoundType.Deal);
+
+            table.bet(player2, 100);
+
+            expect(table.getRoundType()).toBe(RoundType.Deal);
+            let currentPlayer = table.getPlayerIndexByID(player3);
             expect(table.currentPlayer).toBe(currentPlayer);
         });
 
         it('should set correct bets', () => {
             table.bet(player3, bigBlind * 2);
 
-            expect(table.getGame().getBet(0)).toBe(smallBlind);
-            expect(table.getGame().getBet(1)).toBe(bigBlind);
-            expect(table.getGame().getBet(2)).toBe(bigBlind * 2);
+            expect(table.getGame().getBetAmount(0)).toBe(smallBlind);
+            expect(table.getGame().getBetAmount(1)).toBe(bigBlind);
+            expect(table.getGame().getBetAmount(2)).toBe(bigBlind * 2);
         });
 
         it('should be all in', () => {
@@ -176,19 +203,38 @@ describe('Table', () => {
         });
 
 
-        it('should start a new Round(Flop) after everyone called the blinds', () => {
+        it('should stay in the same Round(Deal) after everyone called the blinds', () => {
             expect(table.getRoundType()).toBe(RoundType.Deal);
 
             table.call(player3);
             table.call(player1);
 
+            expect(table.getRoundType()).toBe(RoundType.Deal);
+        });
+
+        it('should progress to the next Round(Flop) after BB checked', () => {
+            expect(table.getRoundType()).toBe(RoundType.Deal);
+
+            table.call(player3);
+            table.call(player1);
+            table.check(player2);
+
             expect(table.getRoundType()).toBe(RoundType.Flop);
+        });
+
+        it('should have nothing in the pot after everyone called the blinds', () => {
+
+            table.call(player3);
+            table.call(player1);
+
+            expect(table.getGame().pot).toBe(0);
         });
 
         it('should have the correct amount in the pot after everyone called the blinds', () => {
 
             table.call(player3);
             table.call(player1);
+            table.check(player2);
 
             expect(table.getGame().pot).toBe(60);
         });
@@ -311,6 +357,7 @@ describe('Table', () => {
                 // Round(Deal)
                 table.call(player3);
                 table.call(player1);
+                table.check(player2);
             });
 
             it('should have 60 chips in the pot', () => {

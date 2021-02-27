@@ -3,9 +3,9 @@
 
 <div class="table__time">Play time: {{time$ | async }}s</div>
 
-<ng-container *ngIf="(sidePots$ | async) as sidePots">
+<ng-container *ngIf="(sidePots$ | async)?.length > 0">
     <span class="side-pots">SidePots</span>
-    <div class="side-pot" *ngFor="let pot of sidePots">
+    <div class="side-pot" *ngFor="let pot of (sidePots$ | async)">
         <div class="side-pot__amount">{{pot.amount}}€</div>
         <ul>
             <li *ngFor="let player of pot.players" [style.color]="player.color">{{player.name}}</li>

@@ -15,25 +15,25 @@
     <div class="avatar" [ngStyle]="{'background-color': player.color || 'dodgerblue'}"></div>
     <div class="name">{{player.name}}</div>
     <div class="dealer-btn">D</div>
-    <div class="mise" *ngIf="player.bet > 0">
+    <div class="mise" *ngIf="player.bet?.amount > 0">
         <div class="mise-value">
-            {{ player.bet }}
+            {{ player.bet.amount }}
         </div>
 
         <div class="jetons jetons-100">
-            <app-coins [amount]="player.bet" [type]="100"></app-coins>
+            <app-coins [amount]="player.bet.amount" [type]="100"></app-coins>
         </div>
         <div class="jetons jetons-50">
-            <app-coins [amount]="player.bet" [type]="50"></app-coins>
+            <app-coins [amount]="player.bet.amount" [type]="50"></app-coins>
         </div>
         <div class="jetons jetons-10">
-            <app-coins [amount]="player.bet" [type]="10"></app-coins>
+            <app-coins [amount]="player.bet.amount" [type]="10"></app-coins>
         </div>
         <div class="jetons jetons-5">
-            <app-coins [amount]="player.bet" [type]="5"></app-coins>
+            <app-coins [amount]="player.bet.amount" [type]="5"></app-coins>
         </div>
         <div class="jetons jetons-1">
-            <app-coins [amount]="player.bet" [type]="1"></app-coins>
+            <app-coins [amount]="player.bet.amount" [type]="1"></app-coins>
         </div>
     </div>
     <div class="cards" [class.folded]="player.folded">

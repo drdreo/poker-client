@@ -56,13 +56,6 @@ export class TableComponent implements OnInit, OnDestroy {
     private _gameStatus$ = new BehaviorSubject<GameStatus>(GameStatus.Waiting);
     gameStatus$ = this._gameStatus$.asObservable();
 
-    _betAmount$: BehaviorSubject<number> = new BehaviorSubject(0);
-    betAmount$ = this._betAmount$.asObservable();
-
-    get betAmount(): number {
-        return this._betAmount$.getValue();
-    }
-
     // maybe refactor to better data structure if more come up
     private _maxBet$ = new BehaviorSubject<number>(0);
     maxBet$ = this._maxBet$.asObservable();
@@ -290,8 +283,13 @@ export class TableComponent implements OnInit, OnDestroy {
         this.pokerService.call();
     }
 
-    bet() {
-        this.pokerService.bet(this.betAmount);
+    bet(bet: number) {
+        if (this.player.chips < bet) {
+            this.notification.addFeedMessage(`Not enough chips to bet ${ bet }!`, MessageType.Error);
+            return;
+        }
+
+        this.pokerService.bet(bet);
     }
 
     fold() {
@@ -311,11 +309,6 @@ export class TableComponent implements OnInit, OnDestroy {
         return Array(number).fill(0).map((x, i) => i);
     }
 
-    onBetChange($event: Event) {
-        const amount = +(<HTMLInputElement>$event.target).value;
-        this._betAmount$.next(amount);
-    }
-
     private loadDevThings() {
         console.log('Loading dev data!');
         setTimeout(() => {
@@ -324,12 +317,14 @@ export class TableComponent implements OnInit, OnDestroy {
         this.loadDevPlayers();
 
         const devPotSubject = new BehaviorSubject<number>(666);
-        const devsidePotsSubject = new BehaviorSubject<SidePot[]>([{ amount: 60, players:  [this.players[0], this.players[1]] }, {
+        const devsidePotsSubject = new BehaviorSubject<SidePot[]>([{ amount: 60, players: [this.players[0], this.players[1]] }, {
             amount: 100,
             players: [this.players[1], this.players[2]]
         }]);
         this.pot$ = devPotSubject.asObservable();
         this.sidePots$ = devsidePotsSubject.asObservable();
+
+        this._maxBet$.next(579);
     }
 
     private loadDevPlayers() {
@@ -376,38 +371,39 @@ export class TableComponent implements OnInit, OnDestroy {
         let players = [];
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: 'tester1', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
+            id: 'tester1', name: 'rivy331', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
             allIn: false, disconnected: true, folded: false, id: 'tester2', name: 'DCer',
-            color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
+            color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: 'tester3', name: 'DrDreo', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
+            id: 'tester3', name: 'DrDreo', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: 'tester4', name: 'Hackl', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
+            id: 'tester4', name: 'Hackl', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
             allIn: false, disconnected: false, folded: true,
-            id: 'tester5', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
+            id: 'tester5', name: 'rivy331', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: 'tester6', name: 'rivy331', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
+            id: 'tester6', name: 'rivy331', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
             allIn: true, disconnected: false, folded: false,
-            id: 'tester7', name: 'rivy331', color: getColor(), chips: 0, bet: 579, cards: test_cards(2)
+            id: 'tester7', name: 'rivy331', color: getColor(), chips: 0, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: 'dealer', name: 'Dealer', color: getColor(), chips: 667, bet: 579, cards: test_cards(2)
+            id: 'dealer', name: 'Dealer', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
 
         this._players$.next(players);
+        this._player$.next(players[2]);
     }
 
     getPlayerSeat(index: number) {

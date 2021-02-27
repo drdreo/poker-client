@@ -1,0 +1,59 @@
+@import "../../../assets/styles/utils";
+
+.controls {
+  display: flex;
+  align-items: center;
+
+  &__bet {
+    margin-left: 1rem;
+    display: flex;
+    align-items: center;
+
+    &__chip {
+      cursor: pointer;
+      margin-right: 0.5rem;
+
+      &-asset {
+        width: 75px;
+        transition: transform 0.3s ease-in-out;
+      }
+
+      &:hover {
+        .controls__bet__chip-asset {
+          transform: translateY(-50%);
+        }
+      }
+
+      &:active {
+        .controls__bet__chip-asset {
+          transform: translateY(-50%) scale(0.9);
+        }
+      }
+    }
+
+    &__amount {
+      min-width: 35px;
+    }
+  }
+
+  .button {
+    padding: .75rem 1rem;
+
+    margin-left: 0.5rem;
+
+    &.check {
+      color: white;
+      background-color: lighten($primary-background-color, 5%);
+
+      &:hover {
+        background-color: lighten($primary-background-color, 2%);
+      }
+    }
+
+    &.clear {
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}

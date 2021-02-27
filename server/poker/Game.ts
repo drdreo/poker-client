@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { RoundType } from '../../shared/src';
+import { RoundType, BetType } from '../../shared/src';
 import { Player } from './Player';
 
 
@@ -37,7 +37,11 @@ export class Game {
         }
     }
 
-    getBet(playerIndex: number): number | undefined {
+    getBetAmount(playerIndex: number): number | undefined {
+        return this.round.bets[playerIndex]?.amount;
+    }
+
+    getBet(playerIndex: number): Bet | undefined {
         return this.round.bets[playerIndex];
     }
 
@@ -48,10 +52,10 @@ export class Game {
     // Returns the index of the player with the last bet or undefined
     getLastBet(): { index: number, bet: number } | null {
 
-        for (let index = 0; index < this.round.bets.length; index++){
+        for (let index = 0; index < this.round.bets.length; index++) {
             let bet = this.round.bets[index];
-            if (bet > 0) {
-                return { index, bet };
+            if (bet.amount > 0) {
+                return { index, bet: bet.amount };
             }
         }
 
@@ -61,8 +65,8 @@ export class Game {
     getLowestBet(): number {
         let lowest = Number.POSITIVE_INFINITY;
         for (let bet of this.round.bets) {
-            if (bet > 0) {
-                lowest = Math.min(lowest, bet);
+            if (bet.amount > 0) {
+                lowest = Math.min(lowest, bet.amount);
             }
         }
 
@@ -70,25 +74,31 @@ export class Game {
     }
 
     getMaxBet(): number {
-        return this.round.bets.reduce((p, c) => {
-            return (p > c ? p : c);
+        return this.round.bets.reduce((maxBet, bet) => {
+            return (maxBet > bet.amount ? maxBet : bet.amount);
         }, 0);
     }
 
     check(playerIndex: number) {
-        this.round.bets[playerIndex] = 0;
+        const playersBet = this.getBetAmount(playerIndex);
+        this.round.bets[playerIndex] = new Bet(playersBet || 0, BetType.Check);
     }
 
     call(playerIndex: number) {
-        this.round.bets[playerIndex] = this.getMaxBet();
+        this.round.bets[playerIndex] = new Bet(this.getMaxBet(), BetType.Call);
     }
 
-    bet(playerIndex: number, bet: number) {
+
+    bet(playerIndex: number, bet: Bet) {
         this.round.bets[playerIndex] = bet;
     }
 
+    betNewBet(playerIndex: number, amount: number, type: BetType) {
+        this.round.bets[playerIndex] = new Bet(amount, type);
+    }
+
     moveBetsToPot() {
-        const bets = this.round.bets.reduce((prev, cur) => prev + cur, 0);
+        const bets = this.round.bets.reduce((prev, cur) => prev + cur.amount, 0);
         this.pot += bets;
     }
 
@@ -127,13 +137,14 @@ export class Game {
 // RoundTypes: Deal,Flop,Turn,River,Showdown
 // BetTypes: Bet,Raise,ReRaise, cap
 export class Round {
-    bets: number[] = [];
-
-    // betName: BetType = BetType.Bet;
+    bets: Bet[] = [];
 
     constructor(public type: RoundType) { }
 }
 
+export class Bet {
+    constructor(public amount: number, public type: BetType) {}
+}
 
 export class SidePot {
     constructor(public amount: number, public players: Player[]) { }

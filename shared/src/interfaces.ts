@@ -30,7 +30,8 @@ export enum BetType {
     BigBlind,
     Bet,
     Raise,
-    ReRaise,
+    Call,
+    Check,
 }
 
 export interface PokerTable {
@@ -66,11 +67,16 @@ export interface PlayerOverview {
     name: string;
     chips: number;
     color: string;
-    bet?: number
+    bet?: Bet
     cards?: Card[];
     allIn: boolean;
     folded: boolean;
     disconnected: boolean;
+}
+
+export interface Bet{
+    amount: number;
+    type: BetType;
 }
 
 export interface SidePotPlayer{

@@ -1,4 +1,6 @@
 <ng-container [ngSwitch]="message.type">
+    <div class="message message__info" *ngSwitchCase="messageTypes.Info">{{message.content}}</div>
+    <div class="message message__error" *ngSwitchCase="messageTypes.Error">{{message.content}}</div>
     <div class="message message__played" *ngSwitchCase="messageTypes.Played">{{message.content}}</div>
     <div class="message message__won" *ngSwitchCase="messageTypes.Won">{{message.content}}</div>
     <div class="message message__joined" *ngSwitchCase="messageTypes.Joined">{{message.content}}</div>

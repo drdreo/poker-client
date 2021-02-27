@@ -15,6 +15,7 @@ import { PokerModule } from './poker/poker.module';
             useFactory: async (cfg: ConfigService<Config>) => ({
                 dsn: cfg.get<SentryConfig>('SENTRY').DSN,
                 environment: cfg.get<Environment>('ENV') === Environment.PROD ? 'production' : 'dev',
+                enabled: cfg.get<Environment>('ENV') === Environment.PROD,
                 tracesSampleRate: cfg.get('SENTRY').TRACES_SAMPLE_RATE,
                 logLevel: LogLevel.Debug //based on sentry.io loglevel //
             }),

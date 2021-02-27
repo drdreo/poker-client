@@ -1,0 +1,38 @@
+<div class="controls" *ngIf="player">
+    <button class="button danger" (click)="onFold()">Fold</button>
+    <ng-container *ngIf="{ maxBet: maxBet$ | async} as data">
+        <button *ngIf="data.maxBet == 0; else callBtn" class="button check" (click)="onCheck()">Check</button>
+        <ng-template #callBtn>
+            <button *ngIf="data.maxBet !== player.bet?.amount" class="button" (click)="onCall()">
+                Call ({{ data.maxBet - player.bet?.amount}})
+            </button>
+        </ng-template>
+
+    </ng-container>
+    <div *ngIf="player.chips > 0" class="controls__bet">
+        <div class="controls__bet__chip" (click)="addBet(1)">
+            <img class="controls__bet__chip-asset" src="/assets/chip_gray_top.png" alt="1 chips"/>
+        </div>
+        <div class="controls__bet__chip" (click)="addBet(5)">
+            <img class="controls__bet__chip-asset" src="/assets/chip_lightblue_top.png" alt="5 chips"/>
+        </div>
+        <div class="controls__bet__chip" (click)="addBet(10)">
+            <img class="controls__bet__chip-asset" src="/assets/chip_red_top.png" alt="10 chips"/>
+        </div>
+        <div class="controls__bet__chip" (click)="addBet(50)">
+            <img class="controls__bet__chip-asset" src="/assets/chip_biege_top.png" alt="50 chips"/>
+        </div>
+        <div class="controls__bet__chip" (click)="addBet(100)">
+            <img class="controls__bet__chip-asset" src="/assets/chip_black_top.png" alt="100 chips"/>
+        </div>
+        <input (input)="onBetChange($event)"
+               [value]="betAmount$ | async"
+               type="range"
+               step="10"
+               min="10"
+               [max]="player.chips"/>
+        <span class="controls__bet__amount">{{betAmount$ | async}}</span>
+        <button class="button" (click)="onBet();">Bet</button>
+        <button class="button is-transparent clear" (click)="clearBet();">Reset</button>
+    </div>
+</div>

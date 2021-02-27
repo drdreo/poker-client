@@ -6,7 +6,8 @@ export const testConfig = () => ({
     WHITELIST: ['http://localhost:4200'],
     SENTRY: {
         DSN: '',
-        TRACES_SAMPLE_RATE: 0
+        TRACES_SAMPLE_RATE: 0,
+        ENABLED: false
     },
     TABLE: {
         END_GAME_DELAY: 0,

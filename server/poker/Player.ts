@@ -1,12 +1,12 @@
 import { WsException } from '@nestjs/websockets';
 import { EvaluatedHand } from 'poker-evaluator/lib/types';
-import { SidePotPlayer, PlayerOverview } from '../../shared/src';
+import { SidePotPlayer, PlayerOverview, Bet } from '../../shared/src';
 import { remapCards, hideCards } from './table/Table';
 
 export class Player {
     cards: string[] = [];
     hand: EvaluatedHand | null;
-    bet: number | null = 0;
+    bet: Bet | null = null;
     folded = false;
     allIn = false;
     hasSidePot = false;

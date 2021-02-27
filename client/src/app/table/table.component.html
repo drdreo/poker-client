@@ -10,7 +10,8 @@
 
     <h3 class="table__action" *ngIf="notification.action$ | async as currentAction">{{currentAction}}</h3>
 
-    <div class="ready-container" *ngIf="(gameStatus$ | async) == 'waiting' && (player$ | async) && (player$ | async).id === (players$ | async)[0]?.id">
+    <div class="ready-container"
+         *ngIf="(gameStatus$ | async) == 'waiting' && (player$ | async) && (player$ | async).id === (players$ | async)[0]?.id">
         <div class="ready-container__message">Everyone's ready?</div>
         <button class="button" (click)="startGame()">Start</button>
     </div>
@@ -20,30 +21,18 @@
     <!--        <button class="button" (click)="startGame()">Start</button>-->
     <!--    </div>-->
 
-    <div class="game_controls"
-         *ngIf="(gameStatus$ | async) == 'started' && isCurrentPlayer && player$ | async as player">
-        <button class="button danger" (click)="fold()">Fold</button>
-        <ng-container *ngIf="{ maxBet: maxBet$ | async} as data">
-            <button *ngIf="data.maxBet == 0; else callBtn" class="button check" (click)="check()">Check</button>
-            <ng-template #callBtn>
-                <button *ngIf="data.maxBet !== player.bet" class="button" (click)="call()">
-                    Call ({{ maxBet - player.bet}})
-                </button>
-            </ng-template>
 
-        </ng-container>
-        <div *ngIf="player.chips > 0" class="game_controls__bet-amount">
-            <input (input)="onBetChange($event)"
-                   [value]="player.chips / 2"
-                   type="range"
-                   step="10"
-                   min="10"
-                   [max]="player.chips"/>
-            {{betAmount$ | async}}
-            <button class="button" (click)="bet();">Bet</button>
-        </div>
-    </div>
+    <game-controls class="game_controls"
+                   *ngIf="(gameStatus$ | async) == 'started' && isCurrentPlayer && player$ | async as player"
+                   [player]="player"
+                   [maxBet$]="maxBet$"
+                   (checked)="check()"
+                   (called)="call()"
+                   (bet)="bet($event)"
+                   (folded)="fold()"
 
+
+    ></game-controls>
 
     <div class="table">
         <div class="stack card-place">

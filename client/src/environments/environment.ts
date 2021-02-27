@@ -11,7 +11,7 @@ export const environment = {
 		dsn: 'https://8f134bc88a744cc28130a298f6bdae88@o528779.ingest.sentry.io/5646355',
 		tracingOrigins: ['localhost:4200'],
 		tracesSampleRate: 1.0,
-		enabled: true
+		enabled: false
 	}
 };
 

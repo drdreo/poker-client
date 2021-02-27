@@ -5,7 +5,7 @@ import { Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { GameStatus, Card, BetType, RoundType, PlayerOverview, SidePot, Winner, SidePotPlayer } from '../../../shared/src';
 import { TableConfig } from '../../config/table.config';
-import { Game } from '../Game';
+import { Game, Bet } from '../Game';
 import { Player } from '../Player';
 import { TableCommand, TableCommandName } from './TableCommand';
 import Timeout = NodeJS.Timeout;
@@ -319,25 +319,27 @@ export class Table {
             throw new WsException('Not your turn!');
         }
 
-        const existingBet = this.game.getBet(playerIndex);
+        const existingBet = this.game.getBetAmount(playerIndex);
         const maxBet = this.game.getMaxBet();
         if (!maxBet || maxBet - existingBet === 0) {
             throw new WsException(`Can't call. No bet to call.`);
         }
 
         let betToPay = existingBet ? maxBet - existingBet : maxBet;
+        this.bet(playerID, betToPay, BetType.Call );
 
-        const player = this.players[playerIndex];
-        player.pay(betToPay);
-        player.bet += betToPay;
+        //
+        // const player = this.players[playerIndex];
+        // player.pay(betToPay);
+        // player.bet.amount += betToPay;
+        //
+        // this.game.call(playerIndex);
 
-        this.game.call(playerIndex);
-
-        const next = this.progress();
-        if (next) {
-            this.nextPlayer();
-            this.sendPlayersUpdate();
-        }
+        // const next = this.progress();
+        // if (next) {
+        //     this.nextPlayer();
+        //     this.sendPlayersUpdate();
+        // }
     }
 
     public bet(playerID: string, bet: number, type: BetType = BetType.Bet) {
@@ -355,10 +357,17 @@ export class Table {
             player.allIn = true;
         }
 
-        // if the player has already bet, add it to the current
-        player.bet += bet;
+        const playerBet = new Bet(bet, type);
 
-        this.game.bet(playerIndex, player.bet);
+        // if the player has already bet, add it to the current
+        const existingBet = player.bet;
+        if (existingBet) {
+            playerBet.amount += existingBet.amount;
+        }
+
+        player.bet = playerBet;
+
+        this.game.bet(playerIndex, playerBet);
 
         this.sendPlayerBet(playerID, bet, type);
         this.sendPlayersUpdate();
@@ -407,7 +416,8 @@ export class Table {
         // check if each player has folded, called or is all-in
         for (let i = 0; i < this.players.length; i++) {
             if (this.players[i].folded === false && !this.players[i].allIn) {
-                if (this.game.getBet(i) !== maxBet) {
+                const playersBet = this.game.getBet(i);
+                if (playersBet?.amount !== maxBet || playersBet.type === BetType.BigBlind) { // if other players just call the BB, give the BB an option as well
                     endOfRound = false;
                     break;
                 }
@@ -508,13 +518,13 @@ export class Table {
 
     private processBets(everyoneElseFolded: boolean = false) {
         // let activePlayers = this.players.filter(player => player.bet > 0);
-        let activePlayers = this.players.filter(player => player.bet > 0 || !player.folded && player.allIn && !player.hasSidePot);
+        let activePlayers = this.players.filter(player => player.bet?.amount > 0 || !player.folded && player.allIn && !player.hasSidePot);
         const allInPlayers = activePlayers.filter(player => player.allIn);
 
         // handle split pots if someone went all-in, and a player raised or bet
         const allinBets = allInPlayers.reduce((bets, player) => {
             const idx = this.getPlayerIndexByID(player.id);
-            const bet = this.game.getBet(idx);
+            const bet = this.game.getBetAmount(idx);
             bets.push(bet);
             return bets;
         }, [] as number[]);
@@ -536,16 +546,16 @@ export class Table {
                 for (let i = 0; i < this.players.length; i++) {
                     const player = this.players[i];
 
-                    if (player.bet > 0) {
+                    if (player.bet.amount > 0) {
                         pot += lowestBet;
-                        player.bet -= lowestBet;
+                        player.bet.amount -= lowestBet;
                         this.game.bet(i, player.bet);
                     }
                 }
 
                 this.game.pot += pot;
 
-                activePlayers = this.players.filter(player => player.bet > 0);
+                activePlayers = this.players.filter(player => player.bet.amount > 0);
                 if (activePlayers.length > 1) {
                     this.game.createSidePot(activePlayers);
                 }
@@ -564,8 +574,8 @@ export class Table {
                 const lastPlayerIndex = this.getPlayerIndexByID(lastPlayer.id);
                 const lastPlayersBet = this.game.getBet(lastPlayerIndex);
                 if (lastPlayersBet) {
-                    lastPlayer.chips += lastPlayersBet;
-                    this.game.bet(lastPlayerIndex, 0);
+                    lastPlayer.chips += lastPlayersBet.amount;
+                    this.game.betNewBet(lastPlayerIndex, 0, lastPlayersBet.type);
                 }
             }
             this.game.moveBetsToPot();
