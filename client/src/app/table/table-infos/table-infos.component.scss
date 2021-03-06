@@ -7,7 +7,7 @@ $text-font: 'Poppins', sans-serif;
   background-color: $input-background-color;
   padding: 0.75rem;
   font-size: 1rem;
-  border-radius: 3px;
+  border-radius: $primary-radius;
   font-family: $text-font;
 
   .table {

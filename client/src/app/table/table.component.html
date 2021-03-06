@@ -21,17 +21,17 @@
     <!--        <button class="button" (click)="startGame()">Start</button>-->
     <!--    </div>-->
 
+    <!--                   *ngIf="(gameStatus$ | async) == 'started' && isCurrentPlayer && player$ | async as player"-->
 
     <game-controls class="game_controls"
-                   *ngIf="(gameStatus$ | async) == 'started' && isCurrentPlayer && player$ | async as player"
                    [player]="player"
                    [maxBet$]="maxBet$"
+                   [pot]="pot$ | async"
+                   [bigBlind]="20"
                    (checked)="check()"
                    (called)="call()"
                    (bet)="bet($event)"
                    (folded)="fold()"
-
-
     ></game-controls>
 
     <div class="table">

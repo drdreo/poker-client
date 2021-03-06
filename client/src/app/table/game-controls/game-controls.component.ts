@@ -1,6 +1,18 @@
 import { Component, OnInit, EventEmitter, Output, Input } from '@angular/core';
+import { PlayerOverview } from '@shared/src';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { PlayerOverview } from '../../../../../shared/src';
+
+enum BetTemplateType {
+    BigBlind,
+    Pot,
+    Bank
+}
+
+interface BetTemplate {
+    amount: number;
+    title: string;
+    type: BetTemplateType;
+}
 
 @Component({
     selector: 'game-controls',
@@ -10,12 +22,23 @@ import { PlayerOverview } from '../../../../../shared/src';
 export class GameControlsComponent implements OnInit {
 
     @Input() maxBet$: Observable<number>;
+    @Input() pot: number;
+    @Input() bigBlind: number;
     @Input() player: PlayerOverview;
 
     @Output() folded = new EventEmitter<void>();
     @Output() checked = new EventEmitter<void>();
     @Output() called = new EventEmitter<void>();
     @Output() bet = new EventEmitter<number>();
+
+    showPopup: boolean = false;
+    betTemplates: BetTemplate[] = [
+        { amount: 0.5, title: '0.5 BB', type: BetTemplateType.BigBlind },
+        { amount: 1, title: '1 BB', type: BetTemplateType.BigBlind },
+        { amount: 2, title: '2 BB', type: BetTemplateType.BigBlind },
+        { amount: 1, title: '1 Pot', type: BetTemplateType.Pot },
+        { amount: 1, title: 'All In', type: BetTemplateType.Bank }
+    ];
 
     _betAmount$: BehaviorSubject<number> = new BehaviorSubject(0);
     betAmount$ = this._betAmount$.asObservable();
@@ -24,22 +47,37 @@ export class GameControlsComponent implements OnInit {
         return this._betAmount$.getValue();
     }
 
+    set betAmount(value: number) {
+        if(value < 0){
+            value = 0;
+        }
+        this._betAmount$.next(value);
+    }
+
     constructor() { }
 
     ngOnInit(): void {
     }
 
+    togglePopup() {
+        this.showPopup = !this.showPopup;
+    }
+
+    closePopup() {
+        this.showPopup = false;
+    }
+
     addBet(amount: number) {
-        this._betAmount$.next(this.betAmount + amount);
+        this.betAmount += amount;
     }
 
     onBetChange($event: Event) {
         const amount = +(<HTMLInputElement>$event.target).value;
-        this._betAmount$.next(amount);
+        this.betAmount = amount;
     }
 
     clearBet() {
-        this._betAmount$.next(0);
+        this.betAmount = 10; // set to minimum bet
     }
 
     onFold() {
@@ -56,5 +94,32 @@ export class GameControlsComponent implements OnInit {
 
     onBet() {
         this.bet.emit(this.betAmount);
+    }
+
+    setBetFromTemplate(tmpl: BetTemplate) {
+        switch (tmpl.type) {
+            case BetTemplateType.BigBlind:
+                this.betAmount = this.bigBlind * tmpl.amount;
+                break;
+            case BetTemplateType.Pot:
+                this.betAmount = this.pot * tmpl.amount;
+                break;
+            case BetTemplateType.Bank:
+                this.betAmount = this.player.chips * tmpl.amount;
+                break;
+            default:
+                console.warn('BetTemplate not handled', tmpl);
+        }
+    }
+
+    onMouseWheel($event: WheelEvent) {
+        const wheelStep = 10;
+        const delta = $event.deltaY;
+
+        if (delta > 0) {
+            this.betAmount -= wheelStep;
+        } else {
+            this.betAmount += wheelStep;
+        }
     }
 }

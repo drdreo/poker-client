@@ -1,8 +1,9 @@
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import * as Sentry from '@sentry/angular';
 import { BehaviorSubject, merge, Observable, Subject, interval } from 'rxjs';
 import { switchMap, takeUntil, tap, shareReplay } from 'rxjs/operators';
-import { GameStatus, Card, BetType, SidePot } from '../../../../shared/src';
+import { GameStatus, Card, BetType, SidePot } from '@shared/src';
 import { environment } from '../../environments/environment';
 import { AudioService, Sounds } from '../audio.service';
 import { PokerService } from '../poker.service';
@@ -10,6 +11,7 @@ import { NotificationService } from '../utils/notification.service';
 import { MessageType } from './feed/feed-message/feed-message.component';
 import { Player } from './player/player.component';
 
+@Sentry.TraceClassDecorator()
 @Component({
     selector: 'app-table',
     templateUrl: './table.component.html',
@@ -312,7 +314,7 @@ export class TableComponent implements OnInit, OnDestroy {
     private loadDevThings() {
         console.log('Loading dev data!');
         setTimeout(() => {
-            this.audio.play(Sounds.Leave);
+            this.audio.play(Sounds.ChipsBet);
         }, 2000);
         this.loadDevPlayers();
 

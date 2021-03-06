@@ -31,5 +31,4 @@ export class PokerController {
 
         throw new HttpException('Table does not exist!', HttpStatus.NOT_FOUND);
     }
-
 }

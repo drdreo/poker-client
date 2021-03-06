@@ -7,23 +7,27 @@ $text-secondary: Poppins, sans-serif;
 
 // Colors
 $black: #111;
+$dark: #1f212a;
 $white: #eee;
 $gray: lightgray;
 $green: hsla(80, 40%, 50%, 1);
 $orange-dark: #da7e35;
 $yellow: #ffeb3b;
 
-$primary-background-color: #1f212a;
+$primary-background-color: $dark;
+$secondary-background-color: #363a49;
 $primary-color: #7289da;
 $success-color: rgba(67, 181, 129, 0.8);
 $danger-color: rgba(207, 73, 80, 0.8);
 $warning-color: #daa520;
 
 
-$input-background-color: #363a49;
+$input-background-color: $secondary-background-color;
 $button-color: $white;
 $button-background-color: $primary-color;
 $link-color: $primary-color;
+
+$primary-radius: 3px;
 
 $currency-symbol: "€";
 

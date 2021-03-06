@@ -6,7 +6,7 @@ import { Integrations } from '@sentry/tracing';
 import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 
-console.log('Initiating Sentry...');
+console.log(`Initiating Sentry in {${environment.name}} enabled[${environment.sentry.enabled}] `);
 
 Sentry.init({
     dsn: environment.sentry.dsn,

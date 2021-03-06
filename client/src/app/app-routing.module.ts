@@ -13,7 +13,6 @@ const routes: Routes = [
     { path: '**', component: ErrorComponent }
 ];
 
-// relativeLinkResolution: 'legacy',
 @NgModule({
     imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })],
     exports: [RouterModule]

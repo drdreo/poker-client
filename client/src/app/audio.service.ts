@@ -22,6 +22,7 @@ export class AudioService {
     private sounds: Sound[] = [];
     private audioPlayer: HTMLAudioElement = new Audio();
 
+    // https://developers.google.com/web/updates/2017/09/autoplay-policy-changes
     constructor() {
 
         this.preload(Sounds.CardDealt, 'assets/sounds/cardPlace1.wav');
@@ -47,7 +48,7 @@ export class AudioService {
         }
 
         this.audioPlayer.src = soundToPlay.asset;
-        this.audioPlayer.volume =soundToPlay.volume || 1;
+        this.audioPlayer.volume = soundToPlay.volume || 1;
         const playStarted = this.audioPlayer.play();
 
         if (playStarted !== undefined) {

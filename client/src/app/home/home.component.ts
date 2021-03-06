@@ -6,7 +6,9 @@ import { takeUntil } from 'rxjs/operators';
 import { HomeInfo } from '../../../../shared/src';
 import { ErrorService } from '../error.service';
 import { PokerService } from '../poker.service';
+import * as Sentry from '@sentry/angular';
 
+@Sentry.TraceClassDecorator()
 @Component({
     selector: 'app-home',
     templateUrl: './home.component.html',
