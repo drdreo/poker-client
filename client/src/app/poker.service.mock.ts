@@ -89,6 +89,10 @@ export class PokerServiceMock {
         return of();
     }
 
+    maxBetUpdate(){
+        return of();
+    }
+
     tableClosed(): Observable<undefined> {
         return of();
     }
