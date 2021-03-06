@@ -21,9 +21,9 @@
     <!--        <button class="button" (click)="startGame()">Start</button>-->
     <!--    </div>-->
 
-    <!--                   *ngIf="(gameStatus$ | async) == 'started' && isCurrentPlayer && player$ | async as player"-->
 
     <game-controls class="game_controls"
+                   *ngIf="(gameStatus$ | async) == 'started' && isCurrentPlayer && player$ | async as player"
                    [player]="player"
                    [maxBet$]="maxBet$"
                    [pot]="pot$ | async"
@@ -31,8 +31,7 @@
                    (checked)="check()"
                    (called)="call()"
                    (bet)="bet($event)"
-                   (folded)="fold()"
-    ></game-controls>
+                   (folded)="fold()"></game-controls>
 
     <div class="table">
         <div class="stack card-place">
