@@ -5,7 +5,7 @@ import {
 import { Client, Server, Socket } from 'socket.io';
 import {
     PokerEvent, GameStatus, GameRoundUpdate, GameBoardUpdate, GameDealerUpdate, GameCurrentPlayer, GameWinners, GamePotUpdate,
-    GamePlayersUpdate, PlayerBet, HomeInfo, PlayerEvent, ServerJoined, PlayerChecked, PlayerCalled, PlayerFolded
+    GamePlayersUpdate, PlayerBet, HomeInfo, PlayerEvent, ServerJoined, PlayerChecked, PlayerCalled, PlayerFolded, MaxBetUpdate
 } from '../../shared/src';
 import { SentryInterceptor } from '../sentry.interceptor';
 import { Player } from './Player';
@@ -105,6 +105,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 table.sendCurrentPlayer();
                 table.sendGameBoardUpdate();
                 table.sendPotUpdate();
+                table.sendMaxBetUpdate();
             }
 
             this.sendTo(socket.id, PokerEvent.GameStatus, gameStatus);
@@ -214,6 +215,12 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
             case TableCommandName.PotUpdate: {
                 let response: GamePotUpdate = { pot: data.pot, sidePots: data.sidePots };
                 this.sendTo(table, PokerEvent.PotUpdate, response);
+            }
+                break;
+
+            case TableCommandName.MaxBetUpdate: {
+                let response: MaxBetUpdate = { maxBet: data.maxBet};
+                this.sendTo(table, PokerEvent.MaxBetUpdate, response);
             }
                 break;
 

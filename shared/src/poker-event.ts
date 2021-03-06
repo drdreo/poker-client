@@ -20,6 +20,7 @@ export enum PokerEvent {
     // Table Stuff
     PotUpdate = 'server:pot_update',
     BoardUpdate = 'server:game:board_updated',
+    MaxBetUpdate = 'server:game:max-bet_updated',
     NewRound = 'server:game:new_round',
     TableClosed = 'server:table:closed',
 

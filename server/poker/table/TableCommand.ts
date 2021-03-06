@@ -6,6 +6,7 @@ export enum TableCommandName{
     GameStarted = 'game_started',
     PlayerUpdate = 'player_update',
     PlayerBet = 'player_bet',
+    MaxBetUpdate = 'max-bet_update',
     PlayersCards = 'players_cards',
     PotUpdate = 'pot_update',
     GameEnded = 'game_ended',

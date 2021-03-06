@@ -16,13 +16,17 @@
       }
     }
 
+    &__amount__wrapper {
+      position: relative;
+    }
+
     &__popup {
       opacity: 0;
       display: flex;
       flex-direction: column;
       position: absolute;
       bottom: 200%;
-      left: calc(-25% + 30px);
+      left: -150px;
       z-index: 2;
 
       padding: 1rem;

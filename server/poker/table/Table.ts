@@ -210,6 +210,14 @@ export class Table {
         });
     }
 
+    public sendMaxBetUpdate() {
+        this.commands$.next({
+            name: TableCommandName.MaxBetUpdate,
+            table: this.name,
+            data: { maxBet: this.game.getMaxBet()  }
+        });
+    }
+
     public sendGameBoardUpdate() {
         this.commands$.next({
             name: TableCommandName.BoardUpdated,
@@ -370,13 +378,12 @@ export class Table {
         this.game.bet(playerIndex, playerBet);
 
         this.sendPlayerBet(playerID, bet, type);
-        this.sendPlayersUpdate();
 
         const next = this.progress();
         if (next) {
             this.nextPlayer();
         }
-
+        this.sendPlayersUpdate();
     }
 
     public fold(playerID: string) {

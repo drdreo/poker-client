@@ -6,7 +6,7 @@ import { map, tap, delay, concatAll } from 'rxjs/operators';
 import {
     PokerEvent, GameStatus, TableResponse, HomeInfo, ServerJoined, GameWinners, GamePotUpdate, PlayerLeft, GameDealerUpdate,
     GameCurrentPlayer, GameBoardUpdate, PlayerCalled, PlayerChecked, PlayerFolded, GameRoundUpdate, PlayerBet, GamePlayersUpdate, Card,
-    PlayerEvent, PlayerOverview, SidePot
+    PlayerEvent, PlayerOverview, SidePot, MaxBetUpdate
 } from '../../../shared/src';
 import { environment } from '../environments/environment';
 
@@ -121,6 +121,10 @@ export class PokerService implements OnDestroy {
                    .pipe(map(data => data.sidePots));
     }
 
+    maxBetUpdate(): Observable<number> {
+        return this.socket.fromEvent<MaxBetUpdate>(PokerEvent.MaxBetUpdate)
+                   .pipe(map(data => data.maxBet));
+    }
 
     roundUpdate(): Observable<any> {
         return this.socket.fromEvent<GameRoundUpdate>(PokerEvent.NewRound)

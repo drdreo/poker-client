@@ -1,12 +1,13 @@
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import * as Sentry from '@sentry/angular';
+import { GameStatus, Card, BetType, SidePot } from '@shared/src';
 import { BehaviorSubject, merge, Observable, Subject, interval } from 'rxjs';
 import { switchMap, takeUntil, tap, shareReplay } from 'rxjs/operators';
-import { GameStatus, Card, BetType, SidePot } from '@shared/src';
 import { environment } from '../../environments/environment';
 import { AudioService, Sounds } from '../audio.service';
 import { PokerService } from '../poker.service';
+import { TitleService } from '../title.service';
 import { NotificationService } from '../utils/notification.service';
 import { MessageType } from './feed/feed-message/feed-message.component';
 import { Player } from './player/player.component';
@@ -68,13 +69,19 @@ export class TableComponent implements OnInit, OnDestroy {
 
     unsubscribe$ = new Subject();
 
-    constructor(private route: ActivatedRoute, public notification: NotificationService, public pokerService: PokerService, private audio: AudioService) {
+    constructor(
+        private route: ActivatedRoute,
+        public notification: NotificationService,
+        public pokerService: PokerService,
+        private audio: AudioService,
+        private titleService: TitleService) {
+
         this.notification.clearAction();
 
         this.currentPlayerID$ = this.pokerService.currentPlayer()
                                     .pipe(
                                         tap(console.log),
-                                        tap(playerID => this.isCurrentPlayer = playerID === this.clientPlayerID),
+                                        tap(playerID => this.setCurrentPlayer(playerID)),
                                         shareReplay(1)  // got to shareReplay due to late subscriptions inside the template
                                     );
 
@@ -99,8 +106,21 @@ export class TableComponent implements OnInit, OnDestroy {
             });
 
         this.board$ = this.pokerService.boardUpdated();
-        this.pot$ = this.pokerService.mainPotUpdate().pipe(tap(() => this.audio.play(Sounds.ChipsBet)));
+        this.pot$ = this.pokerService.mainPotUpdate()
+                        .pipe(
+                            tap(() => this.audio.play(Sounds.ChipsBet)),
+                            shareReplay(1)
+                        );
+
         this.sidePots$ = this.pokerService.sidePotUpdate();
+
+        this.pokerService.maxBetUpdate()
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe((bet) => {
+                console.log({bet});
+                this._maxBet$.next(bet);
+            });
+
 
         this.pokerService.playerLeft()
             .pipe(takeUntil(this.unsubscribe$))
@@ -232,6 +252,16 @@ export class TableComponent implements OnInit, OnDestroy {
 
     }
 
+    private setCurrentPlayer(newPlayerID: string): void {
+        this.isCurrentPlayer = newPlayerID === this.clientPlayerID;
+
+        if (this.isCurrentPlayer) {
+            this.titleService.addTitle(' ❗ YOU TURN ❗ ');
+        } else {
+            this.titleService.addTitle('Waiting');
+        }
+    }
+
     ngOnInit() {
         this.route.paramMap
             .pipe(
@@ -272,6 +302,17 @@ export class TableComponent implements OnInit, OnDestroy {
         this.unsubscribe$.next();
         this.unsubscribe$.complete();
     }
+
+    @HostListener('window:focus', ['$event'])
+    documentFocused(event: FocusEvent) {
+        this.titleService.endAnimation();
+    }
+
+    @HostListener('window:blur', ['$event'])
+    documentBlurred(event: FocusEvent) {
+        this.titleService.startAnimation();
+    }
+
 
     startGame() {
         this.pokerService.startGame();

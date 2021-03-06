@@ -127,6 +127,10 @@ export interface GameRoundUpdate {
     round: any;
 }
 
+export interface MaxBetUpdate {
+    maxBet: number;
+}
+
 export interface Card {
     value: string | number;
     figure: string;

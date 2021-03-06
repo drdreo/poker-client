@@ -2,7 +2,7 @@
     <button class="button danger" (click)="onFold()">Fold</button>
 
     <ng-container *ngIf="{ maxBet: maxBet$ | async} as data">
-        <button *ngIf="data.maxBet == 0; else callBtn" class="button check" (click)="onCheck()">Check</button>
+        <button *ngIf="data.maxBet === 0 || (player.bet?.type === BetType.BigBlind && data.maxBet === player.bet?.amount); else callBtn" class="button check" (click)="onCheck()">Check</button>
         <ng-template #callBtn>
             <button *ngIf="data.maxBet !== player.bet?.amount" class="button" (click)="onCall()">
                 Call ({{ data.maxBet - player.bet?.amount}})

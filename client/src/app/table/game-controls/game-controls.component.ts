@@ -1,5 +1,5 @@
-import { Component, OnInit, EventEmitter, Output, Input } from '@angular/core';
-import { PlayerOverview } from '@shared/src';
+import { Component, OnInit, EventEmitter, Output, Input, ChangeDetectionStrategy } from '@angular/core';
+import { PlayerOverview, BetType } from '@shared/src';
 import { Observable, BehaviorSubject } from 'rxjs';
 
 enum BetTemplateType {
@@ -17,9 +17,12 @@ interface BetTemplate {
 @Component({
     selector: 'game-controls',
     templateUrl: './game-controls.component.html',
-    styleUrls: ['./game-controls.component.scss']
+    styleUrls: ['./game-controls.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GameControlsComponent implements OnInit {
+
+    BetType = BetType;
 
     @Input() maxBet$: Observable<number>;
     @Input() pot: number;
@@ -97,6 +100,7 @@ export class GameControlsComponent implements OnInit {
     }
 
     setBetFromTemplate(tmpl: BetTemplate) {
+        console.log(this.pot);
         switch (tmpl.type) {
             case BetTemplateType.BigBlind:
                 this.betAmount = this.bigBlind * tmpl.amount;
