@@ -23,14 +23,14 @@
     </form>
 
     <div class="form__error">
-        <div *ngIf="username.invalid && (username.dirty || username.touched)">
+        <div *ngIf="username.invalid && username.dirty">
             <div *ngIf="username.errors.minlength">
                 Name must be at least 4 characters long.
             </div>
 
         </div>
 
-        <div *ngIf="table.invalid && (table.dirty || table.touched)">
+        <div *ngIf="table.invalid && table.dirty">
             <div *ngIf="table.errors.forbiddenName">
                 Table name is invalid!
             </div>
