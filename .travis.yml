@@ -10,7 +10,8 @@ cache:
   # cache both npm modules and Cypress binary
   directories:
     - ~/.npm
-    - ./node_modules
+    - ./client/node_modules
+    - ./server/node_modules
     - ~/.cache
 
 jobs:
