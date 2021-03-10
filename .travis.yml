@@ -34,7 +34,7 @@ jobs:
       - npm run ci:cy-run
 
     - name: Backend tests
-      script: cd server && npm run test:ci
+      script: cd server && npm ci && npm run test:ci
 
 #    - stage: Deploy
 #      if: branch = master
