@@ -1,4 +1,4 @@
-import { BetType, Card, Winner, GameStatus, SidePot } from '../../../shared/src';
+import { BetType, Card, Winner, GameStatus, SidePot } from '../../../../shared/src';
 import { Round } from '../Game';
 
 export enum TableCommandName{

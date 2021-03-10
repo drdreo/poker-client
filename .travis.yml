@@ -23,18 +23,17 @@ jobs:
       script: npm run test -- --watch=false --no-progress --browsers=ChromeHeadlessCI
 
     - name: E2E tests
-      install: cd client && npm ci
+      install: cd server && npm ci && cd ../client && npm ci
       script:
-      - cd ..
-      - npm ci
+      - cd ../server
       - npm run build
       - npm run start:test &
-      - cd client
+      - cd ../client
       - npm run cy:verify
       - npm run ci:cy-run
 
     - name: Backend tests
-      script: npm run test
+      script: cd server && npm run test:ci
 
 #    - stage: Deploy
 #      if: branch = master
