@@ -17,7 +17,7 @@
     <h4>Definitely NOT Poker</h4>
 
     <form class="form" [formGroup]="loginForm" (ngSubmit)="joinTable()">
-        <input class="input username" placeholder="Username" formControlName="username" required data-cy="username"/>
+        <input class="input username" placeholder="Name" formControlName="username" required data-cy="username"/>
         <input class="input room" placeholder="Table" formControlName="table" required data-cy="room"/>
         <button class="button join" type="submit" [disabled]="loginForm.invalid" data-cy="join_button">Join</button>
     </form>
