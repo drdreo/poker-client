@@ -3,7 +3,7 @@ import { WsException } from '@nestjs/websockets';
 import * as PokerEvaluator from 'poker-evaluator';
 import { Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { GameStatus, Card, BetType, RoundType, PlayerOverview, SidePot, Winner, SidePotPlayer } from '../../../shared/src';
+import { GameStatus, Card, BetType, RoundType, PlayerOverview, SidePot, Winner, SidePotPlayer } from '../../../../shared/src';
 import { TableConfig } from '../../config/table.config';
 import { Game, Bet } from '../Game';
 import { Player } from '../Player';

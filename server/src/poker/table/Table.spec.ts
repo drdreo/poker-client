@@ -1,4 +1,4 @@
-import { RoundType } from '../../../shared/src';
+import { RoundType } from '../../../../shared/src';
 import { testConfig } from '../../config/configuration.test';
 import { TableMock } from './Table.mock';
 import { TableCommandName } from './TableCommand';

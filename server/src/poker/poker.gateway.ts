@@ -6,7 +6,7 @@ import { Client, Server, Socket } from 'socket.io';
 import {
     PokerEvent, GameStatus, GameRoundUpdate, GameBoardUpdate, GameDealerUpdate, GameCurrentPlayer, GameWinners, GamePotUpdate,
     GamePlayersUpdate, PlayerBet, HomeInfo, PlayerEvent, ServerJoined, PlayerChecked, PlayerCalled, PlayerFolded, MaxBetUpdate
-} from '../../shared/src';
+} from '../../../shared/src';
 import { SentryInterceptor } from '../sentry.interceptor';
 import { Player } from './Player';
 import { remapCards } from './table/Table';
