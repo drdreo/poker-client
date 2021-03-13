@@ -1,14 +1,16 @@
-import { Component, HostBinding, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 
 @Component({
     selector: 'app-coins',
     templateUrl: './coins.component.html',
-    styleUrls: ['./coins.component.scss']
+    styleUrls: ['./coins.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CoinsComponent implements OnInit, OnChanges {
 
     @Input() amount: number;
     @Input() type: number;
+    @Input() direction: string = 'top';
 
     @HostBinding('class.inactive') inactive: boolean = false;
 
@@ -57,4 +59,10 @@ export class CoinsComponent implements OnInit, OnChanges {
         return c.amount;
     }
 
+    getCoinPosition(i: number) {
+        if(this.direction === 'bottom'){
+            return {'bottom.px' : (-2 + (i * 5))};
+        }
+        return {'top.px' : (-2 + (i * 5))};
+    }
 }

@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, HostListener } f
 import { ActivatedRoute } from '@angular/router';
 import * as Sentry from '@sentry/angular';
 import { GameStatus, Card, BetType, SidePot } from '@shared/src';
+import { formatWinnersMessage } from 'app/utils/utils';
 import { BehaviorSubject, merge, Observable, Subject, interval } from 'rxjs';
 import { switchMap, takeUntil, tap, shareReplay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
@@ -179,17 +180,7 @@ export class TableComponent implements OnInit, OnDestroy {
                     console.error('Server sent us no winners at all!');
                 }
 
-                let message = '';
-                if (winners.length === 1) {
-                    message = `${ winners[0].name } won the pot of ${ winners[0].amount }`;
-                    if (winners[0].hand) {
-                        message += ` with ${ winners[0].hand.handName }`;
-                    }
-                } else {
-                    const winnerNames = winners.reduce((prev, cur) => prev + ' ' + cur.name, '');
-                    const winnerPots = winners.reduce((prev, cur) => prev + ',' + cur.amount, '');
-                    message = `${ winnerNames } won the pots of ${ winnerPots }`;
-                }
+                let message = formatWinnersMessage(winners);
 
                 this.notification.showAction(message);
                 this.notification.addFeedMessage(message, MessageType.Won);
@@ -328,7 +319,7 @@ export class TableComponent implements OnInit, OnDestroy {
 
     bet(bet: number) {
         if (this.player.chips < bet) {
-            this.notification.addFeedMessage(`Not enough chips to bet ${ bet }!`, MessageType.Error);
+            this.notification.showAction(`Not enough chips to bet ${ bet }!`, 'error');
             return;
         }
 
@@ -414,7 +405,7 @@ export class TableComponent implements OnInit, OnDestroy {
         let players = [];
         players.push({
             allIn: false, disconnected: false, folded: false,
-            id: 'tester1', name: 'rivy331', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
+            id: 'tester1', name: 'thatN00b', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: [ { figure: 'back'}, { figure: 'back'}]
         });
         players.push({
             allIn: false, disconnected: true, folded: false, id: 'tester2', name: 'DCer',

@@ -8,7 +8,7 @@
                  [sidePots$]="sidePots$"
                  [time$]="playDuration$"></table-infos>
 
-    <h3 class="table__action" *ngIf="notification.action$ | async as currentAction">{{currentAction}}</h3>
+    <h3 class="table__action" *ngIf="notification.action$ | async as currentAction" [class.error]="currentAction.status === 'error'">{{currentAction.message}}</h3>
 
     <div class="ready-container"
          *ngIf="(gameStatus$ | async) == 'waiting' && (player$ | async) && (player$ | async).id === (players$ | async)[0]?.id">

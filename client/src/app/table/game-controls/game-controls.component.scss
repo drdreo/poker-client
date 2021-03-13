@@ -126,18 +126,15 @@
       justify-content: space-between;
       align-items: center;
 
-      min-width: 60px;
+      min-width: 90px;
       margin-right: 0.5rem;
       cursor: pointer;
 
-      transition: transform 0.1s ease;
-
-      &:hover {
-        //font-weight: bold;
-        //transform: scale(1.1) translateY(-5px);
+      &__chips {
+        display: flex;
       }
 
-      span {
+      &__value {
         width: 100%;
         text-align: right;
       }

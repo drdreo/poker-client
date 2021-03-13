@@ -10,7 +10,7 @@ $name-font-family: 'Balsamiq Sans', cursive;
     }
 
     .cards.folded {
-      display: block;
+      display: flex;
       filter: grayscale(1);
       opacity: 0.8;
     }

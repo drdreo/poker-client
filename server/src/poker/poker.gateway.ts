@@ -103,6 +103,7 @@ export class PokerGateway implements OnGatewayConnection, OnGatewayDisconnect {
             // tell the player again all information if game started: players, game status, board, pot
             if (gameStatus === GameStatus.Started) {
                 table.sendCurrentPlayer();
+                table.sendDealerUpdate();
                 table.sendGameBoardUpdate();
                 table.sendPotUpdate();
                 table.sendMaxBetUpdate();

@@ -11,6 +11,10 @@
 .table__action {
   position: absolute;
   top: 5%;
+
+  &.error {
+    color: $danger-color;
+  }
 }
 
 .ready-container {

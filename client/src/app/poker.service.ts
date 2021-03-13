@@ -123,7 +123,7 @@ export class PokerService implements OnDestroy {
 
     maxBetUpdate(): Observable<number> {
         return this.socket.fromEvent<MaxBetUpdate>(PokerEvent.MaxBetUpdate)
-                   .pipe(map(data => data.maxBet));
+                   .pipe(map(data => data.maxBet), tap(console.log));
     }
 
     roundUpdate(): Observable<any> {

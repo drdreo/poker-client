@@ -14,13 +14,12 @@
   position: relative;
   background-color: white;
 
-
   &--back {
     background-image: url('/assets/cards/back_02.svg');
     background-size: contain;
     border: 2px solid white;
+    box-sizing: border-box;
   }
-
 
   &.figures-S, &.figures-C {
     color: #515260;

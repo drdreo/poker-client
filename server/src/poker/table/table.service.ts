@@ -128,7 +128,6 @@ export class TableService {
 
         if (table) {
             if (table.hasGame() || table.isGameEnded()) {
-                this.logger.debug(`Player[${ playerID }] checked!`);
                 table.check(playerID);
             } else {
                 throw new WsException(`Game has not started or has ended!`);
@@ -158,7 +157,6 @@ export class TableService {
 
         if (table) {
             if (table.hasGame() || table.isGameEnded()) {
-                this.logger.debug(`Player[${ playerID }] bet [${ coins }]!`);
                 table.bet(playerID, coins);
             } else {
                 throw new WsException(`Game has not started or has ended!`);
@@ -173,7 +171,6 @@ export class TableService {
 
         if (table) {
             if (table.hasGame() || table.isGameEnded()) {
-                this.logger.debug(`Player[${ playerID }] folded!`);
                 table.fold(playerID);
             } else {
                 throw new WsException(`Game has not started or has ended!`);

@@ -3,7 +3,8 @@
 .message {
 
   &__info {
-    color: $gray;
+
+    color: $primary-color;
   }
 
   &__error {
@@ -11,7 +12,7 @@
   }
 
   &__played {
-    color: $primary-color;
+    color: $gray;
   }
 
   &__won {

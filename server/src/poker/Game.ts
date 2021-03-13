@@ -65,7 +65,7 @@ export class Game {
     getLowestBet(): number {
         let lowest = Number.POSITIVE_INFINITY;
         for (let bet of this.round.bets) {
-            if (bet.amount > 0) {
+            if (bet?.amount > 0) {
                 lowest = Math.min(lowest, bet.amount);
             }
         }
@@ -131,6 +131,11 @@ export class Game {
         this.logger.debug(`Ended`);
 
         this.ended = true;
+    }
+
+    resetPots() {
+        this.pot = 0;
+        this.sidePots = [];
     }
 }
 

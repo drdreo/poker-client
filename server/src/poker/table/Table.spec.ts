@@ -101,7 +101,25 @@ describe('Table', () => {
         table.getGame().board = ['AD', 'KD', 'QD', '2S', '2C'];
     }
 
-    describe('Game Mechanics', () => {
+    describe('Game Mechanics (2 Players)', () => {
+        let player1;
+        let player2;
+
+        beforeEach(() => {
+            player1 = table.addPlayer('Tester1', 1000);
+            player2 = table.addPlayer('Tester2', 1000);
+            table.newGame();
+        });
+
+        it('should set dealer SB in heads up and act first', () => {
+
+            const player2Idx = table.getPlayerIndexByID(player2);
+            expect(player2Idx).toBe(table.dealer);
+            expect(player2Idx).toBe(table.currentPlayer);
+        });
+    });
+
+    describe('Game Mechanics (3 players)', () => {
 
         let player1;
         let player2;
@@ -114,78 +132,173 @@ describe('Table', () => {
             table.newGame();
         });
 
-        it('should throw a not your turn error', () => {
-            expect(() => {
-                table.bet(player1, smallBlind);
-            }).toThrow();
-        });
+        describe('Turn logic', () => {
 
-        it('should set correct next player after folding', () => {
-            table.fold(player3);
+            it('should throw a not your turn error', () => {
+                expect(() => {
+                    table.bet(player1, smallBlind);
+                }).toThrow();
+            });
 
-            let currentPlayer = table.getPlayerIndexByID(player1);
-            expect(table.currentPlayer).toBe(currentPlayer);
-        });
+            it('auto bet the blinds', () => {
+                const p1 = table.getPlayer(player1);
+                const p2 = table.getPlayer(player2);
+                const p3 = table.getPlayer(player3);
+                expect(p1.chips).toBe(990);
+                expect(p2.chips).toBe(980);
+                expect(p3.chips).toBe(1000);
+            });
 
-        it('should set correct next player after folding as first player', () => {
-            table.call(player3);
-            table.fold(player1);
+            it('should set last player as dealer', () => {
+                const player3Idx = table.getPlayerIndexByID(player3);
+                expect(player3Idx).toBe(table.dealer);
+                expect(player3Idx).toBe(table.currentPlayer); // current player should be 3rd player, 1 and 2 are blinds
+            });
 
-            let currentPlayer = table.getPlayerIndexByID(player2);
-            expect(table.currentPlayer).toBe(currentPlayer);
+            it('should set correct next player after folding', () => {
+                table.fold(player3);
 
-            table.check(player2); // BB check
+                let currentPlayer = table.getPlayerIndexByID(player1);
+                expect(table.currentPlayer).toBe(currentPlayer);
+            });
 
-            currentPlayer = table.getPlayerIndexByID(player2);
-            expect(table.currentPlayer).toBe(currentPlayer);
+            it('should set correct next player after folding as first player', () => {
+                table.call(player3);
+                table.fold(player1);
 
-            table.check(player2);
+                let currentPlayer = table.getPlayerIndexByID(player2);
+                expect(table.currentPlayer).toBe(currentPlayer);
 
-            currentPlayer = table.getPlayerIndexByID(player3);
-            expect(table.currentPlayer).toBe(currentPlayer);
-        });
+                table.check(player2); // BB check
 
-        it('should set correct next player after raise', () => {
-            let currentPlayer;
+                currentPlayer = table.getPlayerIndexByID(player2);
+                expect(table.currentPlayer).toBe(currentPlayer);
 
-            table.bet(player3, 2 * bigBlind);
-            currentPlayer = table.getPlayerIndexByID(player1);
-            expect(table.currentPlayer).toBe(currentPlayer);
+                table.check(player2);
 
-            table.call(player1);
-            currentPlayer = table.getPlayerIndexByID(player2);
-            expect(table.currentPlayer).toBe(currentPlayer);
+                currentPlayer = table.getPlayerIndexByID(player3);
+                expect(table.currentPlayer).toBe(currentPlayer);
+            });
 
-            table.call(player2);
-            // next round
-            currentPlayer = table.getPlayerIndexByID(player1);
-            expect(table.currentPlayer).toBe(currentPlayer);
-        });
+            it('should set correct next player after raise', () => {
+                let currentPlayer;
+
+                table.bet(player3, 2 * bigBlind);
+                currentPlayer = table.getPlayerIndexByID(player1);
+                expect(table.currentPlayer).toBe(currentPlayer);
+
+                table.call(player1);
+                currentPlayer = table.getPlayerIndexByID(player2);
+                expect(table.currentPlayer).toBe(currentPlayer);
+
+                table.call(player2);
+                // next round
+                currentPlayer = table.getPlayerIndexByID(player1);
+                expect(table.currentPlayer).toBe(currentPlayer);
+            });
+
+            it('should give the big blind an option if it was called', () => {
+                table.call(player3);
+                table.call(player1);
+
+                expect(table.getRoundType()).toBe(RoundType.Deal);
+                let currentPlayer = table.getPlayerIndexByID(player2);
+                expect(table.currentPlayer).toBe(currentPlayer);
+                table.check(player2);
+
+                expect(table.getRoundType()).toBe(RoundType.Flop);
+            });
+
+            it('should give the big blind an option, if it raises, should not progress', () => {
+                table.call(player3);
+                table.call(player1);
+
+                expect(table.getRoundType()).toBe(RoundType.Deal);
+
+                table.bet(player2, 100);
+
+                expect(table.getRoundType()).toBe(RoundType.Deal);
+                let currentPlayer = table.getPlayerIndexByID(player3);
+                expect(table.currentPlayer).toBe(currentPlayer);
+            });
 
 
-        it('should give the big blind an option if it was called', () => {
-            table.call(player3);
-            table.call(player1);
+            it('should stay in the same Round(Deal) after everyone called the blinds', () => {
+                expect(table.getRoundType()).toBe(RoundType.Deal);
 
-            expect(table.getRoundType()).toBe(RoundType.Deal);
-            let currentPlayer = table.getPlayerIndexByID(player2);
-            expect(table.currentPlayer).toBe(currentPlayer);
-            table.check(player2);
+                table.call(player3);
+                table.call(player1);
 
-            expect(table.getRoundType()).toBe(RoundType.Flop);
-        });
+                expect(table.getRoundType()).toBe(RoundType.Deal);
+            });
 
-        it('should give the big blind an option, if it raises, should not progress', () => {
-            table.call(player3);
-            table.call(player1);
+            it('should progress to the next Round(Flop) after BB checked', () => {
+                expect(table.getRoundType()).toBe(RoundType.Deal);
 
-            expect(table.getRoundType()).toBe(RoundType.Deal);
+                table.call(player3);
+                table.call(player1);
+                table.check(player2);
 
-            table.bet(player2, 100);
+                expect(table.getRoundType()).toBe(RoundType.Flop);
+            });
 
-            expect(table.getRoundType()).toBe(RoundType.Deal);
-            let currentPlayer = table.getPlayerIndexByID(player3);
-            expect(table.currentPlayer).toBe(currentPlayer);
+
+            it('should stay in the same Round after Raise', () => {
+
+                table.bet(player3, bigBlind * 2);
+                table.call(player1);
+
+                expect(table.getRoundType()).toBe(RoundType.Deal);
+            });
+
+            it('should continue to next Round(Flop) after Raise was called', () => {
+
+                table.bet(player3, bigBlind * 2);
+                table.call(player1);
+                table.call(player2);
+
+                expect(table.getRoundType()).toBe(RoundType.Flop);
+            });
+
+            it('should stay in Round(Deal) after Re-Raise', () => {
+
+                table.bet(player3, bigBlind * 2);
+                table.bet(player1, bigBlind * 3);
+                table.call(player2);
+
+                expect(table.getRoundType()).toBe(RoundType.Deal);
+            });
+
+            it('should continue with Round(Flop) after Re-Raise was called', () => {
+
+                table.bet(player3, bigBlind * 2);
+                table.bet(player1, bigBlind * 3);
+                table.call(player2);
+                table.call(player3);
+
+                expect(table.getRoundType()).toBe(RoundType.Flop);
+            });
+
+            it('should stay in Round(Deal) after Re-Raise', () => {
+
+                table.bet(player3, bigBlind * 2);
+                table.bet(player1, bigBlind * 3);
+                table.bet(player2, bigBlind * 4);
+                table.call(player3);
+
+                expect(table.getRoundType()).toBe(RoundType.Deal);
+            });
+
+            it('should continue with Round(Flop) after Re-Raise was called', () => {
+
+                table.bet(player3, bigBlind * 2);
+                table.bet(player1, bigBlind * 3);
+                table.bet(player2, bigBlind * 4);
+                table.call(player3);
+                table.call(player1);
+
+                expect(table.getRoundType()).toBe(RoundType.Flop);
+            });
         });
 
         it('should set correct bets', () => {
@@ -200,26 +313,6 @@ describe('Table', () => {
             expect(table.getPlayer(player3).allIn).toBeFalsy();
             table.bet(player3, 1000);
             expect(table.getPlayer(player3).allIn).toBeTruthy();
-        });
-
-
-        it('should stay in the same Round(Deal) after everyone called the blinds', () => {
-            expect(table.getRoundType()).toBe(RoundType.Deal);
-
-            table.call(player3);
-            table.call(player1);
-
-            expect(table.getRoundType()).toBe(RoundType.Deal);
-        });
-
-        it('should progress to the next Round(Flop) after BB checked', () => {
-            expect(table.getRoundType()).toBe(RoundType.Deal);
-
-            table.call(player3);
-            table.call(player1);
-            table.check(player2);
-
-            expect(table.getRoundType()).toBe(RoundType.Flop);
         });
 
         it('should have nothing in the pot after everyone called the blinds', () => {
@@ -237,63 +330,6 @@ describe('Table', () => {
             table.check(player2);
 
             expect(table.getGame().pot).toBe(60);
-        });
-
-        it('should stay in the same Round after Raise', () => {
-
-            table.bet(player3, bigBlind * 2);
-            table.call(player1);
-
-            expect(table.getRoundType()).toBe(RoundType.Deal);
-        });
-
-        it('should continue to next Round(Flop) after Raise was called', () => {
-
-            table.bet(player3, bigBlind * 2);
-            table.call(player1);
-            table.call(player2);
-
-            expect(table.getRoundType()).toBe(RoundType.Flop);
-        });
-
-        it('should stay in Round(Deal) after Re-Raise', () => {
-
-            table.bet(player3, bigBlind * 2);
-            table.bet(player1, bigBlind * 3);
-            table.call(player2);
-
-            expect(table.getRoundType()).toBe(RoundType.Deal);
-        });
-
-        it('should continue with Round(Flop) after Re-Raise was called', () => {
-
-            table.bet(player3, bigBlind * 2);
-            table.bet(player1, bigBlind * 3);
-            table.call(player2);
-            table.call(player3);
-
-            expect(table.getRoundType()).toBe(RoundType.Flop);
-        });
-
-        it('should stay in Round(Deal) after Re-Raise', () => {
-
-            table.bet(player3, bigBlind * 2);
-            table.bet(player1, bigBlind * 3);
-            table.bet(player2, bigBlind * 4);
-            table.call(player3);
-
-            expect(table.getRoundType()).toBe(RoundType.Deal);
-        });
-
-        it('should continue with Round(Flop) after Re-Raise was called', () => {
-
-            table.bet(player3, bigBlind * 2);
-            table.bet(player1, bigBlind * 3);
-            table.bet(player2, bigBlind * 4);
-            table.call(player3);
-            table.call(player1);
-
-            expect(table.getRoundType()).toBe(RoundType.Flop);
         });
 
         it('should add bets after raising your own blind', () => {
@@ -720,6 +756,28 @@ describe('Table', () => {
                 expect(table.getGame().pot).toBe(450);
             });
 
+            it('should create a side-pot and let poorer players still go all-in', () => {
+
+                table.bet(player3, 50);
+                table.bet(player1, table.getPlayer(player1).chips); // all in
+                table.call(player2);
+                table.bet(player3, 50); // all in
+
+                expect(table.getGame().sidePots[0]).toBeDefined();
+                expect(table.getGame().sidePots[0].amount).toBe(300);
+                expect(table.getGame().pot).toBe(200);
+            });
+
+            it('should process bets correctly if one did not bet', () => {
+                table.fold(player3);
+                table.check(player1);
+                table.bet(player2, table.getPlayer(player2).chips); // all in
+                table.bet(player1, table.getPlayer(player1).chips); // all in
+
+                expect(table.getGame().sidePots[0]).toBeUndefined();
+                expect(table.getGame().pot).toBe(400);
+            });
+
         });
 
 
@@ -852,5 +910,96 @@ describe('Table', () => {
 
         test.todo('should kick player from table if no chips left');
         test.todo('should kick all-in player after lose');
+    });
+
+    describe('Game Mechanics (5+ players)', () => {
+        let player1;
+        let player2;
+        let player3;
+        let player4;
+        let player5;
+
+        beforeEach(() => {
+            player1 = table.addPlayer('Tester1', 1000);
+            player2 = table.addPlayer('Tester2', 1000);
+            player3 = table.addPlayer('Tester3', 1000);
+            player4 = table.addPlayer('Tester4', 500);
+            player5 = table.addPlayer('Tester5', 1000);
+            table.newGame();
+        });
+
+        it('should process bets correctly if one did not bet', () => {
+            table.call(player3);
+            table.fold(player4);
+            table.call(player5);
+            table.call(player1);
+            table.check(player2);
+
+            expect(table.getGame().pot).toBe(80);
+        });
+
+
+        it('should process bets correctly if SB folds after all-in', () => {
+            // 10, 20, 20, 500, 600, 580, 580 = 2310
+            table.call(player3);
+            table.bet(player4, table.getPlayer(player4).chips);
+            table.bet(player5, 600);
+            table.fold(player1);
+            table.call(player2);
+            table.call(player3);
+
+            expect(table.getGame().pot).toBe(300);
+            expect(table.getGame().sidePots[0]).toBeDefined();
+            expect(table.getGame().sidePots[0].amount).toBe(50); // due to SB
+            expect(table.getGame().sidePots[0].players.length).toBe(5); // due to SB
+            expect(table.getGame().sidePots[1]).toBeDefined();
+            expect(table.getGame().sidePots[1].amount).toBe(1960);
+            expect(table.getGame().sidePots[1].players.length).toBe(4);
+        });
+
+        it('should process bets correctly if someone did not bet after all-in', () => {
+            table.call(player3);
+            table.bet(player4, table.getPlayer(player4).chips);
+            table.fold(player5);
+            table.call(player1);
+            table.call(player2);
+            table.call(player3);
+
+            expect(table.getGame().pot).toBe(2000);
+            expect(table.getGame().sidePots[0]).toBeUndefined();
+        });
+
+        it('should pay the winners correctly if SB folded after all-in', done => {
+            table.commands$.subscribe((command) => {
+                if (command.name === TableCommandName.GameWinners) {
+                    const { winners } = command.data;
+
+                    const totalEarnings = winners.reduce((prev, cur) => prev + cur.amount, 0);
+
+                    expect(totalEarnings).toBe(2310);
+                    done();
+                }
+            });
+
+            // 10, 20, 20, 500, 600, 580, 580 = 2310
+            table.call(player3);
+            table.bet(player4, table.getPlayer(player4).chips);
+            table.bet(player5, 600);
+            table.fold(player1);
+            table.call(player2);
+            table.call(player3);
+
+            table.check(player2);
+            table.check(player3);
+            table.check(player5);
+
+            table.check(player2);
+            table.check(player3);
+            table.check(player5);
+
+            table.check(player2);
+            table.check(player3);
+            table.check(player5);
+        });
     });
 });

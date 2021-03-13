@@ -127,16 +127,21 @@ export class Table {
     }
 
     private setStartPlayer() {
-        // TODO: Headsup check
-        // just hardcoded dealer is always last and small blind is first, maybe do better
+
+        // heads up rules, dealer is SB and acts first
+        let headsUp = this.players.length === 2;
+
+        // just hardcoded dealer is always last and small blind is first
         // check if dealer was set already, so move it further instead
         if (this.dealer) {
             this.dealer = getNextIndex(this.dealer, this.players);
-            this.currentPlayer = getNextIndex(this.dealer, this.players);
+            this.currentPlayer = headsUp ? this.dealer : getNextIndex(this.dealer, this.players);
         } else {
             this.dealer = this.players.length - 1;
-            this.currentPlayer = 0;
+            this.currentPlayer = headsUp ? this.dealer : 0;
         }
+
+
         this.sendCurrentPlayer();
         this.sendDealerUpdate();
     }
@@ -214,7 +219,7 @@ export class Table {
         this.commands$.next({
             name: TableCommandName.MaxBetUpdate,
             table: this.name,
-            data: { maxBet: this.game.getMaxBet()  }
+            data: { maxBet: this.game.getMaxBet() }
         });
     }
 
@@ -265,11 +270,17 @@ export class Table {
     }
 
     public sendCurrentPlayer() {
-        this.commands$.next({
-            name: TableCommandName.CurrentPlayer,
-            table: this.name,
-            data: { currentPlayerID: this.players[this.currentPlayer].id }
-        });
+        const currentPlayer = this.players[this.currentPlayer];
+        if (currentPlayer) {
+            this.commands$.next({
+                name: TableCommandName.CurrentPlayer,
+                table: this.name,
+                data: { currentPlayerID: currentPlayer.id }
+            });
+        } else {
+            this.logger.warn('No current player set.');
+        }
+
     }
 
     public sendDealerUpdate() {
@@ -326,15 +337,17 @@ export class Table {
         if (playerIndex !== this.currentPlayer) {
             throw new WsException('Not your turn!');
         }
-
+        const player = this.players[playerIndex];
         const existingBet = this.game.getBetAmount(playerIndex);
         const maxBet = this.game.getMaxBet();
+
         if (!maxBet || maxBet - existingBet === 0) {
             throw new WsException(`Can't call. No bet to call.`);
         }
 
         let betToPay = existingBet ? maxBet - existingBet : maxBet;
-        this.bet(playerID, betToPay, BetType.Call );
+        betToPay = betToPay > player.chips ? player.chips : betToPay;// limit to go all-in
+        this.bet(playerID, betToPay, BetType.Call);
 
         //
         // const player = this.players[playerIndex];
@@ -351,18 +364,28 @@ export class Table {
     }
 
     public bet(playerID: string, bet: number, type: BetType = BetType.Bet) {
+
         const playerIndex = this.getPlayerIndexByID(playerID);
         if (playerIndex !== this.currentPlayer) {
             throw new WsException('Not your turn!');
         }
 
-        // TODO: Check if bet was at least max bet.
-
         const player = this.players[playerIndex];
+        this.logger.debug(`Player[${ player.name }] bet [${ bet }]!`);
+
+        // Check if bet was at least max bet but let call bets still proceed
+        if (type !== BetType.Call) {
+            const maxBet = this.game.getMaxBet();
+            if (bet < maxBet && bet != player.chips) {
+                throw new WsException('Can not bet less than max bet!');
+            }
+        }
+
         player.pay(bet);
         // check if all-in
         if (player.chips <= 0) {
             player.allIn = true;
+            this.logger.debug(player.name + ' went all-in!');
         }
 
         const playerBet = new Bet(bet, type);
@@ -382,8 +405,8 @@ export class Table {
         const next = this.progress();
         if (next) {
             this.nextPlayer();
+            this.sendPlayersUpdate();
         }
-        this.sendPlayersUpdate();
     }
 
     public fold(playerID: string) {
@@ -393,6 +416,8 @@ export class Table {
         }
 
         const player = this.players[playerIndex];
+        this.logger.debug(`Player[${ player.name }] folded!`);
+
         player.folded = true;
 
         const next = this.progress();
@@ -407,6 +432,7 @@ export class Table {
         if (playerIndex !== this.currentPlayer) {
             throw new WsException('Not your turn!');
         }
+        this.logger.debug(`Player[${ playerID }] checked!`);
 
         this.game.check(playerIndex);
 
@@ -471,15 +497,14 @@ export class Table {
 
         if (this.isEndOfRound() || everyoneElseFolded) {
             let round = this.game.round.type;
+            this.logger.debug(`Round[${ round }] ended!`);
 
             this.processBets(everyoneElseFolded);
 
             // all players all in or all except one is all in
-            let autoPlaying = false;
             const allInPlayers = this.players.filter(player => player.allIn);
             if (allInPlayers.length != 0 && allInPlayers.length >= this.getActivePlayers().length - 1) { // TODO: HEADS UP is des voisch wenn wer folded
                 this.logger.debug('All in situation, auto-play game');
-                autoPlaying = true;
                 this.showPlayersCards();
 
                 // play until RoundType.River
@@ -495,14 +520,14 @@ export class Table {
 
                 // only show cards if it was the last betting round
                 if (round === RoundType.River) {
-                    this.showPlayersCards();
+                    this.showPlayersCards(); // showing cards twice if all-in situation
                 }
 
                 // wait for the winner announcement. Maximum of 5s card display delay
                 this.timeouts.push(setTimeout(() => {
                     this.processWinners(everyoneElseFolded);
                     // hide pot after giving it to the winner
-                    this.game.pot = 0;
+                    this.game.resetPots();
                     this.sendPotUpdate();
 
                     // auto-create new game
@@ -545,26 +570,29 @@ export class Table {
         }
 
         if (allInPlayers.length > 0 && raised) {
-            this.logger.warn('Creating new side pot cause someone went all in!');
+            this.logger.debug('Creating new side pot cause someone went all in!');
 
+            let potPlayers = [];
             do {
                 const lowestBet = this.game.getLowestBet();
                 let pot = 0;
                 for (let i = 0; i < this.players.length; i++) {
                     const player = this.players[i];
 
-                    if (player.bet.amount > 0) {
+                    if (player.bet?.amount > 0) {
                         pot += lowestBet;
                         player.bet.amount -= lowestBet;
                         this.game.bet(i, player.bet);
+                        potPlayers.push(player);
                     }
                 }
 
                 this.game.pot += pot;
 
-                activePlayers = this.players.filter(player => player.bet.amount > 0);
+                activePlayers = this.players.filter(player => player.bet?.amount > 0);
                 if (activePlayers.length > 1) {
-                    this.game.createSidePot(activePlayers);
+                    this.game.createSidePot(potPlayers);
+                    potPlayers = [];
                 }
             } while (activePlayers.length > 1);
 
@@ -601,13 +629,11 @@ export class Table {
         const winners: Winner[] = [];
         winners.push(...this.mapWinners(availablePlayers, everyoneElseFolded, mainPot, 'main'));
 
-        // TODO: add money adding method. Depending on winners amount and pot amount, return the earnings
-        // todo: refactor the pot data to use winners earnings on client
-
         // if there were side pots, process the winners of each
         for (let i = 0; i < this.game.sidePots.length; i++) {
             let sidePot = this.game.sidePots[i];
-            winners.push(...this.mapWinners(sidePot.players, everyoneElseFolded, sidePot.amount, 'sidepot' + i));
+            const potPlayers = sidePot.players.filter(player => !player.folded); // remove folded players
+            winners.push(...this.mapWinners(potPlayers, everyoneElseFolded, sidePot.amount, 'sidepot' + i));
         }
 
         if (winners.length === 1) {
