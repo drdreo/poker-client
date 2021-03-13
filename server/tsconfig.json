@@ -8,15 +8,15 @@
     "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
+    "baseUrl": "./src",
     "incremental": true
   },
   "exclude": [
     "node_modules",
     "dist",
-    "client/**/*"
+    "../client/**/*"
   ],
   "files": [
-    "server/main.ts"
-  ],
+    "main.ts"
+  ]
 }

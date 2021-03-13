@@ -26,7 +26,7 @@ npm run build
 ```
 
 ## Running the server
-Run these commands inside the `root` folder
+Run these commands inside the `server` folder
 
 ```bash
 # development

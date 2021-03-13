@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { RoundType, BetType } from '../../shared/src';
+import { RoundType, BetType } from '../../../shared/src';
 import { Player } from './Player';
 
 

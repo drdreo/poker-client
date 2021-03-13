@@ -1,6 +1,6 @@
 import { WsException } from '@nestjs/websockets';
 import { EvaluatedHand } from 'poker-evaluator/lib/types';
-import { SidePotPlayer, PlayerOverview, Bet } from '../../shared/src';
+import { SidePotPlayer, PlayerOverview, Bet } from '../../../shared/src';
 import { remapCards, hideCards } from './table/Table';
 
 export class Player {
