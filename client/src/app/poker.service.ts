@@ -1,13 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
-import { Observable, Subject, zip, interval, of } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
 import { map, tap, delay, concatAll } from 'rxjs/operators';
 import {
     PokerEvent, GameStatus, TableResponse, HomeInfo, ServerJoined, GameWinners, GamePotUpdate, PlayerLeft, GameDealerUpdate,
     GameCurrentPlayer, GameBoardUpdate, PlayerCalled, PlayerChecked, PlayerFolded, GameRoundUpdate, PlayerBet, GamePlayersUpdate, Card,
     PlayerEvent, PlayerOverview, SidePot, MaxBetUpdate
-} from '../../../shared/src';
+} from '@shared/src';
 import { environment } from '../environments/environment';
 
 

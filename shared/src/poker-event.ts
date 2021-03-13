@@ -1,9 +1,7 @@
 export enum PokerEvent {
-
     HomeInfo = 'server:home:info',
 
     Joined = 'server:joined',
-
 
     GameStarted = 'server:game:started',
     GameEnded = 'server:game:ended',
@@ -23,7 +21,6 @@ export enum PokerEvent {
     MaxBetUpdate = 'server:game:max-bet_updated',
     NewRound = 'server:game:new_round',
     TableClosed = 'server:table:closed',
-
 
     // Actions
     PlayerChecked = 'server:checked',

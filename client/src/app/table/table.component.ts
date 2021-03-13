@@ -15,7 +15,7 @@ import { Player } from './player/player.component';
 
 @Sentry.TraceClassDecorator()
 @Component({
-    selector: 'app-table',
+    selector: 'poker-table',
     templateUrl: './table.component.html',
     styleUrls: ['./table.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Observable } from 'rxjs';
+import { ChipsComponent } from '../chips/chips.component';
 
 import { GameControlsComponent } from './game-controls.component';
 
@@ -8,7 +10,7 @@ describe('GameControlsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ GameControlsComponent ]
+      declarations: [ GameControlsComponent, ChipsComponent ]
     })
     .compileComponents();
   });
@@ -16,6 +18,7 @@ describe('GameControlsComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(GameControlsComponent);
     component = fixture.componentInstance;
+    component.maxBet$ = new Observable();
     fixture.detectChanges();
   });
 

@@ -4,6 +4,9 @@ import { Socket } from 'ngx-socket-io';
 import { PokerService } from '../poker.service';
 import { PokerServiceMock } from '../poker.service.mock';
 import { SocketMock } from '../test/socket.mock';
+import { ChipsComponent } from './chips/chips.component';
+import { FeedComponent } from './feed/feed.component';
+import { TableInfosComponent } from './table-infos/table-infos.component';
 
 import { TableComponent } from './table.component';
 
@@ -14,7 +17,7 @@ describe('TableComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             imports: [RouterTestingModule],
-            declarations: [TableComponent],
+            declarations: [TableComponent, ChipsComponent, TableInfosComponent, FeedComponent],
             providers: [
                 { provide: Socket, useClass: SocketMock },
                 { provide: PokerService, useClass: PokerServiceMock }

@@ -6,7 +6,7 @@ interface Card {
 }
 
 @Component({
-	selector: 'app-card',
+	selector: 'poker-card',
 	templateUrl: './card.component.html',
 	styleUrls: ['./card.component.scss'],
 })

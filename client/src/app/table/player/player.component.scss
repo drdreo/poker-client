@@ -82,7 +82,7 @@ $name-font-family: 'Balsamiq Sans', cursive;
     z-index: 20;
     display: inline-flex;
 
-    app-card:first-child {
+    poker-card:first-child {
       margin-right: 20px;
     }
   }
@@ -246,7 +246,7 @@ $name-font-family: 'Balsamiq Sans', cursive;
     color: #96e296;
   }
 
-  app-coins {
+  poker-chips {
     position: absolute;
   }
 

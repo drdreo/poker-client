@@ -35,39 +35,39 @@
 
     <div class="table">
         <div class="stack card-place">
-            <app-card *ngFor="let card of getArray(45); let i = index;"
-                      figure="back"
-                      [ngStyle]="{'top.px': -0.5*i +5 }"></app-card>
+            <poker-card *ngFor="let card of getArray(45); let i = index;"
+                        figure="back"
+                        [ngStyle]="{'top.px': -0.5*i +5 }"></poker-card>
         </div>
         <div class="board card-place">
-            <app-card *ngFor="let card of (board$ | async)" [figure]="card.figure" [value]="card.value"></app-card>
+            <poker-card *ngFor="let card of (board$ | async)" [figure]="card.figure" [value]="card.value"></poker-card>
         </div>
         <div class="players">
-            <app-player *ngFor="let player of (players$ | async); let i = index;"
-                        [class.client-player]="player.id === (player$|async)?.id"
-                        [player]="player"
-                        [seat]="getPlayerSeat(i)"
-                        [dealer]="player.id === (dealerPlayerID$ | async)"
-                        [playing]="player.id === (currentPlayerID$ | async)"></app-player>
+            <poker-player *ngFor="let player of (players$ | async); let i = index;"
+                          [class.client-player]="player.id === (player$|async)?.id"
+                          [player]="player"
+                          [seat]="getPlayerSeat(i)"
+                          [dealer]="player.id === (dealerPlayerID$ | async)"
+                          [playing]="player.id === (currentPlayerID$ | async)"></poker-player>
         </div>
         <div class="pot" *ngIf="pot$ | async as pot">
             <div class="pot__value">
                 {{pot}}€
             </div>
             <div class="jetons">
-                <app-coins [amount]="pot" [type]="100"></app-coins>
+                <poker-chips [amount]="pot" [type]="100"></poker-chips>
             </div>
             <div class="jetons">
-                <app-coins [amount]="pot" [type]="50"></app-coins>
+                <poker-chips [amount]="pot" [type]="50"></poker-chips>
             </div>
             <div class="jetons">
-                <app-coins [amount]="pot" [type]="10"></app-coins>
+                <poker-chips [amount]="pot" [type]="10"></poker-chips>
             </div>
             <div class="jetons">
-                <app-coins [amount]="pot" [type]="5"></app-coins>
+                <poker-chips [amount]="pot" [type]="5"></poker-chips>
             </div>
             <div class="jetons">
-                <app-coins [amount]="pot" [type]="1"></app-coins>
+                <poker-chips [amount]="pot" [type]="1"></poker-chips>
             </div>
         </div>
     </div>

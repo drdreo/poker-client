@@ -48,9 +48,9 @@
 
                 <div class="controls__bet__amount" (click)="togglePopup();">
                     <div class="controls__bet__amount__chips">
-                        <app-coins [amount]="data.betAmount" [type]="10" direction="bottom"></app-coins>
-                        <app-coins [amount]="data.betAmount" [type]="50" direction="bottom"></app-coins>
-                        <app-coins [amount]="data.betAmount" [type]="100" direction="bottom"></app-coins>
+                        <poker-chips [amount]="data.betAmount" [type]="10" direction="bottom"></poker-chips>
+                        <poker-chips [amount]="data.betAmount" [type]="50" direction="bottom"></poker-chips>
+                        <poker-chips [amount]="data.betAmount" [type]="100" direction="bottom"></poker-chips>
                     </div>
                     <div class="controls__bet__amount__value">{{data.betAmount}}</div>
                 </div>

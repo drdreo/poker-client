@@ -1,29 +1,27 @@
-import { ChangeDetectionStrategy, Component, HostBinding, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, Input, OnChanges, SimpleChanges } from '@angular/core';
 
 @Component({
-    selector: 'app-coins',
-    templateUrl: './coins.component.html',
-    styleUrls: ['./coins.component.scss'],
+    selector: 'poker-chips',
+    templateUrl: './chips.component.html',
+    styleUrls: ['./chips.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CoinsComponent implements OnInit, OnChanges {
+export class ChipsComponent implements OnChanges {
 
     @Input() amount: number;
     @Input() type: number;
     @Input() direction: string = 'top';
 
-    @HostBinding('class.inactive') inactive: boolean = false;
+    @HostBinding('class.inactive')
+    inactive: boolean = false;
 
-    // available coins
-    private coins = [100, 50, 10, 5, 1];
+    // available chips
+    private chips = [100, 50, 10, 5, 1];
 
     constructor() { }
 
-    ngOnInit(): void {
-    }
-
     ngOnChanges(changes: SimpleChanges) {
-        if (changes.amount.currentValue && this.getCoinsFor(changes.amount.currentValue, this.type) === 0) {
+        if (changes.amount.currentValue && this.getChipsFor(changes.amount.currentValue, this.type) === 0) {
             this.inactive = true;
         } else {
             this.inactive = false;
@@ -34,9 +32,9 @@ export class CoinsComponent implements OnInit, OnChanges {
         return Array(number).fill(0).map((x, i) => i);
     }
 
-    getCoinsFor(total: number, coin: number) {
-        // prep coins
-        const coins = this.coins.map(c => {
+    getChipsFor(total: number, coin: number) {
+        // prep chips
+        const coins = this.chips.map(c => {
             return { amount: 0, value: c };
         });
 
@@ -59,10 +57,10 @@ export class CoinsComponent implements OnInit, OnChanges {
         return c.amount;
     }
 
-    getCoinPosition(i: number) {
-        if(this.direction === 'bottom'){
-            return {'bottom.px' : (-2 + (i * 5))};
+    getChipPosition(i: number) {
+        if (this.direction === 'bottom') {
+            return { 'bottom.px': (-2 + (i * 5)) };
         }
-        return {'top.px' : (-2 + (i * 5))};
+        return { 'top.px': (-2 + (i * 5)) };
     }
 }

@@ -4,7 +4,7 @@ import { TableComponent } from './table.component';
 import { TableRoutingModule } from './table-routing.module';
 import { CardComponent } from './card/card.component';
 import { PlayerComponent } from './player/player.component';
-import { CoinsComponent } from './coins/coins.component';
+import { ChipsComponent } from './chips/chips.component';
 import { FeedComponent } from './feed/feed.component';
 import { FeedMessageComponent } from './feed/feed-message/feed-message.component';
 import { TableInfosComponent } from './table-infos/table-infos.component';
@@ -16,7 +16,7 @@ import { GameControlsComponent } from './game-controls/game-controls.component';
 		TableComponent,
 		CardComponent,
 		PlayerComponent,
-		CoinsComponent,
+		ChipsComponent,
 		FeedComponent,
 		FeedMessageComponent,
 		TableInfosComponent,

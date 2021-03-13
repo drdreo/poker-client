@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ChipsComponent } from '../chips/chips.component';
+import { GameControlsComponent } from '../game-controls/game-controls.component';
 
 import { PlayerComponent } from './player.component';
 
@@ -18,7 +20,7 @@ describe('PlayerComponent', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
-            declarations: [PlayerComponent]
+            declarations: [PlayerComponent, ChipsComponent]
         }).compileComponents();
     }));
 

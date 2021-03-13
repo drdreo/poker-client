@@ -1,7 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Observable, combineLatest } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
-import { SidePot } from '../../../../../shared/src';
+import { Observable } from 'rxjs';
+import { SidePot } from '@shared/src';
 import { Player } from '../player/player.component';
 
 @Component({

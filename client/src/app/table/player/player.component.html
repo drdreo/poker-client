@@ -6,11 +6,11 @@
      [class.allin]="player.allIn">
     <div class="bank">
         <div class="bank-value">{{bankValue(player.chips, player.allIn)}}</div>
-        <app-coins class="jetons-100" [amount]="player.chips" [type]="100"></app-coins>
-        <app-coins class="jetons-50" [amount]="player.chips" [type]="50"></app-coins>
-        <app-coins class="jetons-10" [amount]="player.chips" [type]="10"></app-coins>
-        <app-coins class="jetons-5" [amount]="player.chips" [type]="5"></app-coins>
-        <app-coins class="jetons-1" [amount]="player.chips" [type]="1"></app-coins>
+        <poker-chips class="jetons-100" [amount]="player.chips" [type]="100"></poker-chips>
+        <poker-chips class="jetons-50" [amount]="player.chips" [type]="50"></poker-chips>
+        <poker-chips class="jetons-10" [amount]="player.chips" [type]="10"></poker-chips>
+        <poker-chips class="jetons-5" [amount]="player.chips" [type]="5"></poker-chips>
+        <poker-chips class="jetons-1" [amount]="player.chips" [type]="1"></poker-chips>
     </div>
     <div class="avatar" [ngStyle]="{'background-color': player.color || 'dodgerblue'}"></div>
     <div class="name">{{player.name}}</div>
@@ -21,23 +21,23 @@
         </div>
 
         <div class="jetons jetons-100">
-            <app-coins [amount]="player.bet.amount" [type]="100"></app-coins>
+            <poker-chips [amount]="player.bet.amount" [type]="100"></poker-chips>
         </div>
         <div class="jetons jetons-50">
-            <app-coins [amount]="player.bet.amount" [type]="50"></app-coins>
+            <poker-chips [amount]="player.bet.amount" [type]="50"></poker-chips>
         </div>
         <div class="jetons jetons-10">
-            <app-coins [amount]="player.bet.amount" [type]="10"></app-coins>
+            <poker-chips [amount]="player.bet.amount" [type]="10"></poker-chips>
         </div>
         <div class="jetons jetons-5">
-            <app-coins [amount]="player.bet.amount" [type]="5"></app-coins>
+            <poker-chips [amount]="player.bet.amount" [type]="5"></poker-chips>
         </div>
         <div class="jetons jetons-1">
-            <app-coins [amount]="player.bet.amount" [type]="1"></app-coins>
+            <poker-chips [amount]="player.bet.amount" [type]="1"></poker-chips>
         </div>
     </div>
     <div class="cards" [class.folded]="player.folded">
-        <app-card *ngFor="let card of player.cards" [figure]="card.figure" [value]="card.value"></app-card>
+        <poker-card *ngFor="let card of player.cards" [figure]="card.figure" [value]="card.value"></poker-card>
     </div>
 </div>
 

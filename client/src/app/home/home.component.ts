@@ -3,7 +3,7 @@ import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from
 import { Router } from '@angular/router';
 import { Observable, Subject, merge } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { HomeInfo } from '../../../../shared/src';
+import { HomeInfo } from '@shared/src';
 import { ErrorService } from '../error.service';
 import { PokerService } from '../poker.service';
 import * as Sentry from '@sentry/angular';

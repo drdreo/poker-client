@@ -1,10 +1,10 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { PlayerOverview } from '../../../../../shared/src';
+import { PlayerOverview } from '@shared/src';
 
 export type Player = PlayerOverview;
 
 @Component({
-    selector: 'app-player',
+    selector: 'poker-player',
     templateUrl: './player.component.html',
     styleUrls: ['./player.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

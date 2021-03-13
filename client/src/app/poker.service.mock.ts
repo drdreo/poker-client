@@ -1,6 +1,5 @@
 import { of, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { HomeInfo, TableResponse, SidePot } from '../../../shared/src';
+import { HomeInfo, TableResponse, SidePot } from '@shared/src';
 
 export class PokerServiceMock {
 
