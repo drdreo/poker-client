@@ -1,0 +1,11 @@
+<ng-container *ngIf="figure !=='back'; else backCard">
+    <div class="card" [ngClass]="['figures-' + figure, 'values-' + value]">
+        <h1>{{value}}</h1>
+        <div class="figures" [ngClass]="[figure]"></div>
+        <h1>{{value}}</h1>
+    </div>
+</ng-container>
+
+<ng-template #backCard>
+    <div class="card card--back"></div>
+</ng-template>

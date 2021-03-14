@@ -1,0 +1,49 @@
+$mobile: 768px;
+$desktop: 1024px;
+$fullhd: 1408px;
+
+$text-primary: 'Open Sans', sans-serif;
+$text-secondary: Poppins, sans-serif;
+
+// Colors
+$black: #111;
+$dark: #1f212a;
+$white: #eee;
+$gray: lightgray;
+$green: hsla(80, 40%, 50%, 1);
+$orange-dark: #da7e35;
+$yellow: #ffeb3b;
+
+$primary-background-color: $dark;
+$secondary-background-color: #363a49;
+$primary-color: #7289da;
+$success-color: rgba(67, 181, 129, 0.8);
+$danger-color: rgba(207, 73, 80, 0.8);
+$warning-color: #daa520;
+
+
+$input-background-color: $secondary-background-color;
+$button-color: $white;
+$button-background-color: $primary-color;
+$link-color: $primary-color;
+
+$primary-radius: 3px;
+
+$currency-symbol: "€";
+
+/** TABLE **/
+$table-font-family: 'Open Sans', sans-serif;
+$table-font-color: rgba(255, 255, 255, 0.33);
+$table-player-font-color: rgba(255, 255, 255, 0.4);
+$table-background-color: #4aad4a;
+$table-border-color: #a95555;
+
+/** JETONS **/
+$jeton-100-color: #444;
+$jeton-50-color: goldenrod;
+$jeton-10-color: crimson;
+$jeton-5-color: $button-background-color;
+$jeton-1-color: lightgrey;
+
+/** PLAYER **/
+$player-font-family: $table-font-family;

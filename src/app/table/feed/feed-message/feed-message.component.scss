@@ -1,0 +1,21 @@
+@import "../../../../assets/styles/utils";
+
+.message {
+
+  &__info {
+
+    color: $primary-color;
+  }
+
+  &__error {
+    color: $danger-color;
+  }
+
+  &__played {
+    color: $gray;
+  }
+
+  &__won {
+    color: $warning-color;
+  }
+}

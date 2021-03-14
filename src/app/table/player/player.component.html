@@ -1,0 +1,43 @@
+<div class="player"
+     [ngClass]="'player-'+ (seat)"
+     [class.playing]="playing"
+     [class.dealer]="dealer"
+     [class.folded]="player.folded"
+     [class.allin]="player.allIn">
+    <div class="bank">
+        <div class="bank-value">{{bankValue(player.chips, player.allIn)}}</div>
+        <poker-chips class="jetons-100" [amount]="player.chips" [type]="100"></poker-chips>
+        <poker-chips class="jetons-50" [amount]="player.chips" [type]="50"></poker-chips>
+        <poker-chips class="jetons-10" [amount]="player.chips" [type]="10"></poker-chips>
+        <poker-chips class="jetons-5" [amount]="player.chips" [type]="5"></poker-chips>
+        <poker-chips class="jetons-1" [amount]="player.chips" [type]="1"></poker-chips>
+    </div>
+    <div class="avatar" [ngStyle]="{'background-color': player.color || 'dodgerblue'}"></div>
+    <div class="name">{{player.name}}</div>
+    <div class="dealer-btn">D</div>
+    <div class="mise" *ngIf="player.bet?.amount > 0">
+        <div class="mise-value">
+            {{ player.bet.amount }}
+        </div>
+
+        <div class="jetons jetons-100">
+            <poker-chips [amount]="player.bet.amount" [type]="100"></poker-chips>
+        </div>
+        <div class="jetons jetons-50">
+            <poker-chips [amount]="player.bet.amount" [type]="50"></poker-chips>
+        </div>
+        <div class="jetons jetons-10">
+            <poker-chips [amount]="player.bet.amount" [type]="10"></poker-chips>
+        </div>
+        <div class="jetons jetons-5">
+            <poker-chips [amount]="player.bet.amount" [type]="5"></poker-chips>
+        </div>
+        <div class="jetons jetons-1">
+            <poker-chips [amount]="player.bet.amount" [type]="1"></poker-chips>
+        </div>
+    </div>
+    <div class="cards" [class.folded]="player.folded">
+        <poker-card *ngFor="let card of player.cards" [figure]="card.figure" [value]="card.value"></poker-card>
+    </div>
+</div>
+

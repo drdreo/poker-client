@@ -1,0 +1,56 @@
+@import "../../../assets/styles/utils";
+
+
+:host {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  display: block;
+}
+
+:host(.inactive) {
+  display: none
+}
+
+.amount {
+  position: absolute;
+  font-family: $table-font-family;
+  right: -37px;
+  font-weight: bold;
+  font-size: 12px;
+  color: #ffeb3b;
+
+  &:after {
+    content: $currency-symbol;
+  }
+}
+
+.jetons {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 100%;
+  border: 2px white dotted;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, .1);
+
+  &.v-100 {
+    background-color: $jeton-100-color;
+  }
+
+  &.v-50 {
+    background-color: $jeton-50-color;
+  }
+
+  &.v-10 {
+    background-color: $jeton-10-color;
+  }
+
+  &.v-5 {
+    background-color: $jeton-5-color;
+  }
+
+  &.v-1 {
+    background-color: $jeton-1-color;
+  }
+}
+

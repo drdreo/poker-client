@@ -1,0 +1,152 @@
+@import "../../assets/styles/utils";
+
+
+.table-infos {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  min-width: 150px;
+}
+
+.table__action {
+  position: absolute;
+  top: 5%;
+
+  &.error {
+    color: $danger-color;
+  }
+}
+
+.ready-container {
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+  position: absolute;
+  bottom: 10%;
+
+  &__message {
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+}
+
+.game_controls {
+  position: absolute;
+  bottom: 3%;
+}
+
+.table {
+  width: 1000px;
+  height: 400px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+
+  border-radius: 150px;
+  border: 15px solid $table-border-color;
+  background-color: $table-background-color;
+  font-family: $table-font-family;
+
+  &:before {
+    content: '';
+    border: 7px solid rgba(0, 0, 0, .1);
+    display: block;
+    width: 1015px;
+    height: 415px;
+    border-radius: 150px;
+    position: absolute;
+    top: -15px;
+    left: -15px;
+  }
+
+  &:after {
+    content: '';
+    border: 7px solid rgba(0, 0, 0, .1);
+    display: block;
+    width: 985px;
+    height: 385px;
+    border-radius: 130px;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+
+  .card-place {
+    border: 5px solid $table-font-color;
+    height: 100px;
+
+    position: absolute;
+    border-radius: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+
+    &.stack {
+      width: 85px;
+      top: 50%;
+      left: calc(50% - 220px);
+      transform: translateX(-50%) translateY(-50%);
+
+      poker-card {
+        position: absolute;
+      }
+    }
+
+    &.board {
+      width: 340px;
+      top: 50%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-50%);
+
+      poker-card:not(:last-child) {
+        margin-right: 15px;
+      }
+    }
+  }
+
+  .pot {
+    font-size: 30px;
+    color: $table-font-color;
+    position: absolute;
+    top: 45%;
+    left: 75%;
+    min-width: 80px;
+    transform: translateX(-50%) translateY(-50%);
+
+    .jetons {
+      display: inline-block;
+    }
+  }
+
+
+}
+
+.players {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+}
+
+
+.overlay {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background-color: #000000ab;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 500ms ease;
+  z-index: 10;
+
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+}

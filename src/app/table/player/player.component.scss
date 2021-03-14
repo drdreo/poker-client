@@ -1,0 +1,348 @@
+@import "../../../assets/styles/utils";
+
+$name-font-family: 'Balsamiq Sans', cursive;
+
+:host(.client-player) {
+  .player {
+    .name {
+      color: $yellow;
+      border-color: $yellow;
+    }
+
+    .cards.folded {
+      display: flex;
+      filter: grayscale(1);
+      opacity: 0.8;
+    }
+  }
+}
+
+.player {
+  position: absolute;
+  font-family: $player-font-family;
+
+  &.allin{
+    .bank-value{
+      color: $yellow;
+    }
+  }
+  &.folded {
+    .avatar {
+      filter: grayscale(1);
+    }
+
+    .cards {
+      display: none;
+    }
+  }
+
+  .avatar {
+    width: 120px;
+    height: 120px;
+    background-color: lightcoral;
+    border-radius: 100%;
+    position: relative;
+    box-shadow: 2px 10px 0 rgba(0, 0, 0, .4);
+    z-index: 15;
+
+    &:after {
+      content: '';
+      width: 70px;
+      height: 70px;
+      position: absolute;
+      background-color: rgba(0, 0, 0, .1);
+      top: 50%;
+      left: 50%;
+      transform: translatex(-50%) translatey(-50%);
+      border-radius: 100%;
+      box-shadow: 0 5px 0 rgba(0, 0, 0, .2)
+    }
+  }
+
+  .name {
+    font-family: $name-font-family;
+    text-align: center;
+    width: 100px;
+    color: $table-player-font-color;
+    padding: 5px 0;
+    margin-left: 10px;
+    box-sizing: border-box;
+    border: 2px solid $table-player-font-color;
+    border-radius: 5px;
+    margin-top: 15px;
+    text-overflow: ellipsis;
+    font-size: 11px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .cards {
+    position: absolute;
+    top: -20px;
+    z-index: 20;
+    display: inline-flex;
+
+    poker-card:first-child {
+      margin-right: 20px;
+    }
+  }
+
+  .dealer-btn {
+    display: none;
+    position: absolute;
+    background-color: white;
+    color: black;
+    width: 30px;
+    height: 30px;
+    border-radius: 30px;
+    align-items: center;
+    bottom: 10px;
+    justify-content: center;
+  }
+
+  &.dealer {
+    .dealer-btn {
+      display: flex;
+    }
+  }
+
+  &.playing:before {
+    content: ' .';
+    animation: dots 1.5s steps(5) infinite;
+
+    color: white;
+    font-size: 20px;
+    position: absolute;
+    background-color: #76daff;
+    display: inline-block;
+    line-height: 0;
+    height: 10px;
+    width: 15px;
+    padding: 2px 10px 5px;
+    border-radius: 5px;
+    z-index: 100;
+  }
+
+  &.player-1 {
+    top: 0;
+    left: 50%;
+    transform: translatex(-50%) translatey(-50%);
+  }
+
+  &.player-2 {
+    top: 0;
+    left: 75%;
+    transform: translatex(-50%) translatey(-50%);
+  }
+
+  &.player-3 {
+    top: 50%;
+    right: 0;
+    transform: translatex(50%) translatey(-50%) rotatez(90deg);
+
+    .name {
+      transform: rotatez(0deg);
+    }
+
+    .cards, .bank-value, .mise-value {
+      transform: rotatez(270deg);
+    }
+  }
+
+  &.player-4 {
+    bottom: 0;
+    left: 75%;
+    transform: translatex(-50%) translatey(50%) rotatez(180deg);
+
+    .name, .cards, .bank-value, .mise-value, .dealer-btn {
+      transform: rotatez(180deg);
+    }
+  }
+
+  &.player-5 {
+    bottom: 0;
+    left: 50%;
+    transform: translatex(-50%) translatey(50%) rotatez(180deg);
+
+    .name, .cards, .bank-value, .mise-value, .dealer-btn {
+      transform: rotatez(180deg);
+    }
+  }
+
+  &.player-6 {
+    bottom: 0;
+    left: 25%;
+    transform: translatex(-50%) translatey(50%) rotatez(180deg);
+
+    .name, .cards, .bank-value, .mise-value, .dealer-btn {
+      transform: rotatez(180deg);
+    }
+  }
+
+  &.player-7 {
+    top: 50%;
+    left: 0;
+    transform: translatex(-50%) translatey(-50%) rotatez(-90deg);
+
+    .name {
+      transform: rotatez(0deg);
+    }
+
+    .cards {
+      transform: rotatez(90deg);
+    }
+
+    .bank-value, .mise-value {
+      transform: rotatez(90deg);
+    }
+
+  }
+
+  &.player-8 {
+    top: 0;
+    left: 25%;
+    transform: translatex(-50%) translatey(-50%);
+  }
+
+
+  &.player-9 {
+    top: 5%;
+    left: 95%;
+    transform: translatex(-50%) translatey(-50%);
+  }
+
+  &.player-10 {
+    bottom: 5%;
+    left: 95%;
+    transform: translatex(-50%) translatey(50%);
+  }
+
+  &.player-11 {
+    bottom: 5%;
+    left: 5%;
+    transform: translatex(-50%) translatey(50%);
+  }
+
+  &.player-12 {
+    top: 5%;
+    left: 5%;
+    transform: translatex(-50%) translatey(-50%);
+  }
+}
+
+.bank {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  top: 100px;
+  right: 0;
+  z-index: 10;
+
+  .bank-value {
+    position: absolute;
+    left: -110px;
+    font-weight: bold;
+    font-size: 12px;
+    color: #96e296;
+  }
+
+  poker-chips {
+    position: absolute;
+  }
+
+  .jetons {
+    &-100 {
+      top: -15px;
+      left: 45px;
+    }
+
+    &-50 {
+      top: -15px;
+      left: 25px;
+    }
+
+    &-10 {
+      top: 0;
+      left: 17px;
+    }
+
+    &-5 {
+      top: 10px;
+      left: 5px;
+    }
+
+    &-1 {
+      top: 20px;
+      left: -10px;
+    }
+  }
+
+}
+
+.mise {
+  position: absolute;
+  top: 170px;
+  left: 50%;
+  transform: translatex(-50%);
+  height: 40px;
+  width: 60px;
+
+  .mise-value {
+    position: absolute;
+    right: -37px;
+    font-weight: bold;
+    font-size: 12px;
+    color: #ffeb3b;
+
+    &:after {
+      content: $currency-symbol;
+    }
+  }
+
+  .jetons {
+    position: absolute;
+
+    &-100 {
+      left: -35px;
+    }
+
+    &-50 {
+      left: -15px;
+    }
+
+    &-10 {
+      left: 5px;
+    }
+
+    &-5 {
+      left: 25px;
+    }
+
+    &-1 {
+      left: 45px;
+    }
+  }
+}
+
+
+/* loading dots */
+@keyframes dots {
+  0%, 20% {
+    color: rgba(0, 0, 0, 0);
+    text-shadow: .25em 0 0 rgba(0, 0, 0, 0),
+    .5em 0 0 rgba(0, 0, 0, 0);
+  }
+  40% {
+    color: white;
+    text-shadow: .25em 0 0 rgba(0, 0, 0, 0),
+    .5em 0 0 rgba(0, 0, 0, 0);
+  }
+  60% {
+    text-shadow: .25em 0 0 white,
+    .5em 0 0 rgba(0, 0, 0, 0);
+  }
+  80%, 100% {
+    text-shadow: .25em 0 0 white,
+    .5em 0 0 white;
+  }
+}

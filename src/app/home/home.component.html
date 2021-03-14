@@ -1,0 +1,49 @@
+<div class="page-container">
+    <div class="overview" *ngIf="homeInfo$ | async as homeInfo">
+        <div class="overview__total-players" data-cy="overview_online">Online: <span>{{homeInfo.players}}</span></div>
+        Tables
+        <div class="overview__rooms">
+            <div *ngFor="let table of homeInfo.tables"
+                 class="overview__rooms__entry"
+                 [class.has-started]="table.started"
+                 (click)="onTableClick(table.name)">
+                <span class="live" *ngIf="table.started"></span>  {{table.name}}
+            </div>
+        </div>
+    </div>
+
+    <img class="brand_logo" src="/assets/images/pokern_icon.png" alt="Pokern Icon"/>
+
+    <h4>Definitely NOT Poker</h4>
+
+    <form class="form" [formGroup]="loginForm" (ngSubmit)="joinTable()">
+        <input class="input username" placeholder="Name" formControlName="username" required data-cy="username"/>
+        <input class="input room" placeholder="Table" formControlName="table" required data-cy="room"/>
+        <button class="button join" type="submit" [disabled]="loginForm.invalid" data-cy="join_button">Join</button>
+    </form>
+
+    <div class="form__error">
+        <div *ngIf="username.invalid && username.dirty">
+            <div *ngIf="username.errors.minlength">
+                Name must be at least 4 characters long.
+            </div>
+
+        </div>
+
+        <div *ngIf="table.invalid && table.dirty">
+            <div *ngIf="table.errors.forbiddenName">
+                Table name is invalid!
+            </div>
+        </div>
+    </div>
+
+
+    <div *ngIf="connectionError$ | async">Something went wrong connecting to the server</div>
+
+    <div class="repository-badge">
+        <a href="https://github.com/drdreo/poker" target="_blank" title="Create an issue at GitHub">
+            <img src="https://img.shields.io/badge/Repository-GitHub-blue" alt="Create an issue at GitHub"/>
+        </a>
+    </div>
+</div>
+

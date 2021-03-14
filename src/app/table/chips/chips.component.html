@@ -1,0 +1,40 @@
+<ng-container *ngIf="amount > 0">
+    <ng-container [ngSwitch]="type">
+        <ng-container *ngSwitchCase="100">
+            <div class="jeton-100" *ngIf="getChipsFor(amount, 100) >= 1">
+                <div class="jetons v-100"
+                     *ngFor="let temp of getArray(getChipsFor(amount, 100)); let i = index;"
+                     [ngStyle]="getChipPosition(i)"></div>
+            </div>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="50">
+            <div class="jeton-50" *ngIf="getChipsFor(amount, 50) >= 1">
+                <div class="jetons v-50"
+                     *ngFor="let temp of getArray(getChipsFor(amount, 50)); let i = index;"
+                     [ngStyle]="getChipPosition(i)"></div>
+            </div>
+        </ng-container>
+        <ng-container *ngSwitchCase="10">
+            <div class="jeton-10" *ngIf="getChipsFor(amount, 10) >= 1">
+                <div class="jetons v-10"
+                     *ngFor="let temp of getArray(getChipsFor(amount, 10)); let i = index;"
+                     [ngStyle]="getChipPosition(i)"></div>
+            </div>
+        </ng-container>
+        <ng-container *ngSwitchCase="5">
+            <div class="jeton-5" *ngIf="getChipsFor(amount, 5) >= 1">
+                <div class="jetons v-5"
+                     *ngFor="let temp of getArray(getChipsFor(amount ,5)); let i = index;"
+                     [ngStyle]="getChipPosition(i)"></div>
+            </div>
+        </ng-container>
+        <ng-container *ngSwitchCase="1">
+            <div class="jeton-1" *ngIf="getChipsFor(amount, 1) >= 1">
+                <div class="jetons v-1"
+                     *ngFor="let temp of getArray(getChipsFor(amount,1)); let i = index;"
+                     [ngStyle]="getChipPosition(i)"></div>
+            </div>
+        </ng-container>
+    </ng-container>
+</ng-container>
