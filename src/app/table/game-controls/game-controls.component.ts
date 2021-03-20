@@ -35,7 +35,7 @@ export class GameControlsComponent implements OnInit {
     @Output() called = new EventEmitter<void>();
     @Output() bet = new EventEmitter<number>();
 
-    showPopup: boolean = false;
+    showPopup = false;
     betTemplates: BetTemplate[] = [
         { amount: 1, title: '1 BB', type: BetTemplateType.BigBlind },
         { amount: 2, title: '2 BB', type: BetTemplateType.BigBlind },
@@ -85,7 +85,7 @@ export class GameControlsComponent implements OnInit {
     }
 
     onBetChange($event: Event) {
-        const amount = +(<HTMLInputElement>$event.target).value;
+        const amount = +($event.target as HTMLInputElement).value;
         this.betAmount = amount;
     }
 
@@ -144,7 +144,7 @@ export class GameControlsComponent implements OnInit {
     }
 
     getCallAmount(maxBet: number): number {
-        let callAmount = this.player.bet ? maxBet - this.player.bet.amount : maxBet;
+        const callAmount = this.player.bet ? maxBet - this.player.bet.amount : maxBet;
         return callAmount > this.player.chips ? this.player.chips : callAmount;
     }
 

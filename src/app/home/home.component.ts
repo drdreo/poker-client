@@ -10,7 +10,7 @@ import * as Sentry from '@sentry/angular';
 
 @Sentry.TraceClassDecorator()
 @Component({
-    selector: 'app-home',
+    selector: 'poker-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -76,6 +76,6 @@ export class HomeComponent {
 function tableNameValidator(nameRe: RegExp): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
         const allowed = nameRe.test(control.value);
-        return allowed ? null : { 'forbiddenName': { value: control.value } };
+        return allowed ? null : { forbiddenName: { value: control.value } };
     };
 }

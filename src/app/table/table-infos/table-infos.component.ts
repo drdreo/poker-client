@@ -8,33 +8,13 @@ import { Player } from '../player/player.component';
     templateUrl: './table-infos.component.html',
     styleUrls: ['./table-infos.component.scss']
 })
-export class TableInfosComponent implements OnInit {
+export class TableInfosComponent {
 
     @Input() tableName: string;
     @Input() players$: Observable<Player[]>;
     @Input() time$: Observable<number>;
-    @Input() sidePots$: Observable<SidePot[]>;
 
     constructor() {
-
-
-    }
-
-    ngOnInit(): void {
-        // this.sidePotsWithPlayers$ = combineLatest([this.players$, this.sidePots$])
-        //     .pipe(
-        //         tap(console.log),
-        //         map(([players, sidePots]) => {
-        //             const newSidePots: SidePotWithPlayers[] = [];
-        //             sidePots.forEach(pot => {
-        //                 const potPlayers = [];
-        //                 pot.playerIDs.forEach(id => {
-        //                     potPlayers.push(players.find(player => player.id === id));
-        //                 });
-        //                 newSidePots.push({ ...pot, players: potPlayers });
-        //             });
-        //             return newSidePots;
-        //         }));
     }
 
 }

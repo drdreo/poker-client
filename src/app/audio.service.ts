@@ -1,17 +1,16 @@
 import { Injectable } from '@angular/core';
 
-interface Sound {
-    key: Sounds;
-    asset: string;
-    volume?: number;
-}
-
-
 export enum Sounds {
     CardDealt,
     CardsDealt,
     ChipsBet,
     Leave
+}
+
+interface Sound {
+    key: Sounds;
+    asset: string;
+    volume?: number;
 }
 
 @Injectable({
@@ -41,7 +40,7 @@ export class AudioService {
 
     play(key: Sounds): void {
 
-        let soundToPlay = this.sounds.find(sound => sound.key === key);
+        const soundToPlay = this.sounds.find(sound => sound.key === key);
 
         if (!soundToPlay) {
             throw new Error(`Could not find sound[${ key }]!`);

@@ -1,20 +1,11 @@
 @import "../../../assets/styles/utils";
 
-$name-font: 'Open Sans', sans-serif;
-$text-font: 'Poppins', sans-serif;
+$text-font: $text-secondary;
 
 :host {
-  background-color: $input-background-color;
+  background-color: $secondary-background-color;
   padding: 0.75rem;
   font-size: 1rem;
   border-radius: $primary-radius;
   font-family: $text-font;
-
-  .table {
-    font-family: $name-font;
-  }
-}
-
-.side-pots{
-  text-decoration: underline;
 }

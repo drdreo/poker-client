@@ -1,0 +1,14 @@
+@import "../../../../assets/styles/utils";
+
+:host{
+  background-color: $secondary-background-color;
+  display: block;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+
+.amount{
+  font-family: $text-primary;
+  color: $yellow;
+}

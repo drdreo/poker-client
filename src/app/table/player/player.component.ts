@@ -12,8 +12,8 @@ export type Player = PlayerOverview;
 export class PlayerComponent {
 
     @Input() player: Player;
-    @Input() playing: boolean = false;
-    @Input() dealer: boolean = false;
+    @Input() playing = false;
+    @Input() dealer = false;
     @Input() seat: number;
 
     constructor() { }

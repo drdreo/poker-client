@@ -9,6 +9,8 @@ import { FeedComponent } from './feed/feed.component';
 import { FeedMessageComponent } from './feed/feed-message/feed-message.component';
 import { TableInfosComponent } from './table-infos/table-infos.component';
 import { GameControlsComponent } from './game-controls/game-controls.component';
+import { SidepotsComponent } from './sidepots/sidepots.component';
+import { SidepotComponent } from './sidepots/sidepot/sidepot.component';
 
 
 @NgModule({
@@ -21,6 +23,8 @@ import { GameControlsComponent } from './game-controls/game-controls.component';
 		FeedMessageComponent,
 		TableInfosComponent,
 		GameControlsComponent,
+		SidepotsComponent,
+		SidepotComponent,
 	],
 	imports: [
 		CommonModule,

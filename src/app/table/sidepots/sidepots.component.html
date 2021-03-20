@@ -1,0 +1,4 @@
+<div *ngIf="(sidePots$ | async)?.length > 0" @fadeInSlideOut>
+    <div class="title">SidePots</div>
+    <poker-sidepot [pot]="pot" *ngFor="let pot of (sidePots$ | async)" @fadeSlideInOut></poker-sidepot>
+</div>

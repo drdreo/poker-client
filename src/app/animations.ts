@@ -25,5 +25,37 @@ export const slideInAnimation =
                 ])
             ]),
             query(':enter', animateChild())
-        ]),
+        ])
     ]);
+
+
+export const fadeInSlideOutAnimation = trigger('fadeInSlideOut', [
+    transition(':enter', [
+        style({ opacity: 0 }),
+        animate('500ms ease-out', style({ opacity: 1}))
+    ]),
+    transition(':leave', [
+        animate('500ms ease-out', style({ opacity: 0, transform: 'translateX(-200%)' }))
+    ])
+]);
+
+
+export const cardFadeInAnimation = trigger('cardsFadeIn', [
+    transition(':enter', [
+        style({ opacity: 0,  transform: 'translateX(-20px)' }),
+        animate('300ms cubic-bezier(0.4, 0, 0.2, 1)', style({ opacity: 1, transform: 'translateX(0)'}))
+    ]),
+    transition(':leave', [
+        animate('200ms cubic-bezier(0.4, 0, 0.2, 1)', style({ opacity: 0 }))
+    ])
+]);
+
+export const sidePotSlideAnimation = trigger('fadeSlideInOut', [
+    transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(-200%)' }),
+        animate('300ms ease-out', style({ opacity: 1, transform: 'translateX(0)' }))
+    ]),
+    transition(':leave', [
+        animate('250ms cubic-bezier(0.4, 0, 0.2, 1)', style({ opacity: 0, transform: 'translateX(-200%)' }))
+    ])
+]);

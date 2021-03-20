@@ -6,6 +6,7 @@ import { formatWinnersMessage } from 'app/utils/utils';
 import { BehaviorSubject, merge, Observable, Subject, interval } from 'rxjs';
 import { switchMap, takeUntil, tap, shareReplay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { cardFadeInAnimation } from '../animations';
 import { AudioService, Sounds } from '../audio.service';
 import { PokerService } from '../poker.service';
 import { TitleService } from '../title.service';
@@ -18,14 +19,15 @@ import { Player } from './player/player.component';
     selector: 'poker-table',
     templateUrl: './table.component.html',
     styleUrls: ['./table.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    animations: [cardFadeInAnimation]
 })
 export class TableComponent implements OnInit, OnDestroy {
 
 
     inProduction = environment.production;
-    showOverlay: boolean = false;
-    isCurrentPlayer: boolean = false; // if its the current clients turn
+    showOverlay = false;
+    isCurrentPlayer = false; // if its the current clients turn
     playDuration$ = interval(1000);
 
     get clientPlayerID(): string {
@@ -118,7 +120,7 @@ export class TableComponent implements OnInit, OnDestroy {
         this.pokerService.maxBetUpdate()
             .pipe(takeUntil(this.unsubscribe$))
             .subscribe((bet) => {
-                console.log({bet});
+                console.log({ bet });
                 this._maxBet$.next(bet);
             });
 
@@ -164,7 +166,7 @@ export class TableComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this.unsubscribe$))
             .subscribe((status) => {
                 console.log('Game Status: ' + status);
-                if (status == 'started' || status == 'ended') {
+                if (status === 'started' || status === 'ended') {
                     this._gameStatus$.next(status);
                 } else {
                     this._gameStatus$.next(GameStatus.Waiting);
@@ -180,7 +182,7 @@ export class TableComponent implements OnInit, OnDestroy {
                     console.error('Server sent us no winners at all!');
                 }
 
-                let message = formatWinnersMessage(winners);
+                const message = formatWinnersMessage(winners);
 
                 this.notification.showAction(message);
                 this.notification.addFeedMessage(message, MessageType.Won);
@@ -339,8 +341,8 @@ export class TableComponent implements OnInit, OnDestroy {
     }
 
 
-    getArray(number: number) {
-        return Array(number).fill(0).map((x, i) => i);
+    getArray(num: number) {
+        return Array(num).fill(0).map((x, i) => i);
     }
 
     private loadDevThings() {
@@ -351,14 +353,37 @@ export class TableComponent implements OnInit, OnDestroy {
         this.loadDevPlayers();
 
         const devPotSubject = new BehaviorSubject<number>(666);
-        const devsidePotsSubject = new BehaviorSubject<SidePot[]>([{ amount: 60, players: [this.players[0], this.players[1]] }, {
-            amount: 100,
-            players: [this.players[1], this.players[2]]
-        }]);
+        const devSidePots = [{ amount: 60, players: [this.players[0], this.players[1]] }];
+        const devsidePotsSubject = new BehaviorSubject<SidePot[]>(devSidePots);
+        const devBoardSubject = new BehaviorSubject<Card[]>([]);
         this.pot$ = devPotSubject.asObservable();
         this.sidePots$ = devsidePotsSubject.asObservable();
+        this.board$ = devBoardSubject.asObservable();
+
+        this.loadDevSidepots(devsidePotsSubject);
+
+        for (let i = 1; i < 6; i++) {
+            setTimeout(() => devBoardSubject.next([...devBoardSubject.value, this.players[0].cards[0]]), 1000 * i);
+        }
+
+        setTimeout(() => devBoardSubject.next([]), 7000);
 
         this._maxBet$.next(579);
+    }
+
+    private loadDevSidepots(devsidePotsSubject) {
+        setTimeout(() => devsidePotsSubject.next([...devsidePotsSubject.value, {
+            amount: 100,
+            players: [this.players[1], this.players[2]]
+        }]), 1500);
+
+        setTimeout(() => devsidePotsSubject.next([...devsidePotsSubject.value, {
+            amount: 333,
+            players: [this.players[1], this.players[2]]
+        }]), 3000);
+
+        // clear sidepots
+        // setTimeout(() => devsidePotsSubject.next([]), 5000);
     }
 
     private loadDevPlayers() {
@@ -373,10 +398,10 @@ export class TableComponent implements OnInit, OnDestroy {
         const figures = ['S', 'H', 'C', 'D'];
         const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
-        function generateCards(): Card[] {
-            let all = [];
-            for (let figure of figures) {
-                for (let value of values) {
+        const generateCards = (): Card[] => {
+            const all = [];
+            for (const figure of figures) {
+                for (const value of values) {
                     all.push({
                         figure,
                         value
@@ -384,28 +409,33 @@ export class TableComponent implements OnInit, OnDestroy {
                 }
             }
             return all;
-        }
+        };
 
         const cards = generateCards();
 
-        function test_cards(amount: number) {
-            let fives = [];
+        const test_cards = (amount: number) => {
+            const fives = [];
             for (let i = 0; i < amount; i++) {
-                let rand_id = Math.floor(Math.random() * cards.length);
+                const rand_id = Math.floor(Math.random() * cards.length);
                 fives.push(cards[rand_id]);
             }
             return fives;
-        }
+        };
 
-        function getColor() {
-            return playerColors.pop();
-        }
+        const getColor = () => playerColors.pop();
 
         // init players
-        let players = [];
+        const players = [];
         players.push({
-            allIn: false, disconnected: false, folded: false,
-            id: 'tester1', name: 'thatN00b', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: [ { figure: 'back'}, { figure: 'back'}]
+            allIn: false,
+            disconnected: false,
+            folded: false,
+            id: 'tester1',
+            name: 'thatN00b',
+            color: getColor(),
+            chips: 667,
+            bet: { amount: 579, type: BetType.Bet },
+            cards: [{ figure: 'back' }, { figure: 'back' }]
         });
         players.push({
             allIn: false, disconnected: true, folded: false, id: 'tester2', name: 'DCer',

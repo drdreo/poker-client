@@ -10,10 +10,10 @@ export class ChipsComponent implements OnChanges {
 
     @Input() amount: number;
     @Input() type: number;
-    @Input() direction: string = 'top';
+    @Input() direction = 'top';
 
     @HostBinding('class.inactive')
-    inactive: boolean = false;
+    inactive = false;
 
     // available chips
     private chips = [100, 50, 10, 5, 1];
@@ -28,33 +28,31 @@ export class ChipsComponent implements OnChanges {
         }
     }
 
-    getArray(number: number) {
-        return Array(number).fill(0).map((x, i) => i);
+    getArray(num: number) {
+        return Array(num).fill(0).map((x, i) => i);
     }
 
-    getChipsFor(total: number, coin: number) {
+    getChipsFor(total: number, chipValue: number) {
         // prep chips
-        const coins = this.chips.map(c => {
-            return { amount: 0, value: c };
-        });
+        const chips = this.chips.map(c => ({ amount: 0, value: c }));
 
         let tmp_rest = total;
 
-        for (let c of coins) {
+        for (const chip of chips) {
             if (tmp_rest <= 0) {
                 break;
             }
 
-            while (tmp_rest - c.value >= 0) {
-                tmp_rest -= c.value;
-                c.amount++;
+            while (tmp_rest - chip.value >= 0) {
+                tmp_rest -= chip.value;
+                chip.amount++;
             }
         }
-        const c = coins.find(c => c.value === coin);
-        if (!c) {
-            console.warn('Couldnt find coin', coin);
+        const chip = chips.find(c => c.value === chipValue);
+        if (!chip) {
+            console.warn('Couldnt find chip with value: ', chipValue);
         }
-        return c.amount;
+        return chip.amount;
     }
 
     getChipPosition(i: number) {
