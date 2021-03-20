@@ -345,6 +345,10 @@ export class TableComponent implements OnInit, OnDestroy {
         return Array(num).fill(0).map((x, i) => i);
     }
 
+    trackCardValue(index: number, card: Card): number {
+        return index;
+    }
+
     private loadDevThings() {
         console.log('Loading dev data!');
         setTimeout(() => {

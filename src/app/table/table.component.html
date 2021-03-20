@@ -44,7 +44,7 @@
                         [ngStyle]="{'top.px': -0.5*i +5 }"></poker-card>
         </div>
         <div class="board card-place">
-            <poker-card @cardsFadeIn *ngFor="let card of (board$ | async)" [figure]="card.figure" [value]="card.value"></poker-card>
+            <poker-card @cardsFadeIn *ngFor="let card of (board$ | async); index as i;  trackBy:trackCardValue;" [figure]="card.figure" [value]="card.value"></poker-card>
         </div>
         <div class="players">
             <poker-player *ngFor="let player of (players$ | async); let i = index;"

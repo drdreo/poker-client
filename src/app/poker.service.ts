@@ -19,6 +19,7 @@ const POKER_API = environment.poker_api;
 export class PokerService implements OnDestroy {
 
     private unsubscribe$ = new Subject();
+    rounds = 1;
 
     constructor(private socket: Socket, private http: HttpClient) {
 
@@ -128,7 +129,9 @@ export class PokerService implements OnDestroy {
 
     roundUpdate(): Observable<any> {
         return this.socket.fromEvent<GameRoundUpdate>(PokerEvent.NewRound)
-                   .pipe(map(data => data.round));
+                   .pipe(
+                       tap(() => this.rounds++),
+                       map(data => data.round));
     }
 
     tableClosed(): Observable<undefined> {

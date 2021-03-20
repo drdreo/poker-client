@@ -1,12 +1,13 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
-import { SidePot } from '@shared/src';
+import { PokerService } from '../../poker.service';
 import { Player } from '../player/player.component';
 
 @Component({
     selector: 'table-infos',
     templateUrl: './table-infos.component.html',
-    styleUrls: ['./table-infos.component.scss']
+    styleUrls: ['./table-infos.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableInfosComponent {
 
@@ -14,7 +15,7 @@ export class TableInfosComponent {
     @Input() players$: Observable<Player[]>;
     @Input() time$: Observable<number>;
 
-    constructor() {
+    constructor(public pokerService: PokerService) {
     }
 
 }

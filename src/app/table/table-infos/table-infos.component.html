@@ -1,5 +1,6 @@
 <div class="title">Table <span class="is-primary-text">{{tableName}}</span>
 </div>
-<div class="table__time">Play time: {{time$ | async }}s</div>
+<div class="table__rounds">Rounds: {{ pokerService.rounds }}</div>
+<div class="table__time" *ngIf="time$ | async as time">Play time: {{time}}s</div>
 
 

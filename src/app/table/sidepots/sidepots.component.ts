@@ -1,21 +1,22 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 import { SidePot } from '@shared/src';
 import { sidePotSlideAnimation, fadeInSlideOutAnimation } from 'app/animations';
 import { Observable } from 'rxjs';
 
 @Component({
-  selector: 'poker-sidepots',
-  templateUrl: './sidepots.component.html',
-  styleUrls: ['./sidepots.component.scss'],
-  animations: [sidePotSlideAnimation, fadeInSlideOutAnimation]
+    selector: 'poker-sidepots',
+    templateUrl: './sidepots.component.html',
+    styleUrls: ['./sidepots.component.scss'],
+    animations: [sidePotSlideAnimation, fadeInSlideOutAnimation],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SidepotsComponent implements OnInit {
 
-  @Input() sidePots$: Observable<SidePot[]>;
+    @Input() sidePots$: Observable<SidePot[]>;
 
-  constructor() { }
+    constructor() { }
 
-  ngOnInit(): void {
-  }
+    ngOnInit(): void {
+    }
 
 }
