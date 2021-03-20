@@ -52,7 +52,7 @@
                           [player]="player"
                           [seat]="getPlayerSeat(i)"
                           [dealer]="player.id === (dealerPlayerID$ | async)"
-                          [playing]="player.id === (currentPlayerID$ | async)"></poker-player>
+                          [playing]="player.id === (currentPlayerID$ | async) && (gameStatus$ | async) === 'started'"></poker-player>
         </div>
         <div class="pot" *ngIf="pot$ | async as pot">
             <div class="pot__value">

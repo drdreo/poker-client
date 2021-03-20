@@ -1,5 +1,6 @@
 import { Winner } from '@shared/src';
 
+
 export function formatWinnersMessage(winners: Winner[]): string {
     let message = '';
     if (winners.length === 1) {
@@ -20,6 +21,8 @@ export function formatWinnersMessage(winners: Winner[]): string {
             message = `${ winnerNames.join(' & ') } won the pots of ${ winnerPots.join(' & ') }`;
         }
     }
+
+    console.log(winners.map(winner => console.log(winner.hand.descr)));
 
     return message;
 }

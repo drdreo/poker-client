@@ -1,13 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { Socket } from 'ngx-socket-io';
-import { Observable, Subject, of } from 'rxjs';
-import { map, tap, delay, concatAll } from 'rxjs/operators';
 import {
     PokerEvent, GameStatus, TableResponse, HomeInfo, ServerJoined, GameWinners, GamePotUpdate, PlayerLeft, GameDealerUpdate,
     GameCurrentPlayer, GameBoardUpdate, PlayerCalled, PlayerChecked, PlayerFolded, GameRoundUpdate, PlayerBet, GamePlayersUpdate, Card,
     PlayerEvent, PlayerOverview, SidePot, MaxBetUpdate
 } from '@shared/src';
+import { Socket } from 'ngx-socket-io';
+import { Observable, Subject, of } from 'rxjs';
+import { map, tap, delay, concatAll } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 
 
@@ -102,10 +102,10 @@ export class PokerService implements OnDestroy {
     boardUpdated(): Observable<Card[]> {
         return this.socket.fromEvent<GameBoardUpdate>(PokerEvent.BoardUpdate)
                    .pipe(
-                        map(data => of(data.board).pipe(delay(1500))),
-                        concatAll(),
-                        tap(console.log)
-                    );
+                       map(data => of(data.board).pipe(delay(1500))),
+                       concatAll(),
+                       tap(console.log)
+                   );
     }
 
     private potUpdate(): Observable<GamePotUpdate> {
@@ -124,7 +124,7 @@ export class PokerService implements OnDestroy {
 
     maxBetUpdate(): Observable<number> {
         return this.socket.fromEvent<MaxBetUpdate>(PokerEvent.MaxBetUpdate)
-                   .pipe(map(data => data.maxBet), tap(console.log));
+                   .pipe(map(data => data.maxBet));
     }
 
     roundUpdate(): Observable<any> {

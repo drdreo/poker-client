@@ -83,7 +83,6 @@ export class TableComponent implements OnInit, OnDestroy {
 
         this.currentPlayerID$ = this.pokerService.currentPlayer()
                                     .pipe(
-                                        tap(console.log),
                                         tap(playerID => this.setCurrentPlayer(playerID)),
                                         shareReplay(1)  // got to shareReplay due to late subscriptions inside the template
                                     );
@@ -176,7 +175,7 @@ export class TableComponent implements OnInit, OnDestroy {
         this.pokerService.gameWinners()
             .pipe(takeUntil(this.unsubscribe$))
             .subscribe(({ winners }) => {
-                console.log(winners);
+                console.log({ winners });
 
                 if (winners.length === 0) {
                     console.error('Server sent us no winners at all!');
@@ -190,7 +189,6 @@ export class TableComponent implements OnInit, OnDestroy {
 
         this.pokerService.playerChecked()
             .pipe(
-                tap(console.log),
                 takeUntil(this.unsubscribe$)
             )
             .subscribe(res => {
@@ -201,7 +199,6 @@ export class TableComponent implements OnInit, OnDestroy {
 
         this.pokerService.playerCalled()
             .pipe(
-                tap(console.log),
                 takeUntil(this.unsubscribe$)
             )
             .subscribe(res => {
@@ -212,7 +209,6 @@ export class TableComponent implements OnInit, OnDestroy {
 
         this.pokerService.playerBet()
             .pipe(
-                tap(console.log),
                 takeUntil(this.unsubscribe$)
             )
             .subscribe(res => {
@@ -233,7 +229,6 @@ export class TableComponent implements OnInit, OnDestroy {
 
         this.pokerService.playerFolded()
             .pipe(
-                tap(console.log),
                 takeUntil(this.unsubscribe$)
             )
             .subscribe(res => {
