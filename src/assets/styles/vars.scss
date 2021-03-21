@@ -21,9 +21,11 @@ $success-color: rgba(67, 181, 129, 0.8);
 $danger-color: rgba(207, 73, 80, 0.8);
 $warning-color: #daa520;
 
+$text-color-primary: $white;
+$text-color-secondary: #757575;
 
 $input-background-color: $secondary-background-color;
-$button-color: $white;
+$button-color: $text-color-primary;
 $button-background-color: $primary-color;
 $link-color: $primary-color;
 

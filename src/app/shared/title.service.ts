@@ -50,10 +50,6 @@ export class TitleService {
         this._title = `${this.appTitle} - ${title}`;
     }
 
-    getTitle(): string {
-        return this._title;
-    }
-
     resetTitle() {
         this.setTitle(this.appTitle);
     }

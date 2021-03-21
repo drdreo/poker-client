@@ -1,0 +1,11 @@
+@import "../../../assets/styles/utils";
+
+:host {
+  position: fixed;
+  background-color: $primary-background-color;
+  border-radius: $primary-radius;
+  padding: 5px 10px;
+  border: 1px solid $secondary-background-color;
+  opacity: 0;
+  transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}

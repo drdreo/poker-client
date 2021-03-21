@@ -2,15 +2,15 @@ import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, HostListener } f
 import { ActivatedRoute } from '@angular/router';
 import * as Sentry from '@sentry/angular';
 import { GameStatus, Card, BetType, SidePot } from '@shared/src';
-import { formatWinnersMessage } from 'app/utils/utils';
+import { formatWinnersMessage } from 'app/shared/utils';
 import { BehaviorSubject, merge, Observable, Subject, interval } from 'rxjs';
 import { switchMap, takeUntil, tap, shareReplay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { cardFadeInAnimation } from '../animations';
-import { AudioService, Sounds } from '../audio.service';
 import { PokerService } from '../poker.service';
-import { TitleService } from '../title.service';
-import { NotificationService } from '../utils/notification.service';
+import { cardFadeInAnimation } from '../shared/animations';
+import { AudioService, Sounds } from '../shared/audio.service';
+import { NotificationService } from '../shared/notification.service';
+import { TitleService } from '../shared/title.service';
 import { MessageType } from './feed/feed-message/feed-message.component';
 import { Player } from './player/player.component';
 
@@ -303,7 +303,9 @@ export class TableComponent implements OnInit, OnDestroy {
 
 
     startGame() {
-        this.pokerService.startGame();
+        if (this.players.length > 1) {
+            this.pokerService.startGame();
+        }
     }
 
     check() {

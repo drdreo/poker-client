@@ -16,7 +16,6 @@ Sentry.init({
             routingInstrumentation: Sentry.routingInstrumentation
         })
     ],
-    release: 'pokern@0.0.0',
     environment: environment.name,
     enabled: environment.sentry.enabled,
     tracesSampleRate: environment.sentry.tracesSampleRate,

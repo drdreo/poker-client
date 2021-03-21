@@ -1,6 +1,6 @@
 import { Component, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { NotificationService } from '../../utils/notification.service';
+import { NotificationService } from '../../shared/notification.service';
 import { FeedMessage } from './feed-message/feed-message.component';
 
 @Component({

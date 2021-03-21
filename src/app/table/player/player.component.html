@@ -3,7 +3,8 @@
      [class.playing]="playing"
      [class.dealer]="dealer"
      [class.folded]="player.folded"
-     [class.allin]="player.allIn">
+     [class.allin]="player.allIn"
+     [class.disconnected]="player.disconnected">
     <div class="bank">
         <div class="bank-value">{{bankValue(player.chips, player.allIn)}}</div>
         <poker-chips class="jetons-100" [amount]="player.chips" [type]="100"></poker-chips>

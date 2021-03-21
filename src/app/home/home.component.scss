@@ -4,6 +4,40 @@
   width: 200px;
 }
 
+.room__wrapper {
+  display: flex;
+  width: 100%;
+  position: relative;
+
+  .generate {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 3px;
+
+    font-size: 10px;
+    background-color: lighten($input-background-color, 5%);
+    color: $text-color-secondary;
+    border: 1px solid $secondary-background-color;
+    border-radius: $primary-radius;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .help {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 20px;
+    cursor: help;
+    color: $text-color-secondary;
+  }
+}
+
 .input {
   background-color: $input-background-color;
   outline: none;
@@ -48,13 +82,13 @@
 .form {
   padding: 1rem;
 
-  .input {
+  .room__wrapper, .username {
     margin-bottom: 1rem;
   }
 
   @include respond-to(tablet) {
     display: flex;
-    .input {
+    .room__wrapper, .username {
       margin-bottom: 0;
     }
   }
@@ -134,4 +168,14 @@
   img {
     width: 100px;
   }
+}
+
+
+.server__error {
+  position: absolute;
+  height: 50px;
+  width: 50px;
+  display: flex;
+  top: 1rem;
+  left: 1rem;
 }

@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 import { SidePot } from '@shared/src';
-import { sidePotSlideAnimation, fadeInSlideOutAnimation } from 'app/animations';
+import { sidePotSlideAnimation, fadeInSlideOutAnimation } from 'app/shared/animations';
 import { Observable } from 'rxjs';
 
 @Component({

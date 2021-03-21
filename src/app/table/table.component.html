@@ -15,8 +15,8 @@
         [class.error]="currentAction.status === 'error'">{{currentAction.message}}</h3>
 
     <div class="ready-container"
-         *ngIf="(gameStatus$ | async) === 'waiting' && (player$ | async) && (player$ | async).id === (players$ | async)[0]?.id">
-        <div class="ready-container__message">Everyone's ready?</div>
+         *ngIf="(gameStatus$ | async) === 'waiting' && (player$ | async) && (player$ | async).id === (players$ | async)[0]?.id && (players$ | async).length > 1">
+        <div class="ready-container__message" >Everyone's ready?</div>
         <button class="button" (click)="startGame()">Start</button>
     </div>
 
@@ -44,7 +44,10 @@
                         [ngStyle]="{'top.px': -0.5*i +5 }"></poker-card>
         </div>
         <div class="board card-place">
-            <poker-card @cardsFadeIn *ngFor="let card of (board$ | async); index as i;  trackBy:trackCardValue;" [figure]="card.figure" [value]="card.value"></poker-card>
+            <poker-card @cardsFadeIn
+                        *ngFor="let card of (board$ | async); index as i;  trackBy:trackCardValue;"
+                        [figure]="card.figure"
+                        [value]="card.value"></poker-card>
         </div>
         <div class="players">
             <poker-player *ngFor="let player of (players$ | async); let i = index;"

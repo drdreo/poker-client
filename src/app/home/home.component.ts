@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import * as Sentry from '@sentry/angular';
+import { HomeInfo } from '@shared/src';
 import { Observable, Subject, merge } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { HomeInfo } from '@shared/src';
-import { ErrorService } from '../error.service';
 import { PokerService } from '../poker.service';
-import * as Sentry from '@sentry/angular';
+import { ErrorService } from '../shared/error.service';
 
 @Sentry.TraceClassDecorator()
 @Component({
@@ -54,7 +54,7 @@ export class HomeComponent {
 
         this.pokerService.roomJoined()
             .pipe(takeUntil(this.unsubscribe$))
-            .subscribe(({ playerID, table } ) => {
+            .subscribe(({ playerID, table }) => {
                 localStorage.setItem('playerID', playerID);
                 this.router.navigate(['/table', table]);
             });
@@ -70,6 +70,12 @@ export class HomeComponent {
             const table = this.table.value;
             this.pokerService.createOrJoinRoom(table, username);
         }
+    }
+
+    generateRoomName(e): void {
+        const randomName = Math.random().toString(36).substring(8);
+
+        this.table.patchValue(randomName);
     }
 }
 

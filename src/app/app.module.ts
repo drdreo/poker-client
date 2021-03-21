@@ -10,19 +10,23 @@ import { SocketIoConfig, SocketIoModule } from 'ngx-socket-io';
 import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { ErrorService } from './error.service';
 import { ErrorComponent } from './error/error.component';
 import { HomeComponent } from './home/home.component';
+import { ErrorService } from './shared/error.service';
+import { SharedModule } from './shared/shared.module';
+import { TooltipComponent } from './shared/tooltip/tooltip.component';
+import { TooltipDirective } from './shared/tooltip/tooltip.directive';
 import { TableModule } from './table/table.module';
 
-const config: SocketIoConfig = { url: environment.socket_url, options: {} };
-
+const config: SocketIoConfig = {
+    url: environment.socket.url, options: environment.socket.config
+};
 
 @NgModule({
     declarations: [
         AppComponent,
         HomeComponent,
-        ErrorComponent
+        ErrorComponent,
     ],
     imports: [
         BrowserModule,
@@ -31,6 +35,7 @@ const config: SocketIoConfig = { url: environment.socket_url, options: {} };
         HttpClientModule,
         ReactiveFormsModule,
         SocketIoModule.forRoot(config),
+        SharedModule,
         TableModule
     ],
     providers: [

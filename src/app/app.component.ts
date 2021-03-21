@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { slideInAnimation } from './animations';
+import { slideInAnimation } from './shared/animations';
 
 @Component({
 	selector: 'poker-root',

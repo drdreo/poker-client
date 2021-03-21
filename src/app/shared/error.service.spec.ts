@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Socket } from 'ngx-socket-io';
 
 import { ErrorService } from './error.service';
-import { SocketMock } from './test/socket.mock';
+import { SocketMock } from '../test/socket.mock';
 
 describe('ErrorService', () => {
     let service: ErrorService;

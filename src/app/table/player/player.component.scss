@@ -21,11 +21,16 @@ $name-font-family: 'Balsamiq Sans', cursive;
   position: absolute;
   font-family: $player-font-family;
 
-  &.allin{
-    .bank-value{
+  &.disconnected {
+    filter: grayscale(100);
+  }
+
+  &.allin {
+    .bank-value {
       color: $yellow;
     }
   }
+
   &.folded {
     .avatar {
       filter: grayscale(1);
