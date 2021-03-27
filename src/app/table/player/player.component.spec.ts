@@ -1,8 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ChipsComponent } from '../chips/chips.component';
-
 import { PlayerComponent } from './player.component';
-
 
 const mockPlayer = {
     id: '123123',
