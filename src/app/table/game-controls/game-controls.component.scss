@@ -10,18 +10,11 @@
     display: flex;
     align-items: center;
 
-    &.show-popup {
-      .controls__bet__popup {
-        opacity: 1;
-      }
-    }
-
     &__amount__wrapper {
       position: relative;
     }
 
     &__popup {
-      opacity: 0;
       display: flex;
       flex-direction: column;
       position: absolute;

@@ -7,7 +7,7 @@ import { BehaviorSubject, merge, Observable, Subject, interval } from 'rxjs';
 import { switchMap, takeUntil, tap, shareReplay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { PokerService } from '../poker.service';
-import { cardFadeInAnimation } from '../shared/animations';
+import { cardFadeInAnimation, controlsFadeAnimation } from '../shared/animations';
 import { AudioService, Sounds } from '../shared/audio.service';
 import { NotificationService } from '../shared/notification.service';
 import { TitleService } from '../shared/title.service';
@@ -20,7 +20,7 @@ import { Player } from './player/player.component';
     templateUrl: './table.component.html',
     styleUrls: ['./table.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    animations: [cardFadeInAnimation]
+    animations: [cardFadeInAnimation, controlsFadeAnimation]
 })
 export class TableComponent implements OnInit, OnDestroy {
 
@@ -188,44 +188,60 @@ export class TableComponent implements OnInit, OnDestroy {
             });
 
         this.pokerService.playerChecked()
-            .pipe(
-                takeUntil(this.unsubscribe$)
-            )
+            .pipe(takeUntil(this.unsubscribe$))
             .subscribe(res => {
                 const player = this.getPlayerById(res.playerID);
                 this.notification.showAction(`${ player.name } checked`);
                 this.notification.addFeedMessage(`${ player.name } checked`, MessageType.Played);
             });
 
-        this.pokerService.playerCalled()
-            .pipe(
-                takeUntil(this.unsubscribe$)
-            )
-            .subscribe(res => {
-                const player = this.getPlayerById(res.playerID);
-                this.notification.showAction(`${ player.name } called`);
-                this.notification.addFeedMessage(`${ player.name } called`, MessageType.Played);
-            });
+        // this.pokerService.playerCalled()
+        //     .pipe(takeUntil(this.unsubscribe$))
+        //     .subscribe(res => {
+        //         const player = this.getPlayerById(res.playerID);
+        //         this.notification.showAction(`${ player.name } called`);
+        //         this.notification.addFeedMessage(`${ player.name } called`, MessageType.Played);
+        //     });
 
         this.pokerService.playerBet()
-            .pipe(
-                takeUntil(this.unsubscribe$)
-            )
-            .subscribe(res => {
-                const player = this.getPlayerById(res.playerID);
-                this._maxBet$.next(res.maxBet);
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe(({ bet, maxBet, type, playerID }) => {
+                    const player = this.getPlayerById(playerID);
+                    this._maxBet$.next(maxBet);
 
+                    let actionMessage;
+                    let feedMessage;
+                    let feedMessageType;
 
-                if (res.type === BetType.Bet) {
-                    this.notification.showAction(`${ player.name } bet ${ res.bet }`);
-                    this.notification.addFeedMessage(`${ player.name } bet ${ res.bet }`, MessageType.Played);
-                } else if (res.type === BetType.SmallBlind) {
-                    this.notification.addFeedMessage(`${ player.name } is small blind with ${ res.bet }`, MessageType.Played);
-                } else if (res.type === BetType.BigBlind) {
-                    this.notification.addFeedMessage(`${ player.name } is big blind with ${ res.bet }`, MessageType.Played);
+                    if (type === BetType.Bet) {
+                        actionMessage = `${ player.name } bet ${ bet }`;
+                        feedMessage = actionMessage;
+                        feedMessageType = MessageType.Played;
+                    } else if (type === BetType.SmallBlind) {
+                        feedMessage = `${ player.name } is small blind with ${ bet }`;
+                        feedMessageType = MessageType.Played;
+                    } else if (type === BetType.BigBlind) {
+                        feedMessage = `${ player.name } is big blind with ${ bet }`;
+                        feedMessageType = MessageType.Played;
+                    } else if (type === BetType.Call) {
+                        actionMessage = `${ player.name } called`;
+                        feedMessage = actionMessage;
+                        feedMessageType = MessageType.Played;
+                    } else if (type === BetType.AllIn) {
+                        actionMessage = `${ player.name } went all in with ${ bet }!`;
+                        feedMessage = actionMessage;
+                        feedMessageType = MessageType.Played;
+                    }
+
+                    if (actionMessage) {
+                        this.notification.showAction(actionMessage);
+                    }
+
+                    if (feedMessage && feedMessageType) {
+                        this.notification.addFeedMessage(feedMessage, feedMessageType);
+                    }
                 }
-
-            });
+            );
 
         this.pokerService.playerFolded()
             .pipe(

@@ -12,10 +12,10 @@
             </button>
         </ng-template>
 
-        <div *ngIf="player.chips > 0 && !hasToAllIn(data.maxBet)" class="controls__bet" [class.show-popup]="showPopup">
+        <div *ngIf="player.chips > 0 && !hasToAllIn(data.maxBet)" class="controls__bet" >
 
             <div class="controls__bet__amount__wrapper">
-                <div class="controls__bet__popup">
+                <div class="controls__bet__popup" *ngIf="showPopup" @fadeInOut>
                     <div class="controls__bet__popup-background"></div>
 
                     <div class="controls__bet__chips">

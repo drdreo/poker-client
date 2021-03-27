@@ -1,7 +1,8 @@
-import { Component, OnInit, EventEmitter, Output, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, Input, ChangeDetectionStrategy, SimpleChanges } from '@angular/core';
 import { PlayerOverview, BetType } from '@shared/src';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { fadeInOutAnimation } from '../../shared/animations';
 
 enum BetTemplateType {
     BigBlind,
@@ -19,7 +20,8 @@ interface BetTemplate {
     selector: 'game-controls',
     templateUrl: './game-controls.component.html',
     styleUrls: ['./game-controls.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    animations: [fadeInOutAnimation]
 })
 export class GameControlsComponent implements OnInit {
 
@@ -70,6 +72,12 @@ export class GameControlsComponent implements OnInit {
         this.maxBet$.pipe(take(1)).subscribe(maxBet => {
             this.betAmount = maxBet > 0 ? maxBet : this.minimumBet;
         });
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes.pot) {
+            this.updateBetTemplates();
+        }
     }
 
     togglePopup() {
@@ -125,7 +133,7 @@ export class GameControlsComponent implements OnInit {
                 this.betAmount = this.pot * tmpl.amount;
                 break;
             case BetTemplateType.Bank:
-                this.betAmount = this.player.chips * tmpl.amount;
+                this.betAmount = this.player.chips * this.player.bet * tmpl.amount;
                 break;
             default:
                 console.warn('BetTemplate not handled', tmpl);
@@ -153,5 +161,22 @@ export class GameControlsComponent implements OnInit {
             return false;
         }
         return maxBet - this.player.bet?.amount >= this.player.chips;
+    }
+
+    private updateBetTemplates() {
+        let potTemplates = [];
+        if (this.pot && this.pot > 0) {
+            potTemplates = [
+                { amount: 0.5, title: '0.5 Pot', type: BetTemplateType.Pot },
+                { amount: 1, title: '1 Pot', type: BetTemplateType.Pot }
+            ];
+        }
+
+        this.betTemplates = [
+            { amount: 1, title: '1 BB', type: BetTemplateType.BigBlind },
+            { amount: 2, title: '2 BB', type: BetTemplateType.BigBlind },
+            ...potTemplates,
+            { amount: 1, title: 'All In', type: BetTemplateType.Bank }
+        ];
     }
 }

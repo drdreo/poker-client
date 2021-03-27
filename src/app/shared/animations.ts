@@ -50,6 +50,16 @@ export const cardFadeInAnimation = trigger('cardsFadeIn', [
     ])
 ]);
 
+export const controlsFadeAnimation = trigger('controlsFadeSlideInOut', [
+    transition(':enter', [
+        style({ opacity: 0,  transform: 'translateY(100%)' }),
+        animate('300ms cubic-bezier(0.4, 0, 0.2, 1)', style({ opacity: 1, transform: 'translateY(0)'}))
+    ]),
+    transition(':leave', [
+        animate('200ms cubic-bezier(0.4, 0, 0.2, 1)', style({ opacity: 0, transform: 'translateY(100%)' }))
+    ])
+]);
+
 export const sidePotSlideAnimation = trigger('fadeSlideInOut', [
     transition(':enter', [
         style({ opacity: 0, transform: 'translateX(-200%)' }),
@@ -57,5 +67,16 @@ export const sidePotSlideAnimation = trigger('fadeSlideInOut', [
     ]),
     transition(':leave', [
         animate('250ms cubic-bezier(0.4, 0, 0.2, 1)', style({ opacity: 0, transform: 'translateX(-200%)' }))
+    ])
+]);
+
+
+export const fadeInOutAnimation = trigger('fadeInOut', [
+    transition(':enter', [
+        style({ opacity: 0}),
+        animate('300ms cubic-bezier(0.4, 0, 0.2, 1)', style({ opacity: 1}))
+    ]),
+    transition(':leave', [
+        animate('200ms cubic-bezier(0.4, 0, 0.2, 1)', style({ opacity: 0 }))
     ])
 ]);

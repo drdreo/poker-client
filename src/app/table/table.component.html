@@ -27,6 +27,7 @@
 
 
     <game-controls class="game_controls"
+                   @controlsFadeSlideInOut
                    *ngIf="(gameStatus$ | async) == 'started' && isCurrentPlayer && player$ | async as player"
                    [player]="player"
                    [maxBet$]="maxBet$"
