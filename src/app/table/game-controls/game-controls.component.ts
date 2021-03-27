@@ -133,7 +133,8 @@ export class GameControlsComponent implements OnInit {
                 this.betAmount = this.pot * tmpl.amount;
                 break;
             case BetTemplateType.Bank:
-                this.betAmount = this.player.chips * this.player.bet * tmpl.amount;
+                const bet = this.player.bet ? this.player.bet.amount : 0;
+                this.betAmount = (this.player.chips + bet) * tmpl.amount;
                 break;
             default:
                 console.warn('BetTemplate not handled', tmpl);

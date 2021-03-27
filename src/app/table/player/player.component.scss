@@ -25,6 +25,18 @@ $name-font-family: 'Balsamiq Sans', cursive;
     filter: grayscale(100);
   }
 
+  &.afk {
+    .afk-indicator {
+      display: block;
+    }
+  }
+
+  &.playing {
+    .playing-indicator {
+      display: flex;
+    }
+  }
+
   &.allin {
     .bank-value {
       color: $yellow;
@@ -39,6 +51,47 @@ $name-font-family: 'Balsamiq Sans', cursive;
     .cards {
       display: none;
     }
+  }
+
+  .playing-indicator {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 100;
+    transform: translatex(-50%) translatey(-50%);
+
+    &:before {
+      content: ' .';
+      animation: dots 1.5s steps(5) infinite;
+
+      color: white;
+      font-size: 20px;
+
+      background-color: #76daff;
+
+      line-height: 0;
+      height: 10px;
+      width: 15px;
+      padding: 2px 10px 5px;
+      border-radius: 5px;
+
+      transform: scale(2);
+    }
+  }
+
+  .afk-indicator {
+    display: none;
+    position: absolute;
+    left: -50px;
+    bottom: 0;
+    padding: 2px 10px;
+
+    color: white;
+    background-color: red;
+    border-radius: 5px;
+    z-index: 100;
+    cursor: pointer;
   }
 
   .avatar {
@@ -111,23 +164,6 @@ $name-font-family: 'Balsamiq Sans', cursive;
     }
   }
 
-  &.playing:before {
-    content: ' .';
-    animation: dots 1.5s steps(5) infinite;
-
-    color: white;
-    font-size: 20px;
-    position: absolute;
-    background-color: #76daff;
-    display: inline-block;
-    line-height: 0;
-    height: 10px;
-    width: 15px;
-    padding: 2px 10px 5px;
-    border-radius: 5px;
-    z-index: 100;
-  }
-
   &.player-1 {
     top: 0;
     left: 50%;
@@ -149,8 +185,14 @@ $name-font-family: 'Balsamiq Sans', cursive;
       transform: rotatez(0deg);
     }
 
-    .cards, .bank-value, .mise-value {
+    .cards, .bank-value, .mise-value, .afk-indicator {
       transform: rotatez(270deg);
+    }
+
+    .playing-indicator {
+      transform: translatex(-50%) translatey(-50%) rotatez(270deg);
+      top: 50px;
+      left: 0;
     }
   }
 
@@ -159,8 +201,12 @@ $name-font-family: 'Balsamiq Sans', cursive;
     left: 75%;
     transform: translatex(-50%) translatey(50%) rotatez(180deg);
 
-    .name, .cards, .bank-value, .mise-value, .dealer-btn {
+    .name, .cards, .bank-value, .mise-value, .dealer-btn, .afk-indicator {
       transform: rotatez(180deg);
+    }
+
+    .playing-indicator {
+      transform: translatex(-50%) translatey(-50%) rotatez(180deg);
     }
   }
 
@@ -169,8 +215,12 @@ $name-font-family: 'Balsamiq Sans', cursive;
     left: 50%;
     transform: translatex(-50%) translatey(50%) rotatez(180deg);
 
-    .name, .cards, .bank-value, .mise-value, .dealer-btn {
+    .name, .cards, .bank-value, .mise-value, .dealer-btn, .afk-indicator {
       transform: rotatez(180deg);
+    }
+
+    .playing-indicator {
+      transform: translatex(-50%) translatey(-50%) rotatez(180deg);
     }
   }
 
@@ -179,8 +229,12 @@ $name-font-family: 'Balsamiq Sans', cursive;
     left: 25%;
     transform: translatex(-50%) translatey(50%) rotatez(180deg);
 
-    .name, .cards, .bank-value, .mise-value, .dealer-btn {
+    .name, .cards, .bank-value, .mise-value, .dealer-btn, .afk-indicator {
       transform: rotatez(180deg);
+    }
+
+    .playing-indicator {
+      transform: translatex(-50%) translatey(-50%) rotatez(180deg);
     }
   }
 
@@ -193,7 +247,7 @@ $name-font-family: 'Balsamiq Sans', cursive;
       transform: rotatez(0deg);
     }
 
-    .cards {
+    .cards, .afk-indicator {
       transform: rotatez(90deg);
     }
 
@@ -201,6 +255,10 @@ $name-font-family: 'Balsamiq Sans', cursive;
       transform: rotatez(90deg);
     }
 
+    .playing-indicator {
+      transform: translatex(-50%) translatey(-50%) rotatez(90deg);
+      bottom: -50px;
+    }
   }
 
   &.player-8 {

@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import * as Sentry from '@sentry/angular';
-import { GameStatus, Card, BetType, SidePot } from '@shared/src';
+import { GameStatus, Card, BetType, SidePot, PlayerOverview } from '@shared/src';
 import { formatWinnersMessage } from 'app/shared/utils';
 import { BehaviorSubject, merge, Observable, Subject, interval } from 'rxjs';
 import { switchMap, takeUntil, tap, shareReplay } from 'rxjs/operators';
@@ -442,44 +442,45 @@ export class TableComponent implements OnInit, OnDestroy {
         const getColor = () => playerColors.pop();
 
         // init players
-        const players = [];
+        const players: PlayerOverview[] = [];
         players.push({
             allIn: false,
             disconnected: false,
+            afk: false,
             folded: false,
             id: 'tester1',
             name: 'thatN00b',
             color: getColor(),
             chips: 667,
             bet: { amount: 579, type: BetType.Bet },
-            cards: [{ figure: 'back' }, { figure: 'back' }]
+            cards: [{ figure: 'back', value: 0}, { figure: 'back', value: 0 }]
         });
         players.push({
-            allIn: false, disconnected: true, folded: false, id: 'tester2', name: 'DCer',
+            allIn: false, disconnected: true, afk: false, folded: false, id: 'tester2', name: 'DCer',
             color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
-            allIn: false, disconnected: false, folded: false,
+            allIn: false, disconnected: false, afk: false, folded: false,
             id: 'tester3', name: 'DrDreo', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
-            allIn: false, disconnected: false, folded: false,
+            allIn: false, disconnected: false, afk: false, folded: false,
             id: 'tester4', name: 'Hackl', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
-            allIn: false, disconnected: false, folded: true,
-            id: 'tester5', name: 'rivy331', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
+            allIn: false, disconnected: true, afk: true, folded: true,
+            id: 'tester5', name: 'DC / AFKer', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
-            allIn: false, disconnected: false, folded: false,
-            id: 'tester6', name: 'rivy331', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
+            allIn: false, disconnected: false, afk: false, folded: false,
+            id: 'tester6', name: 'Autophytes', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
-            allIn: true, disconnected: false, folded: false,
-            id: 'tester7', name: 'rivy331', color: getColor(), chips: 0, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
+            allIn: true, disconnected: false, afk: true, folded: false,
+            id: 'tester7', name: 'AFKer', color: getColor(), chips: 0, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
-            allIn: false, disconnected: false, folded: false,
+            allIn: false, disconnected: false, afk: false, folded: false,
             id: 'dealer', name: 'Dealer', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
 

@@ -21,4 +21,10 @@ export class PlayerComponent {
     bankValue(chips: number, allIn: boolean): string {
         return allIn ? 'All In' : chips + '€';
     }
+
+    kickVote() {
+        if (this.player.afk) {
+            console.log('Kick Vote!');
+        }
+    }
 }
