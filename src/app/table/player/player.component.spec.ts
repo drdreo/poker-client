@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ChipsComponent } from '../chips/chips.component';
-import { GameControlsComponent } from '../game-controls/game-controls.component';
 
 import { PlayerComponent } from './player.component';
 
@@ -12,7 +11,8 @@ const mockPlayer = {
     color: '#DAA520',
     allIn: false,
     folded: false,
-    disconnected: false
+    disconnected: false,
+    afk: false
 };
 describe('PlayerComponent', () => {
     let component: PlayerComponent;
