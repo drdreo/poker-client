@@ -1,5 +1,6 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { PlayerOverview } from '@shared/src';
+import { PokerService } from '../../poker.service';
 
 export type Player = PlayerOverview;
 
@@ -16,15 +17,16 @@ export class PlayerComponent {
     @Input() dealer = false;
     @Input() seat: number;
 
-    constructor() { }
+    constructor(private pokerService: PokerService) { }
 
     bankValue(chips: number, allIn: boolean): string {
         return allIn ? 'All In' : chips + '€';
     }
 
-    kickVote() {
+    voteKick() {
         if (this.player.afk) {
-            console.log('Kick Vote!');
+            console.log('Vote Kick!');
+            this.pokerService.voteKick(this.player.id);
         }
     }
 }
