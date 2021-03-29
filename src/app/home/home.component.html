@@ -23,7 +23,15 @@
             <button class="generate" (click)="generateRoomName($event)" type="button">Generate</button>
             <div class="help" tooltip="Enter or generate a room code">?</div>
         </div>
-        <button class="button join" type="submit" [disabled]="loginForm.invalid" data-cy="join_button">Join</button>
+        <button *ngIf="isJoinable;else spectateButton"
+                class="button join"
+                type="submit"
+                [disabled]="loginForm.invalid"
+                data-cy="join_button">Join
+        </button>
+        <ng-template #spectateButton>
+            <button class="button join" type="button" data-cy="spectate_button" (click)="spectateTable()">Spectate</button>
+        </ng-template>
     </form>
 
     <div class="form__error">

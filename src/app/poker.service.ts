@@ -46,6 +46,10 @@ export class PokerService implements OnDestroy {
         this.socket.emit(PlayerEvent.JoinRoom, { playerName: username, roomName: tableName, playerID: localStorage.getItem('playerID') });
     }
 
+    joinAsSpectator(tableName: string){
+        this.socket.emit(PlayerEvent.SpectatorJoin, { roomName: tableName });
+    }
+
     roomJoined(): Observable<ServerJoined> {
         return this.socket.fromEvent<ServerJoined>(PokerEvent.Joined);
     }

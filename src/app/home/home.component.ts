@@ -3,7 +3,7 @@ import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from
 import { Router } from '@angular/router';
 import * as Sentry from '@sentry/angular';
 import { HomeInfo } from '@shared/src';
-import { Observable, Subject, merge } from 'rxjs';
+import { Observable, Subject, merge, combineLatest } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { PokerService } from '../poker.service';
 import { ErrorService } from '../shared/error.service';
@@ -42,6 +42,8 @@ export class HomeComponent {
         return this.loginForm.get('table');
     }
 
+    isJoinable = true;
+
     private unsubscribe$ = new Subject();
 
     constructor(private router: Router, private error: ErrorService, private pokerService: PokerService) {
@@ -58,6 +60,18 @@ export class HomeComponent {
                 localStorage.setItem('playerID', playerID);
                 this.router.navigate(['/table', table]);
             });
+
+        combineLatest([this.table.valueChanges, this.homeInfo$])
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe(([tableName, homeInfo]) => {
+                const table = homeInfo.tables.find(t => t.name === tableName);
+
+                if (table && table.started) {
+                    this.isJoinable = false;
+                } else {
+                    this.isJoinable = true;
+                }
+            });
     }
 
     onTableClick(tableName: string) {
@@ -71,6 +85,12 @@ export class HomeComponent {
             this.pokerService.createOrJoinRoom(table, username);
         }
     }
+
+    spectateTable() {
+        const table = this.table.value;
+        this.pokerService.joinAsSpectator(table);
+    }
+
 
     generateRoomName(e): void {
         const randomName = Math.random().toString(36).substring(8);
