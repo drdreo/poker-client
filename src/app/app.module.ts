@@ -14,9 +14,8 @@ import { ErrorComponent } from './error/error.component';
 import { HomeComponent } from './home/home.component';
 import { ErrorService } from './shared/error.service';
 import { SharedModule } from './shared/shared.module';
-import { TooltipComponent } from './shared/tooltip/tooltip.component';
-import { TooltipDirective } from './shared/tooltip/tooltip.directive';
 import { TableModule } from './table/table.module';
+import { PokerSettingsComponent } from './home/poker-settings/poker-settings.component';
 
 const config: SocketIoConfig = {
     url: environment.socket.url, options: environment.socket.config
@@ -27,6 +26,7 @@ const config: SocketIoConfig = {
         AppComponent,
         HomeComponent,
         ErrorComponent,
+        PokerSettingsComponent,
     ],
     imports: [
         BrowserModule,
