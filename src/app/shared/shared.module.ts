@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { TippyModule } from '@ngneat/helipopper';
+import { ToggleComponent } from './toggle/toggle.component';
 import { TooltipComponent } from './tooltip/tooltip.component';
 import { TooltipDirective } from './tooltip/tooltip.directive';
-import { ToggleComponent } from './toggle/toggle.component';
 
 
 @NgModule({
@@ -12,11 +13,13 @@ import { ToggleComponent } from './toggle/toggle.component';
         ToggleComponent
     ],
     imports: [
-        CommonModule
+        CommonModule,
+        TippyModule
     ],
     exports: [
         TooltipDirective,
-        ToggleComponent
+        ToggleComponent,
+        TippyModule
     ]
 })
 export class SharedModule {}

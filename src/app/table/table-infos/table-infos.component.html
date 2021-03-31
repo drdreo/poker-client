@@ -2,5 +2,5 @@
 </div>
 <div class="table__rounds">Rounds: {{ pokerService.rounds }}</div>
 <div class="table__time" *ngIf="time$ | async as time">Time: {{time | date:'mm:ss'}}s</div>
-
+<button (click)="showPokerHandRanks()">Show Ranks</button>
 

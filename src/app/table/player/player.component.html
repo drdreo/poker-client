@@ -5,7 +5,9 @@
      [class.folded]="player.folded"
      [class.allin]="player.allIn"
      [class.disconnected]="player.disconnected"
-     [class.afk]="player.afk">
+     [class.afk]="player.afk"
+     tippy="Disconnected!"
+     [isEnabled]="player.disconnected">
     <div class="bank">
         <div class="bank-value">{{bankValue(player.chips, player.allIn)}}</div>
         <poker-chips class="jetons-100" [amount]="player.chips" [type]="100"></poker-chips>
