@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { DialogService } from '@ngneat/dialog';
 import * as Sentry from '@sentry/angular';
 import { HomeInfo } from '@shared/src';
 import { Observable, Subject, merge, combineLatest } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { PokerService } from '../poker.service';
 import { ErrorService } from '../shared/error.service';
+import { PokerSettingsComponent } from './poker-settings/poker-settings.component';
 
 @Sentry.TraceClassDecorator()
 @Component({
@@ -46,7 +48,7 @@ export class HomeComponent {
 
     private unsubscribe$ = new Subject();
 
-    constructor(private router: Router, private error: ErrorService, private pokerService: PokerService) {
+    constructor(private router: Router, private error: ErrorService, private pokerService: PokerService, private dialog: DialogService) {
 
         this.pokerService.leave(); // try to leave if a player comes from a table
 
@@ -96,6 +98,15 @@ export class HomeComponent {
         const randomName = Math.random().toString(36).substring(8);
 
         this.table.patchValue(randomName);
+    }
+
+    openSettings() {
+        this.dialog.open(PokerSettingsComponent)
+            .afterClosed$
+            .subscribe(result => {
+                console.log(`Settings closed`);
+                console.log(result);
+            });
     }
 }
 

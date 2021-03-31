@@ -15,14 +15,13 @@
     <img class="brand_logo" src="/assets/images/pokern_icon.png" alt="Pokern Icon"/>
 
     <h4>Pokern</h4>
-    <poker-settings></poker-settings>
 
     <form class="form" [formGroup]="loginForm" (ngSubmit)="joinTable()">
         <input class="input username" placeholder="Name" formControlName="username" required data-cy="username"/>
         <div class="room__wrapper">
             <input class="input room" placeholder="Table" formControlName="table" required data-cy="room"/>
             <button class="generate" (click)="generateRoomName($event)" type="button">Generate</button>
-            <div class="help" tippy="Enter or generate a room code">?</div>
+            <div class="help" tippy="Enter or generate a room code" (click)="openSettings()">?</div>
         </div>
         <button *ngIf="isJoinable;else spectateButton"
                 class="button join"

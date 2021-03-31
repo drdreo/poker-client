@@ -98,11 +98,11 @@ ul {
 
 
   &[disabled] {
-    background-color: gray;
+    background-color: darken(desaturate($button-background-color, 60%), 30%);
     cursor: initial;
 
     &:hover {
-      background-color: gray;
+      background-color: darken(desaturate($button-background-color, 60%), 30%);
     }
   }
 
@@ -139,6 +139,30 @@ ul {
 }
 
 
+.input {
+  background-color: #363a49;
+  outline: none;
+  border: 1px solid transparentize($black, 0.25);
+  padding: 10px 0.75rem;
+  font-size: 16px;
+  border-radius: $primary-radius;
+  color: #fff;
+  transition: border-color .2s ease-in-out;
+
+  &:hover {
+    border-color: $black;
+    background-color: transparentize($input-background-color, 0.1);
+  }
+
+  &:focus {
+    border-color: $primary-color;
+  }
+
+  &[disabled] {
+    background-color: desaturate(#363a49, 12%);
+  }
+}
+
 .link {
   text-decoration: underline;
   cursor: pointer;
@@ -149,4 +173,21 @@ ul {
   &:hover {
     color: darken($link-color, 10);;
   }
+}
+
+
+.is-hidden {
+  display: none;
+}
+
+.is-invisible {
+  visibility: hidden;
+}
+
+.is-primary-text {
+  color: $primary-color;
+}
+
+.title {
+  font-family: $text-primary;
 }
