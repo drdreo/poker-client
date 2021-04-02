@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { DialogService } from '@ngneat/dialog';
 import { Socket } from 'ngx-socket-io';
 import { PokerService } from '../poker.service';
 import { PokerServiceMock } from '../poker.service.mock';
@@ -16,7 +17,8 @@ describe('HomeComponent', () => {
             declarations: [HomeComponent],
             providers: [
                 { provide: Socket, useClass: SocketMock },
-                { provide: PokerService, useClass: PokerServiceMock }
+                { provide: PokerService, useClass: PokerServiceMock },
+                { provide: DialogService, useValue: 'dialog' }
             ]
         }).compileComponents();
     }));

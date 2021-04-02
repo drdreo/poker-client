@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { DialogService } from '@ngneat/dialog';
 import * as Sentry from '@sentry/angular';
 import { GameStatus, Card, BetType, SidePot, PlayerOverview } from '@shared/src';
 import { formatWinnersMessage } from 'app/shared/utils';
@@ -13,7 +12,6 @@ import { AudioService, Sounds } from '../shared/audio.service';
 import { NotificationService } from '../shared/notification.service';
 import { TitleService } from '../shared/title.service';
 import { MessageType } from './feed/feed-message/feed-message.component';
-import { HandRanksComponent } from './hand-ranks/hand-ranks.component';
 import { Player } from './player/player.component';
 
 @Sentry.TraceClassDecorator()
@@ -25,7 +23,6 @@ import { Player } from './player/player.component';
     animations: [cardFadeInAnimation, controlsFadeAnimation]
 })
 export class TableComponent implements OnInit, OnDestroy {
-
 
     inProduction = environment.production;
     showOverlay = false;
@@ -591,5 +588,9 @@ export class TableComponent implements OnInit, OnDestroy {
                 return index + 1;
         }
 
+    }
+
+    voteKick(id: string) {
+        this.pokerService.voteKick(id);
     }
 }
