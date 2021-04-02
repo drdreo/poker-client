@@ -19,7 +19,7 @@ jobs:
       env:
         - NODE_ENV=testing
       name: Frontend Tests
-      install: cd client && npm ci
+      install: npm ci
       script: npm run test -- --watch=false --no-progress --browsers=ChromeHeadlessCI
 
     - name: E2E tests
