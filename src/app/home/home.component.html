@@ -2,7 +2,7 @@
     <div class="overview" *ngIf="homeInfo$ | async as homeInfo">
         <div class="overview__total-players" data-cy="overview_online">Online: <span>{{homeInfo.players}}</span></div>
         Tables
-        <div class="overview__rooms">
+        <div class="overview__rooms" data-cy="overview_rooms">
             <div *ngFor="let table of homeInfo.tables"
                  class="overview__rooms__entry"
                  [class.has-started]="table.started"
@@ -14,16 +14,27 @@
 
     <img class="brand_logo" src="/assets/images/pokern_icon.png" alt="Pokern Icon"/>
 
-    <h4>Definitely NOT Poker</h4>
+    <h4>Pokern</h4>
 
     <form class="form" [formGroup]="loginForm" (ngSubmit)="joinTable()">
         <input class="input username" placeholder="Name" formControlName="username" required data-cy="username"/>
         <div class="room__wrapper">
             <input class="input room" placeholder="Table" formControlName="table" required data-cy="room"/>
             <button class="generate" (click)="generateRoomName($event)" type="button">Generate</button>
-            <div class="help" tooltip="Enter or generate a room code">?</div>
+            <div class="settings" (click)="openSettings()">
+                <poker-icon type="settings"></poker-icon>
+            </div>
         </div>
-        <button class="button join" type="submit" [disabled]="loginForm.invalid" data-cy="join_button">Join</button>
+        <button *ngIf="isJoinable;else spectateButton"
+                class="button join"
+                type="submit"
+                [disabled]="loginForm.invalid"
+                data-cy="join_button">Join
+        </button>
+        <ng-template #spectateButton>
+            <button class="button join" type="button" data-cy="spectate_button" (click)="spectateTable()">Spectate
+            </button>
+        </ng-template>
     </form>
 
     <div class="form__error">
@@ -42,12 +53,12 @@
     </div>
 
 
-    <div class="server__error" *ngIf="connectionError$ | async" tooltip="Something went wrong connecting to the server">
-        <img src="/assets/images/attention.svg"/>
+    <div class="server__error" *ngIf="connectionError$ | async" tippy="Something went wrong connecting to the server">
+        <img src="/assets/images/warning.svg"/>
     </div>
 
-    <div class="repository-badge" tooltip="Check out the repository">
-        <a href="https://github.com/drdreo/poker" target="_blank" title="Create an issue at GitHub">
+    <div class="repository-badge" tippy="Check out the repository">
+        <a href="https://github.com/drdreo/poker" target="_blank">
             <img src="https://img.shields.io/badge/Repository-GitHub-blue" alt="Create an issue at GitHub"/>
         </a>
     </div>

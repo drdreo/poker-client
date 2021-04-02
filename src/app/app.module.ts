@@ -4,6 +4,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
+import { DialogModule } from '@ngneat/dialog';
+import { TippyModule } from '@ngneat/helipopper';
 import * as Sentry from '@sentry/angular';
 import { SocketIoConfig, SocketIoModule } from 'ngx-socket-io';
 
@@ -12,10 +14,9 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ErrorComponent } from './error/error.component';
 import { HomeComponent } from './home/home.component';
+import { PokerSettingsComponent } from './home/poker-settings/poker-settings.component';
 import { ErrorService } from './shared/error.service';
 import { SharedModule } from './shared/shared.module';
-import { TooltipComponent } from './shared/tooltip/tooltip.component';
-import { TooltipDirective } from './shared/tooltip/tooltip.directive';
 import { TableModule } from './table/table.module';
 
 const config: SocketIoConfig = {
@@ -27,6 +28,7 @@ const config: SocketIoConfig = {
         AppComponent,
         HomeComponent,
         ErrorComponent,
+        PokerSettingsComponent
     ],
     imports: [
         BrowserModule,
@@ -36,7 +38,20 @@ const config: SocketIoConfig = {
         ReactiveFormsModule,
         SocketIoModule.forRoot(config),
         SharedModule,
-        TableModule
+        TableModule,
+        DialogModule.forRoot(),
+        TippyModule.forRoot({
+            defaultVariation: 'tooltip',
+            variations: {
+                tooltip: {
+                    theme: 'poker',
+                    arrow: false,
+                    animation: 'scale',
+                    trigger: 'mouseenter',
+                    offset: [0, 5]
+                }
+            }
+        })
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: ErrorService, multi: true },

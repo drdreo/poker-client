@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { DialogService } from '@ngneat/dialog';
 import * as Sentry from '@sentry/angular';
 import { HomeInfo } from '@shared/src';
-import { Observable, Subject, merge } from 'rxjs';
+import { Observable, Subject, merge, combineLatest } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { PokerService } from '../poker.service';
 import { ErrorService } from '../shared/error.service';
+import { PokerSettingsComponent } from './poker-settings/poker-settings.component';
 
 @Sentry.TraceClassDecorator()
 @Component({
@@ -42,9 +44,11 @@ export class HomeComponent {
         return this.loginForm.get('table');
     }
 
+    isJoinable = true;
+
     private unsubscribe$ = new Subject();
 
-    constructor(private router: Router, private error: ErrorService, private pokerService: PokerService) {
+    constructor(private router: Router, private error: ErrorService, private pokerService: PokerService, private dialog: DialogService) {
 
         this.pokerService.leave(); // try to leave if a player comes from a table
 
@@ -57,6 +61,18 @@ export class HomeComponent {
             .subscribe(({ playerID, table }) => {
                 localStorage.setItem('playerID', playerID);
                 this.router.navigate(['/table', table]);
+            });
+
+        combineLatest([this.table.valueChanges, this.homeInfo$])
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe(([tableName, homeInfo]) => {
+                const table = homeInfo.tables.find(t => t.name === tableName);
+
+                if (table && table.started) {
+                    this.isJoinable = false;
+                } else {
+                    this.isJoinable = true;
+                }
             });
     }
 
@@ -72,10 +88,25 @@ export class HomeComponent {
         }
     }
 
+    spectateTable() {
+        const table = this.table.value;
+        this.pokerService.joinAsSpectator(table);
+    }
+
+
     generateRoomName(e): void {
         const randomName = Math.random().toString(36).substring(8);
 
         this.table.patchValue(randomName);
+    }
+
+    openSettings() {
+        this.dialog.open(PokerSettingsComponent)
+            .afterClosed$
+            .subscribe(result => {
+                console.log(`Settings closed`);
+                console.log(result);
+            });
     }
 }
 

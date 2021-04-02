@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/angular';
 import { GameStatus, Card, BetType, SidePot, PlayerOverview } from '@shared/src';
 import { formatWinnersMessage } from 'app/shared/utils';
 import { BehaviorSubject, merge, Observable, Subject, interval } from 'rxjs';
-import { switchMap, takeUntil, tap, shareReplay } from 'rxjs/operators';
+import { switchMap, takeUntil, tap, shareReplay, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { PokerService } from '../poker.service';
 import { cardFadeInAnimation, controlsFadeAnimation } from '../shared/animations';
@@ -24,11 +24,10 @@ import { Player } from './player/player.component';
 })
 export class TableComponent implements OnInit, OnDestroy {
 
-
     inProduction = environment.production;
     showOverlay = false;
     isCurrentPlayer = false; // if its the current clients turn
-    playDuration$ = interval(1000);
+    playDuration$ = interval(1000).pipe(map((count) => this.startTime + count * 1000));
 
     get clientPlayerID(): string {
         return localStorage.getItem('playerID');
@@ -36,6 +35,7 @@ export class TableComponent implements OnInit, OnDestroy {
 
     /***Comes from server*/
     tableName: string;
+    startTime: number;
     currentPlayerID$: Observable<string>; // ID of the current player
     dealerPlayerID$: Observable<string>; // ID of the dealer
     board$: Observable<Card[]>;
@@ -278,7 +278,10 @@ export class TableComponent implements OnInit, OnDestroy {
             .subscribe(table => {
                 console.log(table);
 
+                this.startTime = new Date().getTime() - new Date(table.startTime).getTime();
                 this._players$.next(table.players);
+
+                const isPlayer = table.players.find(player => player.id === this.clientPlayerID);
 
                 const disconnected = this.player?.disconnected || false;
                 if (disconnected) {
@@ -286,9 +289,10 @@ export class TableComponent implements OnInit, OnDestroy {
                     // reconnect if loading site directly
                     this.pokerService.createOrJoinRoom(this.tableName);
 
-                } else if (!this.clientPlayerID) {
-                    console.log('Joined as spectator!');
+                } else if (!isPlayer) {
+                    console.log('Joining as spectator!');
                     // if a new user just joined the table without being at the home screen, join as spectator
+                    this.pokerService.joinAsSpectator(this.tableName);
                 }
 
             }, error => {
@@ -453,33 +457,41 @@ export class TableComponent implements OnInit, OnDestroy {
             color: getColor(),
             chips: 667,
             bet: { amount: 579, type: BetType.Bet },
-            cards: [{ figure: 'back', value: 0}, { figure: 'back', value: 0 }]
+            cards: [{ figure: 'back', value: 0 }, { figure: 'back', value: 0 }],
+            kickVotes: []
         });
         players.push({
+            kickVotes: [],
             allIn: false, disconnected: true, afk: false, folded: false, id: 'tester2', name: 'DCer',
             color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
+            kickVotes: [],
             allIn: false, disconnected: false, afk: false, folded: false,
             id: 'tester3', name: 'DrDreo', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
+            kickVotes: [],
             allIn: false, disconnected: false, afk: false, folded: false,
             id: 'tester4', name: 'Hackl', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
+            kickVotes: [],
             allIn: false, disconnected: true, afk: true, folded: true,
             id: 'tester5', name: 'DC / AFKer', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
+            kickVotes: [],
             allIn: false, disconnected: false, afk: false, folded: false,
             id: 'tester6', name: 'Autophytes', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
+            kickVotes: [],
             allIn: true, disconnected: false, afk: true, folded: false,
             id: 'tester7', name: 'AFKer', color: getColor(), chips: 0, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
+            kickVotes: [],
             allIn: false, disconnected: false, afk: false, folded: false,
             id: 'dealer', name: 'Dealer', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
@@ -576,5 +588,9 @@ export class TableComponent implements OnInit, OnDestroy {
                 return index + 1;
         }
 
+    }
+
+    voteKick(id: string) {
+        this.pokerService.voteKick(id);
     }
 }

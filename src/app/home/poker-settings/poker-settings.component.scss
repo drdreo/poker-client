@@ -1,0 +1,47 @@
+@import "../../../assets/styles/vars";
+
+:host {
+  color: $white;
+  padding: 1rem;
+  overflow-y: auto;
+  max-height: 75vh;
+}
+
+.setting {
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+  margin-bottom: 20px;
+}
+
+.setting__name {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+
+  cursor: pointer;
+  color: $text-color-primary;
+  line-height: 24px;
+  font-size: 16px;
+
+  margin-bottom: 5px;
+}
+
+.setting__description {
+  color: $gray;
+  line-height: 20px;
+  font-size: 14px;
+}
+
+.toggle {
+  width: 30px;
+  display: inline-block;
+}
+
+
+.divider {
+  width: 100%;
+  height: 1px;
+  border-top: thin solid #ffffff0f;
+  margin-top: 20px;
+}

@@ -1,5 +1,5 @@
-import { of, Observable } from 'rxjs';
 import { HomeInfo, TableResponse, SidePot } from '@shared/src';
+import { of, Observable } from 'rxjs';
 
 export class PokerServiceMock {
 
@@ -7,7 +7,8 @@ export class PokerServiceMock {
     loadTable(tableName: string): Promise<TableResponse> {
         return of({
                 name: tableName,
-                players: []
+                players: [],
+                startTime: new Date()
             }
         ).toPromise();
     }
@@ -24,6 +25,9 @@ export class PokerServiceMock {
     }
 
     createOrJoinRoom(tableName: string, username?: string) {
+    }
+
+    joinAsSpectator(tableName: string) {
     }
 
     roomJoined() {
@@ -88,7 +92,7 @@ export class PokerServiceMock {
         return of();
     }
 
-    maxBetUpdate(){
+    maxBetUpdate() {
         return of();
     }
 

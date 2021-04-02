@@ -1,0 +1,14 @@
+<h2 class="title">Poker Ranks</h2>
+
+<div class="hand" *ngFor="let hand of hands">
+    <div class="cards">
+        <poker-card  class="card" *ngFor="let card of hand.cards"
+                    [value]="card.value"
+                    [figure]="card.figure"
+                    [class.inactive]="card.inactive"></poker-card>
+    </div>
+    <div class="info">
+        <div class="name title">{{hand.name}}</div>
+        <div class="description">{{hand.description}}</div>
+    </div>
+</div>

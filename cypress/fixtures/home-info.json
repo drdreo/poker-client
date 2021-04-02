@@ -1,0 +1,13 @@
+{
+  "tables": [
+    {
+      "name": "test_room1",
+      "started": false
+    },
+    {
+      "name": "test_room2",
+      "started": true
+    }
+  ],
+  "players": 3
+}

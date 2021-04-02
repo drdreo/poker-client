@@ -12,6 +12,7 @@ import { SidepotsComponent } from './sidepots/sidepots.component';
 import { TableInfosComponent } from './table-infos/table-infos.component';
 import { TableRoutingModule } from './table-routing.module';
 import { TableComponent } from './table.component';
+import { HandRanksComponent } from './hand-ranks/hand-ranks.component';
 
 
 @NgModule({
@@ -25,7 +26,8 @@ import { TableComponent } from './table.component';
         TableInfosComponent,
         GameControlsComponent,
         SidepotsComponent,
-        SidepotComponent
+        SidepotComponent,
+        HandRanksComponent
     ],
     imports: [
         CommonModule,

@@ -1,0 +1,17 @@
+{
+  "name": "cypress_room",
+  "players": [
+    {
+      "id": "7d1d0429-b66f-4beb-bf1d-ff763e988f89",
+      "name": "test",
+      "chips": 1000,
+      "bet": null,
+      "cards": [],
+      "allIn": false,
+      "folded": false,
+      "color": "#cf6a87",
+      "disconnected": false,
+      "afk": false
+    }
+  ]
+}

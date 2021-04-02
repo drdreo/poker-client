@@ -10,8 +10,10 @@ const mockPlayer = {
     allIn: false,
     folded: false,
     disconnected: false,
-    afk: false
+    afk: false,
+    kickVotes: []
 };
+
 describe('PlayerComponent', () => {
     let component: PlayerComponent;
     let fixture: ComponentFixture<PlayerComponent>;
