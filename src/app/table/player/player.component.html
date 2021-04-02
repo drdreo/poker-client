@@ -17,7 +17,7 @@
         <poker-chips class="jetons-1" [amount]="player.chips" [type]="1"></poker-chips>
     </div>
     <div class="playing-indicator"></div>
-    <div class="afk-indicator" (click)="voteKick();">AFK</div>
+    <div class="afk-indicator" (click)="kick();">AFK</div>
     <div class="avatar" [ngStyle]="{'background-color': player.color || 'dodgerblue'}"></div>
     <div class="name">{{player.name}}</div>
     <div class="dealer-btn">D</div>
