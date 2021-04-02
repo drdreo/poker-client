@@ -1,0 +1,170 @@
+@import "../../../assets/styles/vars";
+
+$color: $text-color-secondary;
+$success-color: $success-color;
+$toggle-size: 24px;
+
+.toggle {
+  cursor: pointer;
+  display: block;
+  transform-origin: 50% 50%;
+  transform-style: preserve-3d;
+  transition: transform .14s ease;
+
+  &:active {
+    transform: rotateX(30deg);
+  }
+
+  input {
+    display: none;
+
+    & + div {
+      border: 3px solid rgba($success-color, .2);
+      border-radius: 50%;
+      position: relative;
+      width: $toggle-size;
+      height: $toggle-size;
+      box-sizing: border-box;
+
+      svg {
+        fill: none;
+        stroke-width: 3;
+        stroke: $color;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        width: $toggle-size;
+        height: $toggle-size;
+        display: block;
+        position: absolute;
+        left: -3px;
+        top: -3px;
+        right: -3px;
+        bottom: -3px;
+        z-index: 1;
+        stroke-dashoffset: 162.6 - 38;
+        stroke-dasharray: 0 162.6 133 (162.6 - 133);
+        transition: all .4s ease 0s;
+      }
+
+      &:before,
+      &:after {
+        content: '';
+        width: 2px;
+        height: 10px;
+        background: $color;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        border-radius: 5px;
+      }
+
+      &:before {
+        opacity: 0;
+        transform: scale(.3) translate(-50%, -50%) rotate(45deg);
+        animation: bounceInBefore .3s linear forwards .3s;
+      }
+
+      &:after {
+        opacity: 0;
+        transform: scale(.3) translate(-50%, -50%) rotate(-45deg);
+        animation: bounceInAfter .3s linear forwards .3s;
+      }
+    }
+
+    &:checked + div {
+      svg {
+        stroke-dashoffset: 162.6;
+        stroke-dasharray: 0 162.6 28 (162.6 - 28);
+        transition: all .4s ease .2s;
+        stroke: $success-color;
+      }
+
+      &:before {
+        opacity: 0;
+        transform: scale(.3) translate(-50%, -50%) rotate(45deg);
+        animation: bounceInBeforeDont .3s linear forwards 0s;
+      }
+
+      &:after {
+        opacity: 0;
+        transform: scale(.3) translate(-50%, -50%) rotate(-45deg);
+        animation: bounceInAfterDont .3s linear forwards 0s;
+      }
+    }
+  }
+}
+
+@keyframes bounceInBefore {
+  0% {
+    opacity: 0;
+    transform: scale(.3) translate(-50%, -50%) rotate(45deg);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.1) translate(-50%, -50%) rotate(45deg);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(.89) translate(-50%, -50%) rotate(45deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translate(-50%, -50%) rotate(45deg);
+  }
+}
+
+@keyframes bounceInAfter {
+  0% {
+    opacity: 0;
+    transform: scale(.3) translate(-50%, -50%) rotate(-45deg);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.1) translate(-50%, -50%) rotate(-45deg);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(.89) translate(-50%, -50%) rotate(-45deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translate(-50%, -50%) rotate(-45deg);
+  }
+}
+
+@keyframes bounceInBeforeDont {
+  0% {
+    opacity: 1;
+    transform: scale(1) translate(-50%, -50%) rotate(45deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(.3) translate(-50%, -50%) rotate(45deg);
+  }
+}
+
+@keyframes bounceInAfterDont {
+  0% {
+    opacity: 1;
+    transform: scale(1) translate(-50%, -50%) rotate(-45deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(.3) translate(-50%, -50%) rotate(-45deg);
+  }
+}
+
+
+body {
+  .dribbble {
+    position: fixed;
+    display: block;
+    right: 24px;
+    bottom: 24px;
+
+    img {
+      display: block;
+      width: 76px;
+    }
+  }
+}

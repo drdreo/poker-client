@@ -9,7 +9,7 @@ import { takeUntil } from 'rxjs/operators';
 })
 export class TitleService {
 
-    private appTitle = 'Definitely NOT poker';
+    private appTitle = 'Pokern ';
 
     get title(): string {
         return this._title;

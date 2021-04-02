@@ -24,7 +24,6 @@ import { Player } from './player/player.component';
 })
 export class TableComponent implements OnInit, OnDestroy {
 
-
     inProduction = environment.production;
     showOverlay = false;
     isCurrentPlayer = false; // if its the current clients turn
@@ -589,5 +588,9 @@ export class TableComponent implements OnInit, OnDestroy {
                 return index + 1;
         }
 
+    }
+
+    voteKick(id: string) {
+        this.pokerService.voteKick(id);
     }
 }

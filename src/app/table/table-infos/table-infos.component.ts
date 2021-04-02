@@ -1,6 +1,8 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { DialogService } from '@ngneat/dialog';
 import { Observable } from 'rxjs';
 import { PokerService } from '../../poker.service';
+import { HandRanksComponent } from '../hand-ranks/hand-ranks.component';
 import { Player } from '../player/player.component';
 
 @Component({
@@ -15,7 +17,10 @@ export class TableInfosComponent {
     @Input() players$: Observable<Player[]>;
     @Input() time$: Observable<number>;
 
-    constructor(public pokerService: PokerService) {
+    constructor(private dialog: DialogService, public pokerService: PokerService) {
     }
 
+    showPokerHandRanks() {
+        this.dialog.open(HandRanksComponent);
+    }
 }

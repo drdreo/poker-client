@@ -1,0 +1,11 @@
+@import "vars";
+
+@import '~tippy.js/dist/tippy.css';
+@import '~tippy.js/themes/light.css';
+@import '~tippy.js/animations/scale.css';
+
+.tippy-box[data-theme~='poker'] {
+  background-color: $primary-background-color;
+  border-radius: $primary-radius;
+  border: 1px solid $secondary-background-color;
+}

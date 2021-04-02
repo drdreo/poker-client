@@ -1,0 +1,39 @@
+@import "../../../assets/styles/vars";
+
+:host {
+  color: $white;
+  padding: 1rem;
+  max-height: 75vh;
+  overflow-y: scroll;
+}
+
+.hand {
+  display: flex;
+
+  .cards {
+    display: flex;
+    border-right: 1px solid transparentize($white, 0.7);
+    padding: 1rem;
+
+    .card {
+      margin-right: 5px;
+
+      &.inactive {
+        opacity: 0.3;
+      }
+    }
+  }
+
+  .info {
+    padding: 1rem;
+
+    .name {
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    .description {
+      font-size: 12px;
+    }
+  }
+}
