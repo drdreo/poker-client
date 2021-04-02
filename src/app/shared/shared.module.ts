@@ -4,13 +4,15 @@ import { TippyModule } from '@ngneat/helipopper';
 import { ToggleComponent } from './toggle/toggle.component';
 import { TooltipComponent } from './tooltip/tooltip.component';
 import { TooltipDirective } from './tooltip/tooltip.directive';
+import { IconComponent } from './icon/icon.component';
 
 
 @NgModule({
     declarations: [
         TooltipDirective,
         TooltipComponent,
-        ToggleComponent
+        ToggleComponent,
+        IconComponent
     ],
     imports: [
         CommonModule,
@@ -19,7 +21,8 @@ import { TooltipDirective } from './tooltip/tooltip.directive';
     exports: [
         TooltipDirective,
         ToggleComponent,
-        TippyModule
+        TippyModule,
+        IconComponent
     ]
 })
 export class SharedModule {}

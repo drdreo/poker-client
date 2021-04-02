@@ -11,7 +11,7 @@
 
   .generate {
     position: absolute;
-    right: 20px;
+    right: 30px;
     top: 50%;
     transform: translateY(-50%);
     padding: 3px;
@@ -25,16 +25,21 @@
     cursor: pointer;
   }
 
-  .help {
+  .settings {
     display: flex;
     justify-content: center;
     position: absolute;
     top: 50%;
-    right: 0;
+    right: 5px;
     transform: translateY(-50%);
     width: 20px;
-    cursor: help;
-    color: $text-color-secondary;
+    cursor: pointer;
+
+    &:hover {
+      poker-icon {
+        fill: lighten($gray, 20%);
+      }
+    }
   }
 }
 

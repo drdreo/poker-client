@@ -2,7 +2,7 @@
     <div class="overview" *ngIf="homeInfo$ | async as homeInfo">
         <div class="overview__total-players" data-cy="overview_online">Online: <span>{{homeInfo.players}}</span></div>
         Tables
-        <div class="overview__rooms">
+        <div class="overview__rooms" data-cy="overview_rooms">
             <div *ngFor="let table of homeInfo.tables"
                  class="overview__rooms__entry"
                  [class.has-started]="table.started"
@@ -21,7 +21,9 @@
         <div class="room__wrapper">
             <input class="input room" placeholder="Table" formControlName="table" required data-cy="room"/>
             <button class="generate" (click)="generateRoomName($event)" type="button">Generate</button>
-            <div class="help" tippy="Enter or generate a room code" (click)="openSettings()">?</div>
+            <div class="settings" (click)="openSettings()">
+                <poker-icon type="settings"></poker-icon>
+            </div>
         </div>
         <button *ngIf="isJoinable;else spectateButton"
                 class="button join"
@@ -30,7 +32,8 @@
                 data-cy="join_button">Join
         </button>
         <ng-template #spectateButton>
-            <button class="button join" type="button" data-cy="spectate_button" (click)="spectateTable()">Spectate</button>
+            <button class="button join" type="button" data-cy="spectate_button" (click)="spectateTable()">Spectate
+            </button>
         </ng-template>
     </form>
 
@@ -51,7 +54,7 @@
 
 
     <div class="server__error" *ngIf="connectionError$ | async" tippy="Something went wrong connecting to the server">
-        <img src="/assets/images/attention.svg"/>
+        <img src="/assets/images/warning.svg"/>
     </div>
 
     <div class="repository-badge" tippy="Check out the repository">

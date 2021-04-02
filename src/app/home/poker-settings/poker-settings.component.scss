@@ -3,6 +3,8 @@
 :host {
   color: $white;
   padding: 1rem;
+  overflow-y: auto;
+  max-height: 75vh;
 }
 
 .setting {
