@@ -25,7 +25,7 @@ jobs:
     - name: E2E tests
       install: npm ci
       script:
-        - npm run socket-server-mock
+        - npm run socket-server-mock &
         - npm run cy:verify
         - npm run ci:cy-run
 
