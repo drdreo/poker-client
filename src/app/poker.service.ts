@@ -174,7 +174,7 @@ export class PokerService implements OnDestroy {
         this.socket.emit(PlayerEvent.Fold);
     }
 
-    playerFolded() {
+    playerFolded(): Observable<PlayerFolded> {
         return this.socket.fromEvent<PlayerFolded>(PokerEvent.PlayerFolded);
     }
 
@@ -182,7 +182,7 @@ export class PokerService implements OnDestroy {
         this.socket.emit(PlayerEvent.VoteKick, { kickPlayerID: playerID });
     }
 
-    playerKicked() {
-        return this.socket.fromEvent<PlayerKicked>(PokerEvent.PlayerKick);
+    playerKicked(): Observable<string> {
+        return this.socket.fromEvent<PlayerKicked>(PokerEvent.PlayerKick).pipe(map(res => res.kickedPlayer));
     }
 }

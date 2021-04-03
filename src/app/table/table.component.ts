@@ -244,9 +244,7 @@ export class TableComponent implements OnInit, OnDestroy {
             );
 
         this.pokerService.playerFolded()
-            .pipe(
-                takeUntil(this.unsubscribe$)
-            )
+            .pipe(takeUntil(this.unsubscribe$))
             .subscribe(res => {
                 const player = this.getPlayerById(res.playerID);
 
@@ -254,6 +252,11 @@ export class TableComponent implements OnInit, OnDestroy {
                 this.notification.addFeedMessage(`${ player.name } folded`, MessageType.Played);
             });
 
+        this.pokerService.playerKicked()
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe(name => {
+                this.notification.addFeedMessage(`${ name } was kicked from the table!`, MessageType.Error);
+            });
     }
 
     private setCurrentPlayer(newPlayerID: string): void {
