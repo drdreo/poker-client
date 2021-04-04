@@ -36,6 +36,8 @@ export class HomeComponent {
         })
     });
 
+    private config: any;
+
     get username() {
         return this.loginForm.get('username');
     }
@@ -84,7 +86,7 @@ export class HomeComponent {
         if (this.loginForm.valid) {
             const username = this.username.value;
             const table = this.table.value;
-            this.pokerService.createOrJoinRoom(table, username);
+            this.pokerService.createOrJoinRoom(table, username, this.config);
         }
     }
 
@@ -92,7 +94,6 @@ export class HomeComponent {
         const table = this.table.value;
         this.pokerService.joinAsSpectator(table);
     }
-
 
     generateRoomName(e): void {
         const randomName = Math.random().toString(36).substring(8);
@@ -103,9 +104,10 @@ export class HomeComponent {
     openSettings() {
         this.dialog.open(PokerSettingsComponent)
             .afterClosed$
-            .subscribe(result => {
+            .subscribe((config: any) => {
                 console.log(`Settings closed`);
-                console.log(result);
+                console.log(config);
+                this.config = config;
             });
     }
 }

@@ -8,6 +8,7 @@ import {
 import { Socket } from 'ngx-socket-io';
 import { Observable, Subject, of } from 'rxjs';
 import { map, tap, delay, concatAll } from 'rxjs/operators';
+import { PokerConfig } from '../../../server/shared/src';
 import { environment } from '../environments/environment';
 
 
@@ -42,11 +43,16 @@ export class PokerService implements OnDestroy {
         return this.socket.fromEvent<HomeInfo>(PokerEvent.HomeInfo);
     }
 
-    createOrJoinRoom(tableName: string, username?: string) {
-        this.socket.emit(PlayerEvent.JoinRoom, { playerName: username, roomName: tableName, playerID: localStorage.getItem('playerID') });
+    createOrJoinRoom(tableName: string, username?: string, config?: PokerConfig) {
+        this.socket.emit(PlayerEvent.JoinRoom, {
+            playerName: username,
+            roomName: tableName,
+            playerID: localStorage.getItem('playerID'),
+            config
+        });
     }
 
-    joinAsSpectator(tableName: string){
+    joinAsSpectator(tableName: string) {
         this.socket.emit(PlayerEvent.SpectatorJoin, { roomName: tableName });
     }
 
