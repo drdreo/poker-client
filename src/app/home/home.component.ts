@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DialogService } from '@ngneat/dialog';
+import { HotToastService } from '@ngneat/hot-toast';
 import * as Sentry from '@sentry/angular';
 import { HomeInfo } from '@shared/src';
 import { Observable, Subject, merge, combineLatest } from 'rxjs';
@@ -17,7 +18,7 @@ import { PokerSettingsComponent } from './poker-settings/poker-settings.componen
     styleUrls: ['./home.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HomeComponent {
+export class HomeComponent implements OnDestroy {
     homeInfo$: Observable<HomeInfo>;
 
     connectionError$: Observable<any>;
@@ -50,11 +51,22 @@ export class HomeComponent {
 
     private unsubscribe$ = new Subject();
 
-    constructor(private router: Router, private error: ErrorService, private pokerService: PokerService, private dialog: DialogService) {
+    constructor(
+        private router: Router,
+        private errorService: ErrorService,
+        private pokerService: PokerService,
+        private dialog: DialogService,
+        private toastService: HotToastService) {
 
         this.pokerService.leave(); // try to leave if a player comes from a table
 
-        this.connectionError$ = this.error.socketConnectionError$;
+        this.connectionError$ = this.errorService.socketConnectionError$;
+
+        this.errorService.socketError$
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe(error => {
+                this.toastService.error(error.message, { id: 'error' });
+            });
 
         this.homeInfo$ = merge(this.pokerService.loadHomeInfo(), this.pokerService.homeInfo());
 
@@ -76,6 +88,11 @@ export class HomeComponent {
                     this.isJoinable = true;
                 }
             });
+    }
+
+    ngOnDestroy() {
+        this.unsubscribe$.next();
+        this.unsubscribe$.complete();
     }
 
     onTableClick(tableName: string) {

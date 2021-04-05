@@ -36,6 +36,11 @@ export class PokerSettingsComponent implements OnInit {
             })
         });
 
+        const persistedSettings = JSON.parse(localStorage.getItem('poker-settings'));
+        if (persistedSettings) {
+            this.settingsForm.patchValue(persistedSettings);
+        }
+
         this.ref.beforeClose(() => {
 
             if (!this.saved) {
@@ -52,6 +57,7 @@ export class PokerSettingsComponent implements OnInit {
     }
 
     private saveSettingsAndClose() {
+        localStorage.setItem('poker-settings', JSON.stringify(this.settingsForm.value));
         this.ref.close(this.settingsForm.value);
     }
 

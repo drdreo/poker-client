@@ -2,6 +2,7 @@
 @import "./assets/styles/utils";
 @import "./assets/styles/tooltip";
 @import "./assets/styles/dialog";
+@import "./assets/styles/toast";
 
 @import url('https://fonts.googleapis.com/css2?family=Balsamiq+Sans&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@700&display=swap');
@@ -195,3 +196,4 @@ poker-icon {
 .title {
   font-family: $text-primary;
 }
+

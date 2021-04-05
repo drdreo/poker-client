@@ -281,25 +281,29 @@ export class TableComponent implements OnInit, OnDestroy {
             .subscribe(table => {
                 console.log(table);
 
-                this.startTime = new Date().getTime() - new Date(table.startTime).getTime();
-                this._players$.next(table.players);
-
                 const isPlayer = table.players.find(player => player.id === this.clientPlayerID);
 
-                const disconnected = this.player?.disconnected || false;
+                const disconnected = isPlayer?.disconnected || false;
                 if (disconnected) {
                     console.log('Player was disconnected. Try to reconnect!');
                     // reconnect if loading site directly
                     this.pokerService.createOrJoinRoom(this.tableName);
 
                 } else if (!isPlayer) {
+                    // @ts-ignore
+                    if (!table.spectatorsAllowed) {
+                        throw new Error('Not allowed to spectate!');
+                    }
+
                     console.log('Joining as spectator!');
                     // if a new user just joined the table without being at the home screen, join as spectator
                     this.pokerService.joinAsSpectator(this.tableName);
                 }
 
+                this.startTime = new Date().getTime() - new Date(table.startTime).getTime();
+                this._players$.next(table.players);
+
             }, error => {
-                console.log(error);
                 if (!environment.production) {
                     this.loadDevThings();
                 }
