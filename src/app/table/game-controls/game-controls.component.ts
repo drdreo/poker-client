@@ -1,4 +1,4 @@
-import { Component, OnInit, EventEmitter, Output, Input, ChangeDetectionStrategy, SimpleChanges } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, Input, ChangeDetectionStrategy, SimpleChanges, OnChanges } from '@angular/core';
 import { PlayerOverview, BetType } from '@shared/src';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -23,7 +23,7 @@ interface BetTemplate {
     changeDetection: ChangeDetectionStrategy.OnPush,
     animations: [fadeInOutAnimation]
 })
-export class GameControlsComponent implements OnInit {
+export class GameControlsComponent implements OnInit, OnChanges {
 
     BetType = BetType;
 
@@ -56,12 +56,16 @@ export class GameControlsComponent implements OnInit {
     set betAmount(value: number) {
         if (value < 0) {
             value = 0;
-        } else if (value > this.player.chips) {
-            value = this.player.chips;
+        } else if (value > this.getBetableAmount()) {
+            value = this.getBetableAmount();
         }
         this._betAmount$.next(value);
     }
 
+    getBetableAmount(): number {
+        const bet = this.player.bet ? this.player.bet.amount : 0;
+        return this.player.chips + bet;
+    }
 
     minimumBet = 20; // min raise is 1 BB
 
@@ -119,7 +123,7 @@ export class GameControlsComponent implements OnInit {
     }
 
     onAllIn() {
-        this.bet.emit(this.player.chips);
+        this.bet.emit(this.getBetableAmount());
         this.closePopup();
     }
 
@@ -133,8 +137,7 @@ export class GameControlsComponent implements OnInit {
                 this.betAmount = this.pot * tmpl.amount;
                 break;
             case BetTemplateType.Bank:
-                const bet = this.player.bet ? this.player.bet.amount : 0;
-                this.betAmount = (this.player.chips + bet) * tmpl.amount;
+                this.betAmount = (this.getBetableAmount()) * tmpl.amount;
                 break;
             default:
                 console.warn('BetTemplate not handled', tmpl);
@@ -154,14 +157,14 @@ export class GameControlsComponent implements OnInit {
 
     getCallAmount(maxBet: number): number {
         const callAmount = this.player.bet ? maxBet - this.player.bet.amount : maxBet;
-        return callAmount > this.player.chips ? this.player.chips : callAmount;
+        return callAmount > this.getBetableAmount() ? this.getBetableAmount() : callAmount;
     }
 
     hasToAllIn(maxBet): boolean {
         if (maxBet === 0) {
             return false;
         }
-        return maxBet - this.player.bet?.amount >= this.player.chips;
+        return maxBet >= this.getBetableAmount();
     }
 
     private updateBetTemplates() {

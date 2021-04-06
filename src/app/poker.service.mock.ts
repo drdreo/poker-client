@@ -8,7 +8,8 @@ export class PokerServiceMock {
         return of({
                 name: tableName,
                 players: [],
-                startTime: new Date()
+                startTime: new Date(),
+                spectatorsAllowed: true
             }
         ).toPromise();
     }
@@ -69,6 +70,10 @@ export class PokerServiceMock {
     }
 
     currentPlayer() {
+        return of();
+    }
+
+    playerKicked() {
         return of();
     }
 

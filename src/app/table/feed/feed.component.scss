@@ -7,8 +7,13 @@
   text-align: right;
   padding: 1rem;
   max-height: 100px;
-  overflow-y: scroll;
+  overflow-y: auto;
   box-sizing: border-box;
+
+  transition: max-height 0.1s ease;
+  &:hover{
+    max-height: 200px;
+  }
 }
 
 

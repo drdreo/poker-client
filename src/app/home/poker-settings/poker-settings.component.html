@@ -1,81 +1,96 @@
 <h2>Table Settings</h2>
 
-<div class="setting">
-    <label class="setting__name">
-        Show on Public Table
-        <app-toggle class="setting__input toggle"></app-toggle>
-    </label>
-    <div class="divider"></div>
-</div>
+<div [formGroup]="settingsForm">
+    <div class="setting">
+        <label class="setting__name">
+            Show on Public Table
+            <app-toggle class="setting__input toggle" formControlName="isPublic"></app-toggle>
+        </label>
+        <div class="divider"></div>
+    </div>
 
-<div class="setting">
-    <label class="setting__name">
-        Allow Re-Buys
-        <app-toggle class="setting__input toggle"></app-toggle>
-    </label>
-    <div class="setting__description">If a player has no chips left to continue, allow them to rebuy.</div>
-    <div class="divider"></div>
-</div>
-
-<div class="setting">
-    <label class="setting__name">
-        Auto close table
-        <app-toggle class="setting__input toggle"></app-toggle>
-    </label>
-    <div class="setting__description">When the game is over (only one has chips left) the table will be removed.</div>
-    <div class="divider"></div>
-</div>
-
-<div class="setting">
-    <label class="setting__name">
-        Allow Spectators
-        <app-toggle class="setting__input toggle"></app-toggle>
-    </label>
-    <div class="divider"></div>
-</div>
+    <div class="setting">
+        <label class="setting__name">
+            Allow Spectators
+            <app-toggle class="setting__input toggle" formControlName="spectatorsAllowed"></app-toggle>
+        </label>
+        <div class="divider"></div>
+    </div>
 
 
-<div class="setting">
-    <label class="setting__name">
-        Play Ambient Music
-        <app-toggle class="setting__input toggle"></app-toggle>
-    </label>
-    <div class="setting__description">Some casino vibes will be played.</div>
-    <div class="divider"></div>
-</div>
+    <div class="setting" formGroupName="table">
+        <label class="setting__name disabled">
+            Allow Re-Buys
+            <app-toggle class="setting__input toggle" formControlName="rebuy"></app-toggle>
+        </label>
+        <div class="setting__description">If a player has no chips left to continue, allow them to rebuy.</div>
+
+        <div class="divider"></div>
+
+        <label class="setting__name">
+            Auto close table
+            <app-toggle class="setting__input toggle" formControlName="autoClose"></app-toggle>
+        </label>
+        <div class="setting__description">When the game is over (only one has chips left) the table will be removed.
+        </div>
+        <div class="divider"></div>
+    </div>
 
 
-<div class="setting">
-    <label class="setting__name">
-        Small Blind
-        <input class="setting__input input" size="4"/>
-    </label>
-    <label class="setting__name">
-        Big Blind
-        <input class="setting__input input" size="4"/>
-    </label>
-    <label class="setting__name">
-        Blind Duration
-        <input class="setting__input input" size="4"/>
-    </label>
-    <div class="setting__description">Fixed (0) otherwise define the seconds after blinds will be increased.</div>
+    <div class="setting">
+        <label class="setting__name disabled">
+            Play Ambient Music
+            <app-toggle class="setting__input toggle" formControlName="music"></app-toggle>
+        </label>
+        <div class="setting__description">Some casino vibes will be played.</div>
+        <div class="divider"></div>
+    </div>
 
-    <div class="divider"></div>
-</div>
 
-<div class="setting">
-    <label class="setting__name">
-        Turn Time
-        <input class="setting__input input" size="4" placeholder="∞" disabled/>
-    </label>
+    <div class="setting">
+        <label class="setting__name">
+            Player Chips
+            <input class="setting__input input" size="4" formControlName="chips"/>
+        </label>
+        <div class="divider"></div>
+    </div>
 
-    <div class="divider"></div>
-</div>
-<div class="setting">
-    <label class="setting__name">
-        AFK Time
-        <input class="setting__input input" size="4"/>
-    </label>
-    <div class="setting__description">Time until a player will be marked as AFK and is kickable.</div>
-    <div class="divider"></div>
+
+    <div class="setting" formGroupName="blinds">
+        <label class="setting__name">
+            Small Blind
+            <input class="setting__input input" size="4" formControlName="small"/>
+        </label>
+        <label class="setting__name">
+            Big Blind
+            <input class="setting__input input" size="4" formControlName="big"/>
+        </label>
+        <label class="setting__name disabled">
+            Blind Duration
+            <input class="setting__input input" size="4" formControlName="duration"/>
+        </label>
+        <div class="setting__description">Define the seconds after blinds will be increased > 0, otherwise fixed.</div>
+
+        <div class="divider"></div>
+    </div>
+
+    <div class="setting" formGroupName="turn">
+        <label class="setting__name disabled">
+            Turn Time
+            <input class="setting__input input" size="4" placeholder="∞" formControlName="time"/>
+        </label>
+        <div class="setting__description">Define the seconds > 0 a player has time for the turn, otherwise unlimited.
+        </div>
+
+        <div class="divider"></div>
+    </div>
+
+
+    <div class="setting" formGroupName="players">
+        <label class="setting__name">
+            Max Players
+            <input class="setting__input input" size="4" formControlName="max"/>
+        </label>
+        <div class="divider"></div>
+    </div>
 </div>

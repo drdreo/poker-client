@@ -30,7 +30,7 @@ export class TableComponent implements OnInit, OnDestroy {
     playDuration$ = interval(1000).pipe(map((count) => this.startTime + count * 1000));
 
     get clientPlayerID(): string {
-        return localStorage.getItem('playerID');
+        return sessionStorage.getItem('playerID');
     }
 
     /***Comes from server*/
@@ -70,7 +70,7 @@ export class TableComponent implements OnInit, OnDestroy {
         return this._maxBet$.getValue();
     }
 
-    unsubscribe$ = new Subject();
+    private unsubscribe$ = new Subject();
 
     constructor(
         private route: ActivatedRoute,
@@ -244,9 +244,7 @@ export class TableComponent implements OnInit, OnDestroy {
             );
 
         this.pokerService.playerFolded()
-            .pipe(
-                takeUntil(this.unsubscribe$)
-            )
+            .pipe(takeUntil(this.unsubscribe$))
             .subscribe(res => {
                 const player = this.getPlayerById(res.playerID);
 
@@ -254,6 +252,11 @@ export class TableComponent implements OnInit, OnDestroy {
                 this.notification.addFeedMessage(`${ player.name } folded`, MessageType.Played);
             });
 
+        this.pokerService.playerKicked()
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe(name => {
+                this.notification.addFeedMessage(`${ name } was kicked from the table!`, MessageType.Error);
+            });
     }
 
     private setCurrentPlayer(newPlayerID: string): void {
@@ -278,25 +281,29 @@ export class TableComponent implements OnInit, OnDestroy {
             .subscribe(table => {
                 console.log(table);
 
-                this.startTime = new Date().getTime() - new Date(table.startTime).getTime();
-                this._players$.next(table.players);
-
                 const isPlayer = table.players.find(player => player.id === this.clientPlayerID);
 
-                const disconnected = this.player?.disconnected || false;
+                const disconnected = isPlayer?.disconnected || false;
                 if (disconnected) {
                     console.log('Player was disconnected. Try to reconnect!');
                     // reconnect if loading site directly
                     this.pokerService.createOrJoinRoom(this.tableName);
 
                 } else if (!isPlayer) {
+                    // @ts-ignore
+                    if (table.spectatorsAllowed === false) {
+                        throw new Error('Not allowed to spectate!');
+                    }
+
                     console.log('Joining as spectator!');
                     // if a new user just joined the table without being at the home screen, join as spectator
                     this.pokerService.joinAsSpectator(this.tableName);
                 }
 
+                this.startTime = new Date().getTime() - new Date(table.startTime).getTime();
+                this._players$.next(table.players);
+
             }, error => {
-                console.log(error);
                 if (!environment.production) {
                     this.loadDevThings();
                 }
@@ -337,7 +344,8 @@ export class TableComponent implements OnInit, OnDestroy {
     }
 
     bet(bet: number) {
-        if (this.player.chips < bet) {
+        const betableAmount = this.player.chips + (this.player.bet ? this.player.bet.amount : 0);
+        if (betableAmount < bet) {
             this.notification.showAction(`Not enough chips to bet ${ bet }!`, 'error');
             return;
         }

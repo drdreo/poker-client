@@ -1,10 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder } from '@angular/forms';
 import { DialogRef } from '@ngneat/dialog';
-
-interface DialogData {
-    title: string;
-    withResult: boolean;
-}
 
 @Component({
     selector: 'poker-settings',
@@ -14,8 +10,37 @@ interface DialogData {
 export class PokerSettingsComponent implements OnInit {
 
     saved = false;
+    settingsForm;
 
-    constructor(public ref: DialogRef<DialogData>) {
+    constructor(public ref: DialogRef, private formBuilder: FormBuilder) {
+
+        this.settingsForm = this.formBuilder.group({
+            spectatorsAllowed: [true],
+            isPublic: [true],
+            music: [{ value: false, disabled: true }],
+            chips: [1000],
+            turn: this.formBuilder.group({
+                time: [{ value: -1, disabled: true }]
+            }),
+            blinds: this.formBuilder.group({
+                small: [10],
+                big: [20],
+                duration: [{ value: -1, disabled: true }]
+            }),
+            players: this.formBuilder.group({
+                max: [8]
+            }),
+            table: this.formBuilder.group({
+                autoClose: [true],
+                rebuy: [{ value: false, disabled: true }]
+            })
+        });
+
+        const persistedSettings = JSON.parse(localStorage.getItem('poker-settings'));
+        if (persistedSettings) {
+            this.settingsForm.patchValue(persistedSettings);
+        }
+
         this.ref.beforeClose(() => {
 
             if (!this.saved) {
@@ -32,6 +57,8 @@ export class PokerSettingsComponent implements OnInit {
     }
 
     private saveSettingsAndClose() {
-        this.ref.close({ test: 1 });
+        localStorage.setItem('poker-settings', JSON.stringify(this.settingsForm.value));
+        this.ref.close(this.settingsForm.value);
     }
+
 }

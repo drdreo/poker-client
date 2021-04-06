@@ -3,7 +3,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import {
     PokerEvent, GameStatus, TableResponse, HomeInfo, ServerJoined, GameWinners, GamePotUpdate, PlayerLeft, GameDealerUpdate,
     GameCurrentPlayer, GameBoardUpdate, PlayerCalled, PlayerChecked, PlayerFolded, GameRoundUpdate, PlayerBet, GamePlayersUpdate, Card,
-    PlayerEvent, PlayerOverview, SidePot, MaxBetUpdate, PlayerKicked
+    PlayerEvent, PlayerOverview, SidePot, MaxBetUpdate, PlayerKicked, PokerConfig
 } from '@shared/src';
 import { Socket } from 'ngx-socket-io';
 import { Observable, Subject, of } from 'rxjs';
@@ -42,11 +42,16 @@ export class PokerService implements OnDestroy {
         return this.socket.fromEvent<HomeInfo>(PokerEvent.HomeInfo);
     }
 
-    createOrJoinRoom(tableName: string, username?: string) {
-        this.socket.emit(PlayerEvent.JoinRoom, { playerName: username, roomName: tableName, playerID: localStorage.getItem('playerID') });
+    createOrJoinRoom(tableName: string, username?: string, config?: PokerConfig) {
+        this.socket.emit(PlayerEvent.JoinRoom, {
+            playerName: username,
+            roomName: tableName,
+            playerID: sessionStorage.getItem('playerID'),
+            config
+        });
     }
 
-    joinAsSpectator(tableName: string){
+    joinAsSpectator(tableName: string) {
         this.socket.emit(PlayerEvent.SpectatorJoin, { roomName: tableName });
     }
 
@@ -174,7 +179,7 @@ export class PokerService implements OnDestroy {
         this.socket.emit(PlayerEvent.Fold);
     }
 
-    playerFolded() {
+    playerFolded(): Observable<PlayerFolded> {
         return this.socket.fromEvent<PlayerFolded>(PokerEvent.PlayerFolded);
     }
 
@@ -182,7 +187,7 @@ export class PokerService implements OnDestroy {
         this.socket.emit(PlayerEvent.VoteKick, { kickPlayerID: playerID });
     }
 
-    playerKicked() {
-        return this.socket.fromEvent<PlayerKicked>(PokerEvent.PlayerKick);
+    playerKicked(): Observable<string> {
+        return this.socket.fromEvent<PlayerKicked>(PokerEvent.PlayerKick).pipe(map(res => res.kickedPlayer));
     }
 }

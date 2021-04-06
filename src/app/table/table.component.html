@@ -9,9 +9,9 @@
 
     <poker-sidepots [sidePots$]="sidePots$"></poker-sidepots>
 
-    <h3 class="table__action"
+    <div class="table__action"
         *ngIf="notification.action$ | async as currentAction"
-        [class.error]="currentAction.status === 'error'">{{currentAction.message}}</h3>
+        [class.error]="currentAction.status === 'error'">{{currentAction.message}}</div>
 
     <div class="ready-container"
          *ngIf="(gameStatus$ | async) === 'waiting' && (player$ | async) && (player$ | async).id === (players$ | async)[0]?.id && (players$ | async).length > 1">

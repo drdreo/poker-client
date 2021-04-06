@@ -1,8 +1,8 @@
-import { HttpErrorResponse, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
-import { Observable, BehaviorSubject, Subject, throwError } from 'rxjs';
-import { takeUntil, catchError } from 'rxjs/operators';
+import { Observable, BehaviorSubject, Subject } from 'rxjs';
+import { takeUntil, tap } from 'rxjs/operators';
+import { WsError } from './notification.service';
 
 @Injectable({
     providedIn: 'root'
@@ -12,13 +12,12 @@ export class ErrorService {
     private _socketConnectionError$ = new BehaviorSubject(null);
     socketConnectionError$ = this._socketConnectionError$.asObservable();
 
-    private _httpError$ = new BehaviorSubject(null);
-    httpError$ = this._httpError$.asObservable();
+    private _socketError$ = new Subject<WsError>();
+    socketError$: Observable<WsError> = this._socketError$.asObservable();
 
     private unsubscribe$ = new Subject();
 
     constructor(private socket: Socket) {
-
         this.connectionEstablished()
             .pipe(takeUntil(this.unsubscribe$))
             .subscribe(() => {
@@ -31,15 +30,14 @@ export class ErrorService {
                 console.error('Socket Connection Error: ', error);
                 this._socketConnectionError$.next(error);
             });
-    }
 
-    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        return next.handle(req).pipe(
-            catchError((error) => {
-                this._httpError$.next(error);
-                return throwError(error);
-            })
-        );
+        this.socketError()
+            .pipe(
+                tap(console.error),
+                takeUntil(this.unsubscribe$)
+            ).subscribe((error) => {
+            this._socketError$.next(error);
+        });
     }
 
     private connectionEstablished(): Observable<any> {
@@ -50,15 +48,7 @@ export class ErrorService {
         return this.socket.fromEvent('connect_error');
     }
 
-    handleHTTPError(err: HttpErrorResponse) {
-        let errorMessage: string;
-        if (err.error instanceof ErrorEvent) {
-            // A client-side or network error occurred. Handle it accordingly.
-            errorMessage = `An error occurred: ${ err.error.message }`;
-        } else {
-            // The backend returned an unsuccessful response code.
-            errorMessage = 'Something went wrong!';
-        }
-        console.error(errorMessage);
+    private socketError(): Observable<WsError> {
+        return this.socket.fromEvent<WsError>('exception');
     }
 }

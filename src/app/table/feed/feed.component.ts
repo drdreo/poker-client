@@ -21,16 +21,18 @@ export class FeedComponent {
         this.notification.newFeedMessage$.subscribe(newMessage => {
             this._messages$.next([...this._messages$.getValue(), newMessage]);
 
-            // fucking CD time issue
-            setTimeout(() => {
-                this.scrollToBottom();
-            }, 10);
+
+            this.scrollToBottom();
+
         });
     }
 
     scrollToBottom(): void {
         try {
-            this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight + 21;
+            // fucking CD time issue
+            setTimeout(() => {
+                this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight + 21;
+            },100);
         } catch (err) { }
     }
 
