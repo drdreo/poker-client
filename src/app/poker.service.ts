@@ -3,12 +3,11 @@ import { Injectable, OnDestroy } from '@angular/core';
 import {
     PokerEvent, GameStatus, TableResponse, HomeInfo, ServerJoined, GameWinners, GamePotUpdate, PlayerLeft, GameDealerUpdate,
     GameCurrentPlayer, GameBoardUpdate, PlayerCalled, PlayerChecked, PlayerFolded, GameRoundUpdate, PlayerBet, GamePlayersUpdate, Card,
-    PlayerEvent, PlayerOverview, SidePot, MaxBetUpdate, PlayerKicked
+    PlayerEvent, PlayerOverview, SidePot, MaxBetUpdate, PlayerKicked, PokerConfig
 } from '@shared/src';
 import { Socket } from 'ngx-socket-io';
 import { Observable, Subject, of } from 'rxjs';
 import { map, tap, delay, concatAll } from 'rxjs/operators';
-import { PokerConfig } from '../../../server/shared/src';
 import { environment } from '../environments/environment';
 
 
