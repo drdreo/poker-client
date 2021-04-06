@@ -344,7 +344,8 @@ export class TableComponent implements OnInit, OnDestroy {
     }
 
     bet(bet: number) {
-        if (this.player.chips < bet) {
+        const betableAmount = this.player.chips + (this.player.bet ? this.player.bet.amount : 0);
+        if (betableAmount < bet) {
             this.notification.showAction(`Not enough chips to bet ${ bet }!`, 'error');
             return;
         }

@@ -62,7 +62,7 @@
                    type="range"
                    step="10"
                    [min]="data.maxBet === 0 ? minimumBet : getCallAmount(data.maxBet)"
-                   [max]="player.chips"/>
+                   [max]="getBetableAmount()"/>
             <button class="button" (click)="onBet();">Bet</button>
             <button class="button is-transparent clear" (click)="clearBet();">Reset</button>
         </div>

@@ -27,6 +27,7 @@ export class GlobalErrorHandler implements ErrorHandler {
         } else {
             // Handle Client Error (Angular Error, ReferenceError...)
 
+            // TODO: listen to status codes
             if (error.message === 'Not allowed to spectate!') {
                 this.zone.run(() => {
                     toastService.error(error.message, { id: 'error' });
