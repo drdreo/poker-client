@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { CardComponent } from '../card/card.component';
 import { ChipsComponent } from '../chips/chips.component';
 import { PlayerComponent } from './player.component';
 
@@ -20,7 +21,7 @@ describe('PlayerComponent', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
-            declarations: [PlayerComponent, ChipsComponent]
+            declarations: [PlayerComponent, ChipsComponent, CardComponent]
         }).compileComponents();
     }));
 

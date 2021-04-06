@@ -72,6 +72,10 @@ export class PokerServiceMock {
         return of();
     }
 
+    playerKicked() {
+        return of();
+    }
+
     dealerUpdate() {
         return of();
     }

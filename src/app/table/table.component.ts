@@ -70,7 +70,7 @@ export class TableComponent implements OnInit, OnDestroy {
         return this._maxBet$.getValue();
     }
 
-    unsubscribe$ = new Subject();
+    private unsubscribe$ = new Subject();
 
     constructor(
         private route: ActivatedRoute,
@@ -291,7 +291,7 @@ export class TableComponent implements OnInit, OnDestroy {
 
                 } else if (!isPlayer) {
                     // @ts-ignore
-                    if (!table.spectatorsAllowed) {
+                    if (table.spectatorsAllowed === false) {
                         throw new Error('Not allowed to spectate!');
                     }
 
