@@ -47,7 +47,7 @@ export class PokerService implements OnDestroy {
         this.socket.emit(PlayerEvent.JoinRoom, {
             playerName: username,
             roomName: tableName,
-            playerID: localStorage.getItem('playerID'),
+            playerID: sessionStorage.getItem('playerID'),
             config
         });
     }

@@ -1,8 +1,5 @@
-<h2>Table Settings</h2><p>
-    Form Value: {{ settingsForm.value | json }}
-</p><p>
-    Form Status: {{ settingsForm.status }}
-</p>
+<h2>Table Settings</h2>
+
 <div [formGroup]="settingsForm">
     <div class="setting">
         <label class="setting__name">
@@ -22,7 +19,7 @@
 
 
     <div class="setting" formGroupName="table">
-        <label class="setting__name">
+        <label class="setting__name disabled">
             Allow Re-Buys
             <app-toggle class="setting__input toggle" formControlName="rebuy"></app-toggle>
         </label>
@@ -41,7 +38,7 @@
 
 
     <div class="setting">
-        <label class="setting__name">
+        <label class="setting__name disabled">
             Play Ambient Music
             <app-toggle class="setting__input toggle" formControlName="music"></app-toggle>
         </label>
@@ -68,7 +65,7 @@
             Big Blind
             <input class="setting__input input" size="4" formControlName="big"/>
         </label>
-        <label class="setting__name">
+        <label class="setting__name disabled">
             Blind Duration
             <input class="setting__input input" size="4" formControlName="duration"/>
         </label>
@@ -78,7 +75,7 @@
     </div>
 
     <div class="setting" formGroupName="turn">
-        <label class="setting__name">
+        <label class="setting__name disabled">
             Turn Time
             <input class="setting__input input" size="4" placeholder="∞" formControlName="time"/>
         </label>

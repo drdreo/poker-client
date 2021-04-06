@@ -73,7 +73,7 @@ export class HomeComponent implements OnDestroy {
         this.pokerService.roomJoined()
             .pipe(takeUntil(this.unsubscribe$))
             .subscribe(({ playerID, table }) => {
-                localStorage.setItem('playerID', playerID);
+                sessionStorage.setItem('playerID', playerID);
                 this.router.navigate(['/table', table]);
             });
 

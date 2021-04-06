@@ -30,7 +30,7 @@ export class TableComponent implements OnInit, OnDestroy {
     playDuration$ = interval(1000).pipe(map((count) => this.startTime + count * 1000));
 
     get clientPlayerID(): string {
-        return localStorage.getItem('playerID');
+        return sessionStorage.getItem('playerID');
     }
 
     /***Comes from server*/

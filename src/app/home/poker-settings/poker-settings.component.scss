@@ -23,7 +23,11 @@
   line-height: 24px;
   font-size: 16px;
 
-  &:not(:only-of-type){
+  &.disabled {
+    color: $gray;
+  }
+
+  &:not(:only-of-type) {
     margin-bottom: 5px;
   }
 }
