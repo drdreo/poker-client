@@ -5,6 +5,7 @@ import { ToggleComponent } from './toggle/toggle.component';
 import { TooltipComponent } from './tooltip/tooltip.component';
 import { TooltipDirective } from './tooltip/tooltip.directive';
 import { IconComponent } from './icon/icon.component';
+import { ConnectionErrorComponent } from './connection-error/connection-error.component';
 
 
 @NgModule({
@@ -12,7 +13,8 @@ import { IconComponent } from './icon/icon.component';
         TooltipDirective,
         TooltipComponent,
         ToggleComponent,
-        IconComponent
+        IconComponent,
+        ConnectionErrorComponent
     ],
     imports: [
         CommonModule,

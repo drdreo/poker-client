@@ -1,0 +1,13 @@
+.connection-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 1rem;
+
+  .icon {
+    height: 50px;
+    width: 50px;
+  }
+
+}

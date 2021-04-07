@@ -9,6 +9,7 @@ import { environment } from '../../environments/environment';
 import { PokerService } from '../poker.service';
 import { cardFadeInAnimation, controlsFadeAnimation } from '../shared/animations';
 import { AudioService, Sounds } from '../shared/audio.service';
+import { ErrorService } from '../shared/error.service';
 import { NotificationService } from '../shared/notification.service';
 import { TitleService } from '../shared/title.service';
 import { MessageType } from './feed/feed-message/feed-message.component';
@@ -496,12 +497,12 @@ export class TableComponent implements OnInit, OnDestroy {
         players.push({
             kickVotes: [],
             allIn: true, disconnected: false, afk: true, folded: false,
-            id: 'tester7', name: 'AFKer', color: getColor(), chips: 0, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
+            id: 'tester7', name: 'AFKer', color: getColor(), chips: 0, bet: { amount: 4000, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
             kickVotes: [],
             allIn: false, disconnected: false, afk: false, folded: false,
-            id: 'dealer', name: 'Dealer', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
+            id: 'dealer', name: 'Dealer', color: getColor(), chips: 3667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
 
         this._players$.next(players);

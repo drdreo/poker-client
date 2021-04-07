@@ -6,9 +6,9 @@ import { HotToastService } from '@ngneat/hot-toast';
 import * as Sentry from '@sentry/angular';
 import { HomeInfo } from '@shared/src';
 import { Observable, Subject, merge, combineLatest } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, filter } from 'rxjs/operators';
 import { PokerService } from '../poker.service';
-import { ErrorService } from '../shared/error.service';
+import { NotificationService } from '../shared/notification.service';
 import { PokerSettingsComponent } from './poker-settings/poker-settings.component';
 
 @Sentry.TraceClassDecorator()
@@ -20,8 +20,6 @@ import { PokerSettingsComponent } from './poker-settings/poker-settings.componen
 })
 export class HomeComponent implements OnDestroy {
     homeInfo$: Observable<HomeInfo>;
-
-    connectionError$: Observable<any>;
 
     loginForm = new FormGroup({
         username: new FormControl('', {
@@ -53,17 +51,17 @@ export class HomeComponent implements OnDestroy {
 
     constructor(
         private router: Router,
-        private errorService: ErrorService,
+        private notificationService: NotificationService,
         private pokerService: PokerService,
         private dialog: DialogService,
         private toastService: HotToastService) {
 
         this.pokerService.leave(); // try to leave if a player comes from a table
 
-        this.connectionError$ = this.errorService.socketConnectionError$;
-
-        this.errorService.socketError$
-            .pipe(takeUntil(this.unsubscribe$))
+        this.notificationService.action$
+            .pipe(
+                filter(action => action?.status === 'error'),
+                takeUntil(this.unsubscribe$))
             .subscribe(error => {
                 this.toastService.error(error.message, { id: 'error' });
             });
@@ -82,7 +80,7 @@ export class HomeComponent implements OnDestroy {
             .subscribe(([tableName, homeInfo]) => {
                 const table = homeInfo.tables.find(t => t.name === tableName);
 
-                if (table && table.started) {
+                if (table?.started) {
                     this.isJoinable = false;
                 } else {
                     this.isJoinable = true;

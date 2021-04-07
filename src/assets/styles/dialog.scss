@@ -6,6 +6,8 @@ ngneat-dialog {
     .ngneat-dialog-content {
       // dialog content, where your component/template is placed
       background-color: transparentize($secondary-background-color, 0.2);
+      color: $white;
+
       .ngneat-drag-marker {
         // draggable marker
       }

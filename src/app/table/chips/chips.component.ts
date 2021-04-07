@@ -56,9 +56,15 @@ export class ChipsComponent implements OnChanges {
     }
 
     getChipPosition(i: number) {
-        if (this.direction === 'bottom') {
-            return { 'bottom.px': (-2 + (i * 5)) };
+        // split stacks
+        let splitStack;
+        if (i >= 20) {
+            splitStack = { 'left.px': 17 };
+            i -= 20;
         }
-        return { 'top.px': (-2 + (i * 5)) };
+        if (this.direction === 'bottom') {
+            return { 'bottom.px': (-2 + (i * 5)), ...splitStack };
+        }
+        return { 'top.px': (-2 + (i * 5)), ...splitStack };
     }
 }

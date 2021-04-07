@@ -12,7 +12,7 @@ export const environment = {
 			reconnection: true,
 			reconnectionDelay: 1000,
 			reconnectionDelayMax: 5000,
-			reconnectionAttempts: 1
+			reconnectionAttempts: 5
 		}
 	},
 	sentry: {

@@ -4,6 +4,10 @@ import { Observable, BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
 import { WsError } from './notification.service';
 
+export class ConnectionError extends Error {
+    name = 'Connection Error';
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -27,8 +31,9 @@ export class ErrorService {
         this.connectionError()
             .pipe(takeUntil(this.unsubscribe$))
             .subscribe(error => {
-                console.error('Socket Connection Error: ', error);
-                this._socketConnectionError$.next(error);
+                const e = new ConnectionError(error.message);
+                console.error('Socket Connection Error: ', e);
+                this._socketConnectionError$.next(e);
             });
 
         this.socketError()
