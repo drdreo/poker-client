@@ -3,13 +3,12 @@ import { ActivatedRoute } from '@angular/router';
 import * as Sentry from '@sentry/angular';
 import { GameStatus, Card, BetType, SidePot, PlayerOverview } from '@shared/src';
 import { formatWinnersMessage } from 'app/shared/utils';
-import { BehaviorSubject, merge, Observable, Subject, interval } from 'rxjs';
+import { BehaviorSubject, merge, Observable, Subject, interval, timer } from 'rxjs';
 import { switchMap, takeUntil, tap, shareReplay, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { PokerService } from '../poker.service';
 import { cardFadeInAnimation, controlsFadeAnimation } from '../shared/animations';
 import { AudioService, Sounds } from '../shared/audio.service';
-import { ErrorService } from '../shared/error.service';
 import { NotificationService } from '../shared/notification.service';
 import { TitleService } from '../shared/title.service';
 import { MessageType } from './feed/feed-message/feed-message.component';
@@ -29,6 +28,8 @@ export class TableComponent implements OnInit, OnDestroy {
     showOverlay = false;
     isCurrentPlayer = false; // if its the current clients turn
     playDuration$ = interval(1000).pipe(map((count) => this.startTime + count * 1000));
+    turnTimer$: Observable<number>;
+    stopTurnTimer$ = new Subject();
 
     get clientPlayerID(): string {
         return sessionStorage.getItem('playerID');
@@ -37,6 +38,7 @@ export class TableComponent implements OnInit, OnDestroy {
     /***Comes from server*/
     tableName: string;
     startTime: number;
+    config: any;
     currentPlayerID$: Observable<string>; // ID of the current player
     dealerPlayerID$: Observable<string>; // ID of the dealer
     board$: Observable<Card[]>;
@@ -264,6 +266,7 @@ export class TableComponent implements OnInit, OnDestroy {
         this.isCurrentPlayer = newPlayerID === this.clientPlayerID;
 
         if (this.isCurrentPlayer) {
+            this.startTurnTimer();
             this.titleService.addTitle(' ❗ YOU TURN ❗ ');
         } else {
             this.titleService.addTitle('Waiting');
@@ -281,6 +284,8 @@ export class TableComponent implements OnInit, OnDestroy {
                 takeUntil(this.unsubscribe$))
             .subscribe(table => {
                 console.log(table);
+                // @ts-ignore
+                this.config = table.config;
 
                 const isPlayer = table.players.find(player => player.id === this.clientPlayerID);
 
@@ -292,7 +297,7 @@ export class TableComponent implements OnInit, OnDestroy {
 
                 } else if (!isPlayer) {
                     // @ts-ignore
-                    if (table.spectatorsAllowed === false) {
+                    if (table.config.spectatorsAllowed === false) {
                         throw new Error('Not allowed to spectate!');
                     }
 
@@ -338,10 +343,12 @@ export class TableComponent implements OnInit, OnDestroy {
 
     check() {
         this.pokerService.check();
+        this.endTurnTimer();
     }
 
     call() {
         this.pokerService.call();
+        this.endTurnTimer();
     }
 
     bet(bet: number) {
@@ -352,10 +359,12 @@ export class TableComponent implements OnInit, OnDestroy {
         }
 
         this.pokerService.bet(bet);
+        this.endTurnTimer();
     }
 
     fold() {
         this.pokerService.fold();
+        this.endTurnTimer();
     }
 
     /**********************
@@ -602,4 +611,19 @@ export class TableComponent implements OnInit, OnDestroy {
     voteKick(id: string) {
         this.pokerService.voteKick(id);
     }
+
+    private startTurnTimer() {
+        const seconds = this.config.inactiveDelay / 1000;
+        this.turnTimer$ = interval(1000).pipe(
+            map(num => seconds - 1 - (num + 1)),
+            takeUntil(timer(this.config.inactiveDelay)),
+            takeUntil(this.stopTurnTimer$),
+            takeUntil(this.unsubscribe$)
+        );
+    }
+
+    private endTurnTimer() {
+        this.stopTurnTimer$.next();
+    }
+
 }
