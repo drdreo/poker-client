@@ -32,6 +32,7 @@ export class PokerSettingsComponent implements OnInit {
             }),
             table: this.formBuilder.group({
                 autoClose: [true],
+                autoFold: [false],
                 rebuy: [{ value: false, disabled: true }]
             })
         });

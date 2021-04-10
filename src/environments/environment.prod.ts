@@ -5,6 +5,7 @@ export const environment = {
     production: true,
     name: 'production',
     poker_api: domain + '/api/poker',
+    admin_api: domain + '/api/admin',
     socket: {
         url: domain_ws,
         config: {}

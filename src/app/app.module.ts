@@ -8,6 +8,7 @@ import { DialogModule } from '@ngneat/dialog';
 import { TippyModule } from '@ngneat/helipopper';
 import { HotToastModule } from '@ngneat/hot-toast';
 import * as Sentry from '@sentry/angular';
+import { GoogleLoginProvider, SocialAuthServiceConfig } from 'angularx-social-login';
 import { SocketIoConfig, SocketIoModule } from 'ngx-socket-io';
 
 import { environment } from '../environments/environment';
@@ -66,7 +67,7 @@ const config: SocketIoConfig = {
             useFactory: () => () => {},
             deps: [Sentry.TraceService],
             multi: true
-        }
+        },
     ],
     bootstrap: [AppComponent]
 })

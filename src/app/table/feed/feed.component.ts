@@ -28,11 +28,14 @@ export class FeedComponent {
     }
 
     scrollToBottom(): void {
+        if (!this.scrollContainer) {
+            return;
+        }
         try {
             // fucking CD time issue
             setTimeout(() => {
                 this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight + 21;
-            },100);
+            }, 100);
         } catch (err) { }
     }
 

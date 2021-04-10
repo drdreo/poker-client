@@ -7,15 +7,18 @@
                  [players$]="players$"
                  [time$]="playDuration$"></table-infos>
 
+    <div *ngIf="isCurrentPlayer && config.table.autoFold" style="position:absolute; top:0;">
+        {{turnTimer$ | async}}
+    </div>
     <poker-sidepots [sidePots$]="sidePots$"></poker-sidepots>
 
     <div class="table__action"
-        *ngIf="notification.action$ | async as currentAction"
-        [class.error]="currentAction.status === 'error'">{{currentAction.message}}</div>
+         *ngIf="notification.action$ | async as currentAction"
+         [class.error]="currentAction.status === 'error'">{{currentAction.message}}</div>
 
     <div class="ready-container"
          *ngIf="(gameStatus$ | async) === 'waiting' && (player$ | async) && (player$ | async).id === (players$ | async)[0]?.id && (players$ | async).length > 1">
-        <div class="ready-container__message" >Everyone's ready?</div>
+        <div class="ready-container__message">Everyone's ready?</div>
         <button class="button" (click)="startGame()">Start</button>
     </div>
 
@@ -56,8 +59,7 @@
                           [seat]="getPlayerSeat(i)"
                           [dealer]="player.id === (dealerPlayerID$ | async)"
                           [playing]="player.id === (currentPlayerID$ | async) && (gameStatus$ | async) === 'started'"
-                          (voteKick)="voteKick(player.id)"
-            ></poker-player>
+                          (voteKick)="voteKick(player.id)"></poker-player>
         </div>
         <div class="pot" *ngIf="pot$ | async as pot">
             <div class="pot__value">

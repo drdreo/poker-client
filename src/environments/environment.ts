@@ -1,18 +1,20 @@
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
+const domain = 'http://localhost:3000';
 
 export const environment = {
 	production: false,
 	name: 'dev',
-	poker_api: 'http://localhost:3000/api/poker',
+	poker_api: domain + '/api/poker',
+	admin_api: domain + '/api/admin',
 	socket: {
 		url: 'ws://localhost:3000',
 		config: {
 			reconnection: true,
 			reconnectionDelay: 1000,
 			reconnectionDelayMax: 5000,
-			reconnectionAttempts: 1
+			reconnectionAttempts: 5
 		}
 	},
 	sentry: {
