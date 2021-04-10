@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { DialogService } from '@ngneat/dialog';
 import { Socket } from 'ngx-socket-io';
 import { SocketMock } from '../../test/socket.mock';
 
@@ -11,7 +12,10 @@ describe('FeedComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             declarations: [FeedComponent],
-            providers: [{ provide: Socket, useClass: SocketMock }]
+            providers: [
+                { provide: Socket, useClass: SocketMock },
+                { provide: DialogService, useValue: 'dialog' }
+            ]
         }).compileComponents();
     });
 

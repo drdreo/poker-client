@@ -9,7 +9,32 @@ export class PokerServiceMock {
                 name: tableName,
                 players: [],
                 startTime: new Date(),
-                spectatorsAllowed: true
+                config: {
+                    spectatorsAllowed: true,
+                    isPublic: true,
+                    turn: {
+                        time: -1,
+                        autoFold: false
+                    },
+                    chips: 1000,
+                    blinds: {
+                        small: 10,
+                        big: 20,
+                        duration: -1
+                    },
+                    music: false,
+                    afk: {
+                        delay: 30000
+                    },
+                    players: {
+                        min: 2,
+                        max: 8
+                    },
+                    table: {
+                        autoClose: true,
+                        rebuy: false
+                    }
+                }
             }
         ).toPromise();
     }

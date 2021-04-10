@@ -18,7 +18,6 @@ export class AdminComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        console.log('init Admin!');
     }
 
     getSocketsWithPlayerID(sockets: any[]): number {
