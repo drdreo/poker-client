@@ -1,0 +1,5 @@
+<div *ngIf="(userService.user$ | async) as user">
+    <p>{{user.name}}</p>
+    <a routerLink="/admin">Admin</a>
+</div>
+<button class="button" (click)="login()">Sign In</button>

@@ -2,6 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { DialogService } from '@ngneat/dialog';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 import { MessageType, FeedMessage } from '../table/feed/feed-message/feed-message.component';
 import { ConnectionErrorComponent } from './connection-error/connection-error.component';
 import { ErrorService } from './error.service';
@@ -36,7 +37,7 @@ export class NotificationService implements OnDestroy {
         this.error.socketConnectionError$
             .pipe(takeUntil(this.unsubscribe$))
             .subscribe(e => {
-                if (e) {
+                if (e && environment.production) {
                     if (!this.errorDialogRef) {
                         this.errorDialogRef = this.dialog.open(ConnectionErrorComponent, {
                             enableClose: false,
