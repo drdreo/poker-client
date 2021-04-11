@@ -59,6 +59,11 @@ export class PokerService implements OnDestroy {
         return this.socket.fromEvent<ServerJoined>(PokerEvent.Joined);
     }
 
+    // ask the server to send all relevant data again
+    requestUpdate() {
+        this.socket.emit(PlayerEvent.RequestUpdate);
+    }
+
     startGame() {
         this.socket.emit(PlayerEvent.StartGame);
     }

@@ -9,3 +9,19 @@ $text-font: $text-secondary;
   border-radius: $primary-radius;
   font-family: $text-font;
 }
+
+
+.helper__ranks {
+
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+
+
+  &:hover {
+    poker-icon {
+      fill: lighten($gray, 20%);
+    }
+  }
+
+}
