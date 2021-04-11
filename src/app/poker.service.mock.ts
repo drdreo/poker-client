@@ -60,6 +60,9 @@ export class PokerServiceMock {
         return of();
     }
 
+    requestUpdate() {
+    }
+
     startGame() {
     }
 
