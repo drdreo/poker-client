@@ -3,7 +3,7 @@
 
 <a href="https://angular.io/" target="blank"><img src="https://angular.io/assets/images/logos/angular/angular.svg" alt="angular-logo" width="120px" height="120px"/></a>
 
-[![Build Status](https://travis-ci.com/drdreo/poker-client.svg?branch=master)](https://travis-ci.com/drdreo/poker-backend)
+[![Build Status](https://travis-ci.com/drdreo/poker-client.svg?branch=master)](https://travis-ci.com/drdreo/poker-client)
 [![Netlify Status](https://api.netlify.com/api/v1/badges/ba84f3f4-6438-4553-83e3-f9e8198dd9a1/deploy-status)](https://app.netlify.com/sites/pokern/deploys)
 
 

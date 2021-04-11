@@ -309,6 +309,7 @@ export class TableComponent implements OnInit, OnDestroy {
                 this.startTime = new Date().getTime() - new Date(table.startTime).getTime();
                 this._players$.next(table.players);
 
+                this.pokerService.requestUpdate();
             }, error => {
                 if (!environment.production) {
                     this.loadDevThings();
