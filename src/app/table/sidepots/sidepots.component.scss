@@ -1,7 +1,8 @@
+@import "../../../assets/styles/vars";
 
-:host{
+:host {
   position: absolute;
-  left: 1rem;
+  left: $spacing-primary;
   top: 30%;
   //transform: translateY(-50%)
 }

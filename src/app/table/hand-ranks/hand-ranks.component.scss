@@ -2,7 +2,7 @@
 
 :host {
   color: $white;
-  padding: 1rem;
+  padding: $spacing-primary;
   max-height: 75vh;
   overflow-y: scroll;
 }
@@ -13,7 +13,7 @@
   .cards {
     display: flex;
     border-right: 1px solid transparentize($white, 0.7);
-    padding: 1rem;
+    padding: $spacing-primary;
 
     .card {
       margin-right: 5px;
@@ -25,7 +25,7 @@
   }
 
   .info {
-    padding: 1rem;
+    padding: $spacing-primary;
 
     .name {
       font-weight: bold;
