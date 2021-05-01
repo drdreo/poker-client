@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CardComponent } from '../card/card.component';
 import { ChipsComponent } from '../chips/chips.component';
+import { GameService } from '../game.service';
 import { PlayerComponent } from './player.component';
 
 const mockPlayer = {
@@ -21,6 +22,9 @@ describe('PlayerComponent', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
+            providers: [
+                { provide: GameService, useClass: GameService }
+            ],
             declarations: [PlayerComponent, ChipsComponent, CardComponent]
         }).compileComponents();
     }));

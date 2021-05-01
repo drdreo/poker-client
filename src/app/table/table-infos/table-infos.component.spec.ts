@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DialogService } from '@ngneat/dialog';
 import { Socket } from 'ngx-socket-io';
 import { SocketMock } from '../../test/socket.mock';
+import { GameService } from '../game.service';
 
 import { TableInfosComponent } from './table-infos.component';
 
@@ -13,7 +14,7 @@ describe('TableInfosComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [ TableInfosComponent ],
       providers: [
-        { provide: Socket, useClass: SocketMock },
+        { provide: GameService, useClass: GameService },
         { provide: DialogService, useValue: 'dialog' },
       ]
     })
