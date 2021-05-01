@@ -1,6 +1,6 @@
 <div class="title">Table <span class="is-primary-text">{{tableName}}</span>
 </div>
-<div class="table__rounds">Rounds: {{ pokerService.rounds }}</div>
+<div class="table__rounds">Rounds: {{ gameService.rounds }}</div>
 <div class="table__time" *ngIf="time$ | async as time">Time: {{time | date:'mm:ss'}}s</div>
 <div class="helper__ranks" (click)="showPokerHandRanks()" tippy="Show Poker Hand Ranks">
     <poker-icon type="ranks"></poker-icon>

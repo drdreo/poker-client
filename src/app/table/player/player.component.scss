@@ -31,12 +31,6 @@ $name-font-family: 'Balsamiq Sans', cursive;
     }
   }
 
-  &.playing {
-    .playing-indicator {
-      display: flex;
-    }
-  }
-
   &.allin {
     .bank-value {
       color: $yellow;
@@ -54,30 +48,13 @@ $name-font-family: 'Balsamiq Sans', cursive;
   }
 
   .playing-indicator {
-    display: none;
-    position: absolute;
-    top: 50%;
-    left: 50%;
+    display: block;
+    //position: absolute;
+    //top: 50%;
+    //left: 50%;
     z-index: 100;
-    transform: translatex(-50%) translatey(-50%);
+    //transform: translatex(-50%) translatey(-50%);
 
-    &:before {
-      content: ' .';
-      animation: dots 1.5s steps(5) infinite;
-
-      color: white;
-      font-size: 20px;
-
-      background-color: #76daff;
-
-      line-height: 0;
-      height: 10px;
-      width: 15px;
-      padding: 2px 10px 5px;
-      border-radius: 5px;
-
-      transform: scale(2);
-    }
   }
 
   .afk-indicator {
@@ -190,9 +167,7 @@ $name-font-family: 'Balsamiq Sans', cursive;
     }
 
     .playing-indicator {
-      transform: translatex(-50%) translatey(-50%) rotatez(270deg);
-      top: 50px;
-      left: 0;
+      transform: rotatez(270deg);
     }
   }
 
@@ -206,7 +181,7 @@ $name-font-family: 'Balsamiq Sans', cursive;
     }
 
     .playing-indicator {
-      transform: translatex(-50%) translatey(-50%) rotatez(180deg);
+      transform: rotatez(180deg);
     }
   }
 
@@ -220,7 +195,7 @@ $name-font-family: 'Balsamiq Sans', cursive;
     }
 
     .playing-indicator {
-      transform: translatex(-50%) translatey(-50%) rotatez(180deg);
+      transform: rotatez(180deg);
     }
   }
 
@@ -234,7 +209,7 @@ $name-font-family: 'Balsamiq Sans', cursive;
     }
 
     .playing-indicator {
-      transform: translatex(-50%) translatey(-50%) rotatez(180deg);
+      transform: rotatez(180deg);
     }
   }
 
@@ -256,8 +231,8 @@ $name-font-family: 'Balsamiq Sans', cursive;
     }
 
     .playing-indicator {
-      transform: translatex(-50%) translatey(-50%) rotatez(90deg);
-      bottom: -50px;
+      transform: rotatez(90deg);
+      //bottom: -50px;
     }
   }
 

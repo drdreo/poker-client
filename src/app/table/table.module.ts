@@ -7,6 +7,7 @@ import { FeedMessageComponent } from './feed/feed-message/feed-message.component
 import { FeedComponent } from './feed/feed.component';
 import { GameControlsComponent } from './game-controls/game-controls.component';
 import { PlayerComponent } from './player/player.component';
+import { PlayingIndicatorComponent } from './player/playing-indicator/playing-indicator.component';
 import { SidepotComponent } from './sidepots/sidepot/sidepot.component';
 import { SidepotsComponent } from './sidepots/sidepots.component';
 import { TableInfosComponent } from './table-infos/table-infos.component';
@@ -27,7 +28,7 @@ import { HandRanksComponent } from './hand-ranks/hand-ranks.component';
         GameControlsComponent,
         SidepotsComponent,
         SidepotComponent,
-        HandRanksComponent
+        HandRanksComponent,
     ],
     imports: [
         CommonModule,

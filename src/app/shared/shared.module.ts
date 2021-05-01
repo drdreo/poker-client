@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { TippyModule } from '@ngneat/helipopper';
+import { PlayingIndicatorComponent } from '../table/player/playing-indicator/playing-indicator.component';
 import { ToggleComponent } from './toggle/toggle.component';
 import { TooltipComponent } from './tooltip/tooltip.component';
 import { TooltipDirective } from './tooltip/tooltip.directive';
@@ -14,7 +15,8 @@ import { ConnectionErrorComponent } from './connection-error/connection-error.co
         TooltipComponent,
         ToggleComponent,
         IconComponent,
-        ConnectionErrorComponent
+        ConnectionErrorComponent,
+        PlayingIndicatorComponent
     ],
     imports: [
         CommonModule,
@@ -24,7 +26,8 @@ import { ConnectionErrorComponent } from './connection-error/connection-error.co
         TooltipDirective,
         ToggleComponent,
         TippyModule,
-        IconComponent
+        IconComponent,
+        PlayingIndicatorComponent
     ]
 })
 export class SharedModule {}

@@ -1,6 +1,5 @@
 <div class="player"
      [ngClass]="'player-'+ (seat)"
-     [class.playing]="playing"
      [class.dealer]="dealer"
      [class.folded]="player.folded"
      [class.allin]="player.allIn"
@@ -16,9 +15,12 @@
         <poker-chips class="jetons-5" [amount]="player.chips" [type]="5"></poker-chips>
         <poker-chips class="jetons-1" [amount]="player.chips" [type]="1"></poker-chips>
     </div>
-    <div class="playing-indicator"></div>
+
+
     <div class="afk-indicator" (click)="kick();" tippy="Kick Player">AFK</div>
-    <div class="avatar" [ngStyle]="{'background-color': player.color || 'dodgerblue'}"></div>
+    <div class="avatar" [ngStyle]="{'background-color': player.color || 'dodgerblue'}">
+        <poker-playing-indicator *ngIf="playing" class="playing-indicator" [timer$]="gameService.turnTimer$" [totalTime]="gameService.config.turn.time"></poker-playing-indicator>
+    </div>
     <div class="name">{{player.name}}</div>
     <div class="dealer-btn">D</div>
     <div class="mise" *ngIf="player.bet?.amount > 0">
