@@ -1,10 +1,10 @@
-@import "../../assets/styles/utils";
+@import "../../assets/styles/vars";
 
 
 .table-infos {
   position: absolute;
-  top: 1rem;
-  left: 1rem;
+  top: $spacing-primary;
+  left: $spacing-primary;
   min-width: 150px;
 }
 

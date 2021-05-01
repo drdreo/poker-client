@@ -1,6 +1,6 @@
-import { Component, Input, ChangeDetectionStrategy, Output, EventEmitter  } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { PlayerOverview } from '@shared/src';
-import { PokerService } from '../../poker.service';
+import { GameService } from '../game.service';
 
 export type Player = PlayerOverview;
 
@@ -18,7 +18,9 @@ export class PlayerComponent {
     @Input() seat: number;
     @Output() voteKick: EventEmitter<void> = new EventEmitter();
 
-    constructor() { }
+    constructor(public gameService: GameService) {
+
+    }
 
     bankValue(chips: number, allIn: boolean): string {
         return allIn ? 'All In' : chips + '€';
@@ -30,4 +32,5 @@ export class PlayerComponent {
             this.voteKick.emit();
         }
     }
+
 }

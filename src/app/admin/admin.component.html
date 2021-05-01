@@ -1,41 +1,60 @@
 <h1>Admin Dashboard</h1>
 
-<ng-container *ngIf="adminInfo$ | async as info">
-    Up Time: {{getUptime(info.uptime) | date:'H:mm:ss'}}
+<div class="container">
 
+    <div *ngIf="adminInfo" class="column">
+        Up Time: {{getUptime(adminInfo.uptime) | date:'H:mm:ss'}}
 
-    <div class="sockets">
-        Sockets
-        <ul class="sockets__stats">
-            <li> Sockets: {{info.sockets.length}}            </li>
-            <li> Sockets with PlayerID: {{getSocketsWithPlayerID(info.sockets)}}</li>
-            <li> Sockets without Table: {{getPlayersWithoutTable(info.sockets, info.tables)}}</li>
-        </ul>
+        <div class="section">
+            <button class="button show-sockets" (click)="showSockets = !showSockets">Show Sockets</button>
 
-        <button class="button" (click)="showSockets = !showSockets">Show Sockets</button>
+            <h3 class="section__header">Sockets</h3>
 
-        <ul [hidden]="!showSockets">
-            <li class="socket" *ngFor="let socket of info.sockets">
-                {{socket.id}} - {{ socket.playerID}}
+            <ul class="sockets__stats">
+                <li> Sockets: {{adminInfo.sockets.length}}            </li>
+                <li> Sockets with PlayerID: {{getSocketsWithPlayerID(adminInfo.sockets)}}</li>
+                <li> Sockets without Table: {{getPlayersWithoutTable(adminInfo.sockets, adminInfo.tables)}}</li>
+            </ul>
+
+            <hr>
+
+            <ul *ngIf="showSockets">
+                <li class="is-clickable"
+                    *ngFor="let socket of adminInfo.sockets"
+                    (click)="showTableOfPlayer(socket.playerID)">
+                    {{socket.id}} - {{ socket.playerID}}
+                </li>
+            </ul>
+
+        </div>
+
+        <div class="section">
+            <h3 class="section__header">Tables</h3>
+
+            <ul class="tables__stats">
+                <li>Tables: {{adminInfo.tables.length}}</li>
+                <li>Players: {{getPlayersFromTables(adminInfo.tables)}}</li>
+                <li>Last Player added: {{adminInfo.lastPlayerAdded | date:'d.M.y, H:mm'}}</li>
+            </ul>
+
+            <div class="table" *ngFor="let table of adminInfo.tables" [class.started]="table.started">
+                {{table.startTime | date:'d.M.y, H:mm'}} - <span class="is-clickable"
+                                                                 (click)="selectTable(table)">{{table.name}}</span>
+            </div>
+        </div>
+    </div>
+    <div class="section table column" *ngIf="table">
+        <h3 class="section__header">{{table.name}}</h3>
+        <span (click)="removeTable(table.name)">X</span>
+        Players:
+        <ul>
+            <li class="is-clickable" *ngFor="let player of table.players" (click)="player.shown = !player.shown;">
+                {{player.name}}
+                <div *ngIf="player.shown">
+                    {{player | json}}
+                </div>
             </li>
         </ul>
 
     </div>
-
-    <hr/>
-
-    <div class="tables">
-        Tables
-        Last Player added: {{info.lastPlayerAdded | date:'d.M.y, H:mm'}}
-
-        <ul class="tables__stats">
-            <li>Tables: {{info.tables.length}}</li>
-            <li>Players: {{getPlayersFromTables(info.tables)}}</li>
-        </ul>
-
-        <div class="table" *ngFor="let table of info.tables" [class.started]="table.started">
-            {{table.startTime | date:'d.M.y, H:mm'}} - {{table.name}}
-        </div>
-
-    </div>
-</ng-container>
+</div>

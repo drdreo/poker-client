@@ -20,7 +20,7 @@ export class PokerSettingsComponent implements OnInit {
             music: [{ value: false, disabled: true }],
             chips: [1000],
             turn: this.formBuilder.group({
-                time: [{ value: -1, disabled: true }]
+                time: [{ value: -1, disabled: false }],
             }),
             blinds: this.formBuilder.group({
                 small: [10],
@@ -32,7 +32,6 @@ export class PokerSettingsComponent implements OnInit {
             }),
             table: this.formBuilder.group({
                 autoClose: [true],
-                autoFold: [false],
                 rebuy: [{ value: false, disabled: true }]
             })
         });

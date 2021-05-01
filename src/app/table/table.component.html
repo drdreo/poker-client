@@ -7,9 +7,7 @@
                  [players$]="players$"
                  [time$]="playDuration$"></table-infos>
 
-    <div *ngIf="isCurrentPlayer && config.table.autoFold" style="position:absolute; top:0;">
-        {{turnTimer$ | async}}
-    </div>
+
     <poker-sidepots [sidePots$]="sidePots$"></poker-sidepots>
 
     <div class="table__action"
