@@ -16,7 +16,7 @@
     </div>
 
     <ng-template #indefinteIndicator>
-        <div class="timer indefinite">
+        <div class="timer indefinite" *ngIf="totalTime < 1">
             <svg class="timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                 <g class="timer__circle">
                     <path class="timer__path-indefinite" d="

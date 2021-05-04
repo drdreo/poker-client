@@ -19,7 +19,11 @@
 
     <div class="afk-indicator" (click)="kick();" tippy="Kick Player">AFK</div>
     <div class="avatar" [ngStyle]="{'background-color': player.color || 'dodgerblue'}">
-        <poker-playing-indicator *ngIf="playing" class="playing-indicator" [timer$]="gameService.turnTimer$" [totalTime]="gameService.config.turn.time"></poker-playing-indicator>
+        <poker-playing-indicator *ngIf="playing"
+                                 class="playing-indicator"
+                                 [timer$]="gameService.turnTimer$"
+                                 [totalTime]="gameService.config.turn.time">
+        </poker-playing-indicator>
     </div>
     <div class="name">{{player.name}}</div>
     <div class="dealer-btn">D</div>

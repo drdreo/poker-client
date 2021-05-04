@@ -26,16 +26,13 @@ export class GameService implements OnDestroy {
 
     startTurnTimer() {
         if (this.config.turn.time > 1) {
-            console.log('Starting turn timer');
             this.endTurnTimer();
-            // @ts-ignore
             const seconds = this.config.turn.time;
             interval(1000).pipe(
                 map(num => seconds - num),
                 takeUntil(this.stopTurnTimer$),
                 takeUntil(this.unsubscribe$)
             ).subscribe(time => {
-                console.log(time);
                 if (time < 0) {
                     this.endTurnTimer();
                 } else {
@@ -46,7 +43,6 @@ export class GameService implements OnDestroy {
     }
 
     endTurnTimer() {
-        console.log('Ending turn timer');
         this.stopTurnTimer$.next();
         this.turnTimer$.next(null);
     }
