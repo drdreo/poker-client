@@ -1,14 +1,10 @@
 <ng-container *ngIf="{ timer: subscribeTimer(timer$ | async)} as data">
 
-    <div class="base-timer" *ngIf="isNumber(data.timer)">
-        <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <g class="base-timer__circle">
-                <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
-                <path id="base-timer-path-remaining"
-                      [attr.stroke-dasharray]="circleDasharray"
-                      class="base-timer__path-remaining"
-                      [ngClass]="state"
-                      d="
+    <div class="timer" *ngIf="isNumber(data.timer); else indefinteIndicator">
+        <svg class="timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <g class="timer__circle">
+                <circle class="timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+                <path [attr.stroke-dasharray]="circleDasharray" class="timer__path-remaining" [ngClass]="state" d="
                       M 50, 50
                       m -45, 0
                       a 45,45 0 1,0 90,0
@@ -16,6 +12,21 @@
                     "></path>
             </g>
         </svg>
-        <span class="base-timer__label">{{formatTime(data.timer)}}</span>
+        <span class="timer__label">{{formatTime(data.timer)}}</span>
     </div>
+
+    <ng-template #indefinteIndicator>
+        <div class="timer">
+            <svg class="timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <g class="timer__circle">
+                    <path class="timer__path-indefinite" d="
+                      M 50, 50
+                      m -45, 0
+                      a 45,45 0 1,0 90,0
+                      a 45,45 0 1,0 -90,0
+                    "></path>
+                </g>
+            </svg>
+        </div>
+    </ng-template>
 </ng-container>

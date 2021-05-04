@@ -20,23 +20,29 @@
         <button class="button" (click)="startGame()">Start</button>
     </div>
 
+
     <!--    <div class="ready-container" *ngIf="(gameStatus$ | async) == 'ended' && player$ | async">-->
     <!--        <div class="ready-container__message">Go next?</div>-->
     <!--        <button class="button" (click)="startGame()">Start</button>-->
     <!--    </div>-->
 
 
-    <game-controls class="game_controls"
-                   @controlsFadeSlideInOut
-                   *ngIf="(gameStatus$ | async) == 'started' && isCurrentPlayer && player$ | async as player"
-                   [player]="player"
-                   [maxBet$]="maxBet$"
-                   [pot]="pot$ | async"
-                   [bigBlind]="20"
-                   (checked)="check()"
-                   (called)="call()"
-                   (bet)="bet($event)"
-                   (folded)="fold()"></game-controls>
+    <div class="game_controls" *ngIf="player$ | async as player">
+
+        <div *ngIf="(gameStatus$ | async) === 'ended' && !player.folded && !player.showCards">
+            <button class="button" (click)="showCards()">Show Cards</button>
+        </div>
+        <game-controls @controlsFadeSlideInOut
+                       *ngIf="(gameStatus$ | async) === 'started' && isCurrentPlayer && player"
+                       [player]="player"
+                       [maxBet$]="maxBet$"
+                       [pot]="pot$ | async"
+                       [bigBlind]="20"
+                       (checked)="check()"
+                       (called)="call()"
+                       (bet)="bet($event)"
+                       (folded)="fold()"></game-controls>
+    </div>
 
     <div class="table">
         <div class="stack card-place">

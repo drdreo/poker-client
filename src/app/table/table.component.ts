@@ -378,6 +378,10 @@ export class TableComponent implements OnInit, OnDestroy {
         this.gameService.endTurnTimer();
     }
 
+    showCards() {
+        this.pokerService.showCards();
+    }
+
     /**********************
      * HELPER
      */

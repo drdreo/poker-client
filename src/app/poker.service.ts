@@ -192,4 +192,8 @@ export class PokerService implements OnDestroy {
     playerKicked(): Observable<string> {
         return this.socket.fromEvent<PlayerKicked>(PokerEvent.PlayerKick).pipe(map(res => res.kickedPlayer));
     }
+
+    showCards() {
+        this.socket.emit(PlayerEvent.ShowCards);
+    }
 }
