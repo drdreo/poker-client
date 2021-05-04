@@ -10,10 +10,13 @@ $stroke-width: 5px;
   transform: scale(1.1);
 
   &__svg {
-    //transform: scaleX(-1);
+    transform: scaleX(-1);
 
+  }
+
+  &.indefinite {
+    transform: scaleX(1);
     animation: 2s linear infinite svg-animation;
-
   }
 
   &__circle {
