@@ -3,7 +3,7 @@
 $size: 120px;
 $stroke-width: 5px;
 
-.base-timer {
+.timer {
   position: relative;
   width: $size;
   height: $size;
@@ -11,6 +11,12 @@ $stroke-width: 5px;
 
   &__svg {
     transform: scaleX(-1);
+
+  }
+
+  &.indefinite {
+    transform: scaleX(1);
+    animation: 2s linear infinite svg-animation;
   }
 
   &__circle {
@@ -54,5 +60,39 @@ $stroke-width: 5px;
     &.alert {
       color: $danger-color;
     }
+  }
+
+  &__path-indefinite {
+    stroke: dodgerblue;
+    stroke-width: 3px;
+    stroke-linecap: round;
+    stroke-dasharray: (3.14 * $size);
+    transform-origin: center;
+    animation: spinner 8s linear infinite;
+  }
+}
+
+// SVG animation.
+@keyframes svg-animation {
+  0% {
+    transform: rotateZ(0deg);
+  }
+  100% {
+    transform: rotateZ(360deg)
+  }
+}
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+    stroke-dashoffset: (0.66 * $size);
+  }
+  50% {
+    transform: rotate(720deg);
+    stroke-dashoffset: (3.14 * $size);
+  }
+  100% {
+    transform: rotate(1080deg);
+    stroke-dashoffset: (0.66 * $size);
   }
 }

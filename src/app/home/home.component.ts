@@ -101,7 +101,7 @@ export class HomeComponent implements OnDestroy {
         if (this.loginForm.valid) {
             const username = this.username.value;
             const table = this.table.value;
-            this.pokerService.createOrJoinRoom(table, username, this.config);
+            this.pokerService.createOrJoinRoom(table, this.config?.type, username, this.config);
         }
     }
 

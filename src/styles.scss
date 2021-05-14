@@ -98,25 +98,27 @@ poker-icon {
   background-color: $button-background-color;
   transition: background-color .17s ease, color .17s ease;
 
-  &:hover, &:focus {
-    background-color: transparentize($button-background-color, 0.1); //#677bc4
+
+  &:not([disabled]) {
+    &:hover {
+      background-color: darken(desaturate($button-background-color, 30%), 10%);
+    }
+
+    &:active {
+      background-color: darken(desaturate($button-background-color, 40%), 20%);
+    }
   }
 
-
   &[disabled] {
-    background-color: darken(desaturate($button-background-color, 60%), 30%);
-    cursor: initial;
-
-    &:hover {
-      background-color: darken(desaturate($button-background-color, 60%), 30%);
-    }
+    cursor: not-allowed;
+    opacity: .5;
   }
 
   &.light {
     color: #080808;
     background-color: $gray;
 
-    &:hover, &:focus {
+    &:hover {
       background-color: transparentize($gray, 0.1);
     }
   }
@@ -125,7 +127,7 @@ poker-icon {
     color: white;
     background-color: $success-color;
 
-    &:hover, &:focus {
+    &:hover {
       background-color: transparentize($success-color, 0.1);
     }
   }
@@ -134,13 +136,17 @@ poker-icon {
     color: #080808;
     background-color: $danger-color;
 
-    &:hover, &:focus {
+    &:hover {
       background-color: transparentize($danger-color, 0.1);
     }
   }
 
   &.is-transparent {
     background-color: transparent;
+
+    &:hover {
+      background-color: transparent;
+    }
   }
 }
 

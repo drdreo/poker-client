@@ -13,7 +13,8 @@ const mockPlayer = {
     folded: false,
     disconnected: false,
     afk: false,
-    kickVotes: []
+    kickVotes: [],
+    showCards: false
 };
 
 describe('PlayerComponent', () => {

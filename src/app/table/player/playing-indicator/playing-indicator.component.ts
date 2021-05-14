@@ -20,13 +20,10 @@ export class PlayingIndicatorComponent {
 
     circleDasharray = '283';
 
-    constructor() {
-
-    }
+    constructor() { }
 
     subscribeTimer(timeLeft: number): number {
         if (timeLeft > 0) {
-            console.log(timeLeft);
             this.setCircleDasharray(timeLeft);
             this.setRemainingPathColor(timeLeft);
         }

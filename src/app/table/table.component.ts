@@ -378,6 +378,10 @@ export class TableComponent implements OnInit, OnDestroy {
         this.gameService.endTurnTimer();
     }
 
+    showCards() {
+        this.pokerService.showCards();
+    }
+
     /**********************
      * HELPER
      */
@@ -487,39 +491,45 @@ export class TableComponent implements OnInit, OnDestroy {
             chips: 667,
             bet: { amount: 579, type: BetType.Bet },
             cards: [{ figure: 'back', value: 0 }, { figure: 'back', value: 0 }],
+            showCards: false,
             kickVotes: []
         });
         players.push({
             kickVotes: [],
             allIn: false, disconnected: true, afk: false, folded: false, id: 'tester2', name: 'DCer',
-            color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
+            color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2), showCards: false
         });
         players.push({
             kickVotes: [],
-            allIn: false, disconnected: false, afk: false, folded: false,
+            allIn: false, disconnected: false, afk: false, folded: false, showCards: false,
             id: 'tester3', name: 'DrDreo', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
+            showCards: false,
             kickVotes: [],
             allIn: false, disconnected: false, afk: false, folded: false,
             id: 'tester4', name: 'Hackl', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
+            showCards: false,
             kickVotes: [],
             allIn: false, disconnected: true, afk: true, folded: true,
             id: 'tester5', name: 'DC / AFKer', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
+            showCards: false,
             kickVotes: [],
             allIn: false, disconnected: false, afk: false, folded: false,
             id: 'tester6', name: 'Autophytes', color: getColor(), chips: 667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
+            showCards: false,
             kickVotes: [],
             allIn: true, disconnected: false, afk: true, folded: false,
             id: 'tester7', name: 'AFKer', color: getColor(), chips: 0, bet: { amount: 4000, type: BetType.Bet }, cards: test_cards(2)
         });
         players.push({
+            showCards: false,
             kickVotes: [],
             allIn: false, disconnected: false, afk: false, folded: false,
             id: 'dealer', name: 'Dealer', color: getColor(), chips: 3667, bet: { amount: 579, type: BetType.Bet }, cards: test_cards(2)

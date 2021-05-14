@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { GoogleLoginProvider, SocialLoginModule, SocialAuthServiceConfig } from 'angularx-social-login';
-import { AdminGuard } from '../core/admin-guard.service';
 import { UserService } from '../core/user.service';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AdminComponent } from './admin.component';
+import { AdminGuard } from './admin.guard';
 import { LoginComponent } from './login/login.component';
 
 

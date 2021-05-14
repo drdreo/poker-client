@@ -3,7 +3,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import {
     PokerEvent, GameStatus, TableResponse, HomeInfo, ServerJoined, GameWinners, GamePotUpdate, PlayerLeft, GameDealerUpdate,
     GameCurrentPlayer, GameBoardUpdate, PlayerCalled, PlayerChecked, PlayerFolded, GameRoundUpdate, PlayerBet, GamePlayersUpdate, Card,
-    PlayerEvent, PlayerOverview, SidePot, MaxBetUpdate, PlayerKicked, PokerConfig
+    PlayerEvent, PlayerOverview, SidePot, MaxBetUpdate, PlayerKicked, PokerConfig, GameType
 } from '@shared/src';
 import { Socket } from 'ngx-socket-io';
 import { Observable, Subject, of } from 'rxjs';
@@ -41,10 +41,11 @@ export class PokerService implements OnDestroy {
         return this.socket.fromEvent<HomeInfo>(PokerEvent.HomeInfo);
     }
 
-    createOrJoinRoom(tableName: string, username?: string, config?: PokerConfig) {
+    createOrJoinRoom(tableName: string, gameType?: GameType, username?: string, config?: PokerConfig) {
         this.socket.emit(PlayerEvent.JoinRoom, {
             playerName: username,
             roomName: tableName,
+            gameType,
             playerID: sessionStorage.getItem('playerID'),
             config
         });
@@ -191,5 +192,9 @@ export class PokerService implements OnDestroy {
 
     playerKicked(): Observable<string> {
         return this.socket.fromEvent<PlayerKicked>(PokerEvent.PlayerKick).pipe(map(res => res.kickedPlayer));
+    }
+
+    showCards() {
+        this.socket.emit(PlayerEvent.ShowCards);
     }
 }
