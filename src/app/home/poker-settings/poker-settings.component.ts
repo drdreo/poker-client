@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { DialogRef } from '@ngneat/dialog';
+import { GameType } from '@shared/src';
 
 @Component({
     selector: 'poker-settings',
@@ -12,15 +13,22 @@ export class PokerSettingsComponent implements OnInit {
     saved = false;
     settingsForm;
 
+    gameTypes = [
+        { value: GameType.TexasHoldem, name: 'Texas Holdem' },
+        { value: GameType.CoinFlip, name: 'Coin Flip' },
+        { value: GameType.OneCard, name: 'One Card', disabled: true },
+    ];
+
     constructor(public ref: DialogRef, private formBuilder: FormBuilder) {
 
         this.settingsForm = this.formBuilder.group({
+            type: [GameType.TexasHoldem],
             spectatorsAllowed: [true],
             isPublic: [true],
             music: [{ value: false, disabled: true }],
             chips: [1000],
             turn: this.formBuilder.group({
-                time: [{ value: -1, disabled: false }],
+                time: [{ value: -1, disabled: false }]
             }),
             blinds: this.formBuilder.group({
                 small: [10],

@@ -15,7 +15,7 @@
          [class.error]="currentAction.status === 'error'">{{currentAction.message}}</div>
 
     <div class="ready-container"
-         *ngIf="(gameStatus$ | async) === 'waiting' && (player$ | async) && (player$ | async).id === (players$ | async)[0]?.id && (players$ | async).length > 1">
+         *ngIf="(gameStatus$ | async) === 'waiting' && (player$ | async) && (players$ | async).length > 1 && (player$ | async).id === (players$ | async)[0]?.id">
         <div class="ready-container__message">Everyone's ready?</div>
         <button class="button" (click)="startGame()">Start</button>
     </div>

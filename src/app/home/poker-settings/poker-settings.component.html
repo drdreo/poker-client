@@ -1,6 +1,17 @@
 <h2>Table Settings</h2>
 
 <div [formGroup]="settingsForm">
+
+    <div class="setting">
+        <label class="setting__name">
+            Game Type
+            <select formControlName="type">
+                <option *ngFor="let type of gameTypes" [value]="type.value" [disabled]="type.disabled">{{type.name}}</option>
+            </select>
+        </label>
+        <div class="divider"></div>
+    </div>
+
     <div class="setting">
         <label class="setting__name">
             Show on Public Table
